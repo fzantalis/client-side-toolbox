@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Regex Tester - Client-Side Toolbox</title>
+  <style>
+    /* ---- Regex input row ---- */
+    .regex-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 1rem;
+      font-family: 'Fira Code', monospace;
+    }
+    .regex-slash { color: var(--primary); font-size: 1.4rem; font-weight: 700; user-select: none; }
+    .regex-row input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Fira Code', monospace;
+      font-size: 1.05rem;
+      color: var(--text);
+      padding: 0.3rem 0;
+    }
+    .regex-flags {
+      display: flex;
+      gap: 0.3rem;
+    }
+    .flag-btn {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .flag-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* ---- Status badge ---- */
+    .regex-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      min-height: 1.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge-success { background: rgba(16,185,129,0.12); color: #10b981; }
+    .badge-error   { background: rgba(239,68,68,0.12);  color: #ef4444; }
+    .badge-info    { background: rgba(99,102,241,0.12); color: var(--primary); }
+
+    /* ---- Highlighted test area ---- */
+    .test-area-wrap {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .highlight-layer {
+      position: absolute;
+      inset: 0;
+      padding: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      pointer-events: none;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: transparent;
+    }
+    .highlight-layer mark {
+      background: rgba(250,204,21,0.45);
+      border-radius: 2px;
+      color: transparent;
+    }
+    .highlight-layer mark.first-match {
+      background: rgba(250,204,21,0.75);
+    }
+    textarea#testInput {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 160px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      background: transparent;
+      position: relative;
+      z-index: 1;
+      caret-color: var(--text);
+      color: var(--text);
+      resize: vertical;
+    }
+
+    /* ---- Matches panel ---- */
+    .match-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .match-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .match-item:last-child { border-bottom: none; }
+    .match-idx {
+      min-width: 2rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--primary);
+      padding-top: 2px;
+    }
+    .match-val {
+      font-family: 'Fira Code', monospace;
+      background: rgba(250,204,21,0.2);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+    }
+    .match-pos { color: var(--text-muted); font-size: 0.78rem; margin-left: auto; white-space: nowrap; }
+    .match-groups { margin-top: 0.3rem; }
+    .match-group {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      margin: 0.15rem 0.15rem 0 0;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* ---- Cheatsheet ---- */
+    .cheatsheet { font-size: 0.82rem; }
+    .cheat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.4rem;
+    }
+    .cheat-item {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .cheat-item:hover { background: var(--surface); }
+    .cheat-code {
+      font-family: 'Fira Code', monospace;
+      color: var(--primary);
+      font-size: 0.8rem;
+      min-width: 3.5rem;
+    }
+    .cheat-desc { color: var(--text-muted); }
+
+    .section-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .section-toggle i { transition: transform 0.2s; }
+    .section-toggle.collapsed i.toggle-icon { transform: rotate(-90deg); }
+    .collapsible { overflow: hidden; transition: max-height 0.25s ease; max-height: 800px; }
+    .collapsible.hidden { max-height: 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="breadcrumb">
+    <i class="ph ph-arrow-left"></i> Back to Toolbox
+  </a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-magnifying-glass"></i></div>
+    <div class="tool-header-text">
+      <h1>Regex Tester</h1>
+      <p>Write and test regular expressions with live match highlighting, capture groups, and a built-in cheat sheet.</p>
+    </div>
+  </header>
+
+  <main class="workspace" style="flex-direction: column;">
+
+    <!-- Pattern -->
+    <div class="panel" style="width:100%;box-sizing:border-box;">
+      <div class="panel-header">
+        <h3>Pattern</h3>
+        <div class="panel-actions">
+          <button id="clearBtn" class="btn-secondary"><i class="ph ph-trash"></i> Clear</button>
+        </div>
+      </div>
+
+      <div class="regex-row">
+        <span class="regex-slash">/</span>
+        <input type="text" id="regexInput" placeholder="Enter your regular expression…" autocomplete="off" spellcheck="false">
+        <span class="regex-slash">/</span>
+        <div class="regex-flags">
+          <button class="flag-btn active" data-flag="g" title="Global — find all matches">g</button>
+          <button class="flag-btn active" data-flag="i" title="Case insensitive">i</button>
+          <button class="flag-btn" data-flag="m" title="Multiline — ^ and $ match line starts/ends">m</button>
+          <button class="flag-btn" data-flag="s" title="Dot matches newlines">s</button>
+        </div>
+      </div>
+
+      <div class="regex-status" id="regexStatus"></div>
+    </div>
+
+    <!-- Test input + matches side by side -->
+    <div class="workspace" style="gap:1rem; margin-top:0;">
+
+      <div class="panel" style="flex:1.5;min-width:0;">
+        <div class="panel-header"><h3>Test String</h3></div>
+        <div class="test-area-wrap">
+          <div class="highlight-layer" id="highlightLayer" aria-hidden="true"></div>
+          <textarea id="testInput" placeholder="Type or paste the text you want to test against…"></textarea>
+        </div>
+      </div>
+
+      <div class="panel" style="flex:1;min-width:0;">
+        <div class="panel-header">
+          <h3>Matches</h3>
+          <span class="badge badge-info" id="matchCount" style="display:none;"></span>
+        </div>
+        <div id="matchesWrap">
+          <p style="color:var(--text-muted);font-size:0.875rem;">Matches will appear here.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Cheat sheet -->
+    <div class="panel" style="width:100%;box-sizing:border-box;">
+      <div class="panel-header section-toggle" id="cheatToggle">
+        <h3>Regex Cheat Sheet <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">— click to insert</span></h3>
+        <i class="ph ph-caret-down toggle-icon"></i>
+      </div>
+      <div class="collapsible" id="cheatBody">
+        <div class="cheatsheet" style="padding-top:0.75rem;">
+          <div class="cheat-grid" id="cheatGrid"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+      <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ---- Cheat sheet data ----
+const CHEAT = [
+  ['.', 'Any character except newline'],
+  ['\\d', 'Digit [0-9]'],
+  ['\\D', 'Non-digit'],
+  ['\\w', 'Word char [a-zA-Z0-9_]'],
+  ['\\W', 'Non-word char'],
+  ['\\s', 'Whitespace'],
+  ['\\S', 'Non-whitespace'],
+  ['^', 'Start of string'],
+  ['$', 'End of string'],
+  ['\\b', 'Word boundary'],
+  ['*', '0 or more (greedy)'],
+  ['+', '1 or more (greedy)'],
+  ['?', '0 or 1'],
+  ['{n}', 'Exactly n times'],
+  ['{n,m}', 'Between n and m'],
+  ['[abc]', 'Character class'],
+  ['[^abc]', 'Negated class'],
+  ['(abc)', 'Capture group'],
+  ['(?:abc)', 'Non-capture group'],
+  ['a|b', 'Alternation (a or b)'],
+  ['(?=abc)', 'Positive lookahead'],
+  ['(?!abc)', 'Negative lookahead'],
+];
+
+const grid = document.getElementById('cheatGrid');
+CHEAT.forEach(([code, desc]) => {
+  const el = document.createElement('div');
+  el.className = 'cheat-item';
+  el.innerHTML = `<span class="cheat-code">${escHtml(code)}</span><span class="cheat-desc">${desc}</span>`;
+  el.title = `Insert: ${code}`;
+  el.addEventListener('click', () => {
+    const inp = document.getElementById('regexInput');
+    const s = inp.selectionStart, e = inp.selectionEnd;
+    inp.value = inp.value.slice(0, s) + code + inp.value.slice(e);
+    inp.focus();
+    inp.selectionStart = inp.selectionEnd = s + code.length;
+    runMatch();
+  });
+  grid.appendChild(el);
+});
+
+// ---- Cheatsheet toggle ----
+document.getElementById('cheatToggle').addEventListener('click', () => {
+  const t = document.getElementById('cheatToggle');
+  const b = document.getElementById('cheatBody');
+  t.classList.toggle('collapsed');
+  b.classList.toggle('hidden');
+});
+
+// ---- Flag toggles ----
+let flags = new Set(['g','i']);
+document.querySelectorAll('.flag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.flag;
+    if (flags.has(f)) { flags.delete(f); btn.classList.remove('active'); }
+    else { flags.add(f); btn.classList.add('active'); }
+    runMatch();
+  });
+});
+
+// ---- Inputs ----
+document.getElementById('regexInput').addEventListener('input', runMatch);
+document.getElementById('testInput').addEventListener('input', () => { syncScroll(); runMatch(); });
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('regexInput').value = '';
+  document.getElementById('testInput').value = '';
+  runMatch();
+});
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function runMatch() {
+  const pattern = document.getElementById('regexInput').value;
+  const text    = document.getElementById('testInput').value;
+  const status  = document.getElementById('regexStatus');
+  const matchCount = document.getElementById('matchCount');
+  const matchesWrap = document.getElementById('matchesWrap');
+  const highlight = document.getElementById('highlightLayer');
+
+  if (!pattern) {
+    status.innerHTML = '';
+    highlight.innerHTML = escHtml(text);
+    matchCount.style.display = 'none';
+    matchesWrap.innerHTML = '<p style="color:var(--text-muted);font-size:0.875rem;">Matches will appear here.</p>';
+    return;
+  }
+
+  let regex;
+  try {
+    const flagStr = [...flags].join('');
+    regex = new RegExp(pattern, flagStr.includes('g') ? flagStr : flagStr + 'g');
+    status.innerHTML = `<span class="badge badge-success"><i class="ph ph-check-circle"></i> Valid expression</span>`;
+  } catch (e) {
+    status.innerHTML = `<span class="badge badge-error"><i class="ph ph-warning-circle"></i> ${escHtml(e.message)}</span>`;
+    highlight.innerHTML = escHtml(text);
+    matchCount.style.display = 'none';
+    matchesWrap.innerHTML = '<p style="color:#ef4444;font-size:0.875rem;">Fix the regex above.</p>';
+    return;
+  }
+
+  // Find all matches
+  const matches = [];
+  let m;
+  regex.lastIndex = 0;
+  while ((m = regex.exec(text)) !== null) {
+    matches.push({ index: m.index, end: m.index + m[0].length, value: m[0], groups: [...m].slice(1) });
+    if (!flags.has('g')) break;
+    if (m[0].length === 0) regex.lastIndex++;
+  }
+
+  // Highlight layer
+  if (matches.length === 0) {
+    highlight.innerHTML = escHtml(text);
+  } else {
+    let out = '', pos = 0;
+    matches.forEach((match, i) => {
+      out += escHtml(text.slice(pos, match.index));
+      out += `<mark class="${i === 0 ? 'first-match' : ''}">${escHtml(text.slice(match.index, match.end))}</mark>`;
+      pos = match.end;
+    });
+    out += escHtml(text.slice(pos));
+    highlight.innerHTML = out;
+  }
+
+  // Count badge
+  if (matches.length > 0) {
+    matchCount.textContent = `${matches.length} match${matches.length !== 1 ? 'es' : ''}`;
+    matchCount.style.display = '';
+  } else {
+    matchCount.style.display = 'none';
+  }
+
+  // Match list
+  if (matches.length === 0) {
+    matchesWrap.innerHTML = '<p style="color:var(--text-muted);font-size:0.875rem;">No matches found.</p>';
+  } else {
+    const ul = document.createElement('ul');
+    ul.className = 'match-list';
+    matches.forEach((match, i) => {
+      const li = document.createElement('li');
+      li.className = 'match-item';
+      const groupHtml = match.groups.length
+        ? `<div class="match-groups">${match.groups.map((g,j) => `<span class="match-group">$${j+1}: ${escHtml(g ?? 'undefined')}</span>`).join('')}</div>`
+        : '';
+      li.innerHTML = `
+        <span class="match-idx">#${i+1}</span>
+        <div style="flex:1;min-width:0;">
+          <span class="match-val">${escHtml(match.value)}</span>
+          ${groupHtml}
+        </div>
+        <span class="match-pos">${match.index}–${match.end}</span>
+      `;
+      ul.appendChild(li);
+    });
+    matchesWrap.innerHTML = '';
+    matchesWrap.appendChild(ul);
+  }
+}
+
+function syncScroll() {
+  const ta = document.getElementById('testInput');
+  const hl = document.getElementById('highlightLayer');
+  hl.scrollTop = ta.scrollTop;
+}
+document.getElementById('testInput').addEventListener('scroll', syncScroll);
+
+// Kick off
+runMatch();
+</script>
+
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

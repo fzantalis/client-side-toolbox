@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Cron Expression Builder - Client-Side Toolbox</title>
+  <style>
+    .cron-display {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .cron-expression {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+    }
+    .cron-human {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    .cron-parts {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 640px) {
+      .cron-parts { grid-template-columns: 1fr 1fr; }
+    }
+    .cron-part {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+    .cron-part label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .cron-part input {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      text-align: center;
+    }
+    .cron-part input:focus { outline: none; border-color: var(--primary); }
+    .cron-part .range-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 0.3rem;
+    }
+
+    .quick-presets h3 { font-size: 0.85rem; font-weight: 600; margin: 0 0 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .preset-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      text-align: left;
+      gap: 0.15rem;
+    }
+    .preset-btn:hover { border-color: var(--primary); background: var(--surface-hover, rgba(99,102,241,0.05)); }
+    .preset-btn.active { border-color: var(--primary); background: rgba(99,102,241,0.1); }
+    .preset-btn .preset-label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .preset-btn .preset-expr { font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--primary); }
+
+    .next-runs {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+    }
+    .next-runs h3 { font-size: 0.85rem; font-weight: 600; margin: 0 0 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .run-list { list-style: none; padding: 0; margin: 0; }
+    .run-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .run-list li:last-child { border-bottom: none; }
+    .run-list .run-num {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--primary);
+      min-width: 1.5rem;
+    }
+    .run-list .run-date { color: var(--text); }
+    .run-list .run-rel { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+
+    .error-msg {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="breadcrumb">
+    <i class="ph ph-arrow-left"></i> Back to Toolbox
+  </a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-clock-countdown"></i></div>
+    <div class="tool-header-text">
+      <h1>Cron Expression Builder</h1>
+      <p>Build, validate, and understand cron schedules with a human-readable explanation and next-run preview.</p>
+    </div>
+  </header>
+
+  <main class="workspace" style="flex-direction: column;">
+    <div class="panel" style="width: 100%; box-sizing: border-box;">
+      <div class="panel-header">
+        <h3>Expression</h3>
+        <div class="panel-actions">
+          <button id="copyBtn" class="btn-secondary"><i class="ph ph-copy"></i> Copy</button>
+        </div>
+      </div>
+
+      <div class="cron-display">
+        <div>
+          <div class="cron-expression" id="cronExpr">* * * * *</div>
+          <div class="cron-human" id="cronHuman">Every minute</div>
+          <div class="error-msg" id="errorMsg"></div>
+        </div>
+      </div>
+
+      <div class="cron-parts">
+        <div class="cron-part">
+          <label>Minute</label>
+          <input type="text" id="pMinute" value="*">
+          <div class="range-hint">0–59</div>
+        </div>
+        <div class="cron-part">
+          <label>Hour</label>
+          <input type="text" id="pHour" value="*">
+          <div class="range-hint">0–23</div>
+        </div>
+        <div class="cron-part">
+          <label>Day (month)</label>
+          <input type="text" id="pDom" value="*">
+          <div class="range-hint">1–31</div>
+        </div>
+        <div class="cron-part">
+          <label>Month</label>
+          <input type="text" id="pMonth" value="*">
+          <div class="range-hint">1–12</div>
+        </div>
+        <div class="cron-part">
+          <label>Day (week)</label>
+          <input type="text" id="pDow" value="*">
+          <div class="range-hint">0–6 (Sun=0)</div>
+        </div>
+      </div>
+
+      <div class="quick-presets">
+        <h3>Quick presets</h3>
+        <div class="preset-grid" id="presetGrid"></div>
+      </div>
+
+      <div class="next-runs">
+        <h3>Next 5 scheduled runs</h3>
+        <ul class="run-list" id="runList"></ul>
+      </div>
+    </div>
+  </main>
+
+  <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+      <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+const PRESETS = [
+  { label: 'Every minute',       expr: '* * * * *' },
+  { label: 'Every 5 minutes',    expr: '*/5 * * * *' },
+  { label: 'Every 15 minutes',   expr: '*/15 * * * *' },
+  { label: 'Every 30 minutes',   expr: '*/30 * * * *' },
+  { label: 'Every hour',         expr: '0 * * * *' },
+  { label: 'Every 6 hours',      expr: '0 */6 * * *' },
+  { label: 'Every day at noon',  expr: '0 12 * * *' },
+  { label: 'Every day midnight', expr: '0 0 * * *' },
+  { label: 'Every Monday 9am',   expr: '0 9 * * 1' },
+  { label: 'Weekdays at 8am',    expr: '0 8 * * 1-5' },
+  { label: 'Every Sunday',       expr: '0 0 * * 0' },
+  { label: '1st of month',       expr: '0 0 1 * *' },
+];
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// ---- Build presets ----
+const grid = document.getElementById('presetGrid');
+PRESETS.forEach(p => {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.innerHTML = `<span class="preset-label">${p.label}</span><span class="preset-expr">${p.expr}</span>`;
+  btn.addEventListener('click', () => {
+    applyExpression(p.expr);
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+  grid.appendChild(btn);
+});
+
+// ---- Inputs ----
+const inputs = {
+  minute: document.getElementById('pMinute'),
+  hour:   document.getElementById('pHour'),
+  dom:    document.getElementById('pDom'),
+  month:  document.getElementById('pMonth'),
+  dow:    document.getElementById('pDow'),
+};
+Object.values(inputs).forEach(inp => inp.addEventListener('input', update));
+
+function applyExpression(expr) {
+  const parts = expr.trim().split(/\s+/);
+  if (parts.length < 5) return;
+  inputs.minute.value = parts[0];
+  inputs.hour.value   = parts[1];
+  inputs.dom.value    = parts[2];
+  inputs.month.value  = parts[3];
+  inputs.dow.value    = parts[4];
+  update();
+}
+
+function update() {
+  const min = inputs.minute.value.trim() || '*';
+  const hr  = inputs.hour.value.trim()   || '*';
+  const dom = inputs.dom.value.trim()    || '*';
+  const mon = inputs.month.value.trim()  || '*';
+  const dow = inputs.dow.value.trim()    || '*';
+  const expr = `${min} ${hr} ${dom} ${mon} ${dow}`;
+
+  document.getElementById('cronExpr').textContent = expr;
+
+  const err = document.getElementById('errorMsg');
+  try {
+    const human = toHuman(min, hr, dom, mon, dow);
+    document.getElementById('cronHuman').textContent = human;
+    err.classList.remove('visible');
+    renderNextRuns(min, hr, dom, mon, dow);
+  } catch(e) {
+    document.getElementById('cronHuman').textContent = '';
+    err.textContent = e.message;
+    err.classList.add('visible');
+    document.getElementById('runList').innerHTML = '';
+  }
+}
+
+// ---- Human-readable ----
+function toHuman(min, hr, dom, mon, dow) {
+  const timePart = () => {
+    if (min === '*' && hr === '*') return 'every minute';
+    if (min === '*') return `every minute of hour ${hr}`;
+    if (hr === '*')  return `at minute ${min} of every hour`;
+    if (min.startsWith('*/')) return `every ${min.slice(2)} minutes`;
+    return `at ${pad(hr)}:${pad(min)}`;
+  };
+
+  const dayPart = () => {
+    if (dom === '*' && dow === '*') return '';
+    if (dow !== '*') {
+      const names = dow.split(',').map(d => {
+        if (d.includes('-')) {
+          const [a,b] = d.split('-');
+          return `${DAYS[+a]}–${DAYS[+b]}`;
+        }
+        return DAYS[+d] || d;
+      });
+      return ` on ${names.join(', ')}`;
+    }
+    if (dom !== '*') return ` on day ${dom} of the month`;
+    return '';
+  };
+
+  const monPart = () => {
+    if (mon === '*') return '';
+    const names = mon.split(',').map(m => MONTHS[(+m)-1] || m);
+    return ` in ${names.join(', ')}`;
+  };
+
+  if (min === '*' && hr === '*' && dom === '*' && mon === '*' && dow === '*')
+    return 'Every minute';
+  if (min.startsWith('*/') && hr === '*' && dom === '*' && mon === '*' && dow === '*')
+    return `Every ${min.slice(2)} minutes`;
+  if (min === '0' && hr.startsWith('*/') && dom === '*' && mon === '*' && dow === '*')
+    return `Every ${hr.slice(2)} hours`;
+
+  return `${timePart()}${dayPart()}${monPart()}`.replace(/^./, c => c.toUpperCase());
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// ---- Next runs ----
+function renderNextRuns(min, hr, dom, mon, dow) {
+  const list = document.getElementById('runList');
+  list.innerHTML = '';
+  const runs = getNextRuns(min, hr, dom, mon, dow, 5);
+  const now = Date.now();
+  runs.forEach((d, i) => {
+    const diff = d - now;
+    const rel = formatRel(diff);
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="run-num">#${i+1}</span>
+      <span class="run-date">${d.toLocaleString()}</span>
+      <span class="run-rel">${rel}</span>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function formatRel(ms) {
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return `in ${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `in ${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `in ${h}h ${m % 60}m`;
+  return `in ${Math.floor(h/24)}d`;
+}
+
+function getNextRuns(min, hr, dom, mon, dow, count) {
+  const results = [];
+  const d = new Date();
+  d.setSeconds(0, 0);
+  d.setMinutes(d.getMinutes() + 1);
+  let iters = 0;
+  while (results.length < count && iters < 200000) {
+    iters++;
+    if (matchField(d.getMonth()+1, mon, 1, 12) &&
+        matchField(d.getDate(), dom, 1, 31) &&
+        matchField(d.getDay(), dow, 0, 6) &&
+        matchField(d.getHours(), hr, 0, 23) &&
+        matchField(d.getMinutes(), min, 0, 59)) {
+      results.push(new Date(d));
+    }
+    d.setMinutes(d.getMinutes() + 1);
+  }
+  return results;
+}
+
+function matchField(val, expr, lo, hi) {
+  if (expr === '*') return true;
+  for (const part of expr.split(',')) {
+    if (part.includes('/')) {
+      const [range, step] = part.split('/');
+      const s = parseInt(step);
+      const [start] = range === '*' ? [lo] : range.split('-').map(Number);
+      if (val >= start && (val - start) % s === 0) return true;
+    } else if (part.includes('-')) {
+      const [a, b] = part.split('-').map(Number);
+      if (val >= a && val <= b) return true;
+    } else {
+      if (parseInt(part) === val) return true;
+    }
+  }
+  return false;
+}
+
+// ---- Copy ----
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const expr = document.getElementById('cronExpr').textContent;
+  navigator.clipboard.writeText(expr).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  });
+});
+
+update();
+</script>
+
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
