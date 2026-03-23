@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script><title>SVG Optimizer</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header"><div class="card-icon"><i class="ph ph-bezier-curve"></i></div>
+      <div class="tool-header-text"><h1>SVG Cleaner</h1><p>Strip comments, empty groups, and bloat from exported SVG code.</p></div>
+    </header>
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header"><h3>Raw SVG Code</h3></div>
+        <textarea id="svg-in" placeholder="<svg>...</svg>"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Cleaned Output</h3></div>
+        <pre id="svg-out">Result will appear here...</pre>
+      </div>
+    </main>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  <script>
+    document.getElementById('svg-in').addEventListener('input', (e) => {
+      let code = e.target.value;
+      if(!code) { document.getElementById('svg-out').textContent = ''; return; }
+      
+      // Basic cleanup: Remove XML declarations, DOCTYPE, comments, empty <g> tags, and extra spaces
+      code = code.replace(/<\?xml.*?\?>/g, '')
+                 .replace(/<!DOCTYPE.*?>/gi, '')
+                 .replace(//g, '')
+                 .replace(/<g>\s*<\/g>/gi, '')
+                 .replace(/>\s+</g, '><')
+                 .trim();
+                 
+      document.getElementById('svg-out').textContent = code;
+    });
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body></html>

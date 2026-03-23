@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Image to WebP Converter (Demo)</title></head>
+  <link rel="stylesheet" href="style.css"/>
+<body>
+  <h1>Image to WebP Converter (Client-Side Demo)</h1>
+  <input type="file" id="img" accept="image/*" /><br/>
+  <p>After selecting an image, click 'Convert to WebP'.</p>
+  <button id="convertBtn" disabled>Convert to WebP</button>
+  <p id="status">Selected file: None</p>
+  <canvas id="canvas" width="500" height="300" style="border:1px solid #ccc;margin-top:10px"></canvas><br/>
+  <a id="downloadLink" download="converted.webp" style="display:none;">Download WebP</a>
+  <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  <script>
+    const imgInput = document.getElementById('img');
+    const convertBtn = document.getElementById('convertBtn');
+    const statusDisplay = document.getElementById('status');
+    const downloadLink = document.getElementById('downloadLink');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let loadedImage = null;
+
+    imgInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) {
+        statusDisplay.textContent = 'Selected file: None';
+        convertBtn.disabled = true;
+        return;
+      }
+      statusDisplay.textContent = `Selected file: ${file.name}`;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          loadedImage = img;
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          convertBtn.disabled = false;
+        };
+        img.onerror = () => {
+          statusDisplay.textContent = 'Error loading image.';
+          convertBtn.disabled = true;
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        statusDisplay.textContent = 'Error reading file.';
+        convertBtn.disabled = true;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    convertBtn.addEventListener('click', () => {
+      if (!loadedImage) {
+        statusDisplay.textContent = 'No image loaded to convert.';
+        return;
+      }
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          downloadLink.href = url;
+          downloadLink.style.display = 'inline-block';
+          statusDisplay.textContent = 'Conversion complete. Click Download.';
+        } else {
+          statusDisplay.textContent = 'Conversion to WebP failed.';
+          downloadLink.style.display = 'none';
+        }
+      }, 'image/webp');
+    });
+  </script>
+</body>
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
+</html>

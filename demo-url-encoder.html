@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>URL Encoder/Decoder</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-link"></i></div>
+      <div class="tool-header-text">
+        <h1>URL Encoder/Decoder</h1>
+        <p>Safely encode URLs for data transfer or decode them to read parameters.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Input</h3>
+          <div class="panel-actions">
+            <button onclick="encode()" class="btn-primary"><i class="ph ph-lock-key"></i> Encode</button>
+            <button onclick="decode()" class="btn-secondary"><i class="ph ph-lock-key-open"></i> Decode</button>
+          </div>
+        </div>
+        <textarea id="t" placeholder="Paste URL or string here..."></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Output</h3></div>
+        <pre id="out">Output will appear here...</pre>
+      </div>
+    </main>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  <script>
+    function encode(){ document.getElementById('out').textContent = encodeURIComponent(document.getElementById('t').value); }
+    function decode(){ document.getElementById('out').textContent = decodeURIComponent(document.getElementById('t').value); }
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body></html>

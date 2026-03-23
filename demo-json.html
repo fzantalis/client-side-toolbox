@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>JSON Beautifier - Client-Side Toolbox</title>
+</head>
+<body>
+  <div class="container">
+    
+    <a href="index.html" class="breadcrumb">
+      <i class="ph ph-arrow-left"></i> Back to Toolbox
+    </a>
+
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-brackets-curly"></i></div>
+      <div class="tool-header-text">
+        <h1>JSON Beautifier</h1>
+        <p>Format, validate, and structure your JSON data instantly.</p>
+      </div>
+    </header>
+
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Input</h3>
+          <div class="panel-actions">
+            <button id="clearBtn" class="btn-secondary"><i class="ph ph-trash"></i> Clear</button>
+            <button id="formatBtn" class="btn-primary"><i class="ph ph-magic-wand"></i> Beautify</button>
+          </div>
+        </div>
+        <textarea id="input" placeholder="Paste your raw JSON here..."></textarea>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Output</h3>
+          <button id="copyBtn" class="btn-secondary"><i class="ph ph-copy"></i> Copy</button>
+        </div>
+        <pre id="output">Result will appear here...</pre>
+      </div>
+
+    </main>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Modernized logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const inputEl = document.getElementById('input');
+      const outputEl = document.getElementById('output');
+      const formatBtn = document.getElementById('formatBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const copyBtn = document.getElementById('copyBtn');
+
+      // The core beautify function
+      const jsonBeautify = (input) => {
+        try {
+          const str = (typeof input === 'string') ? input : JSON.stringify(input, null, 2);
+          const parsed = JSON.parse(str);
+          return { success: true, data: JSON.stringify(parsed, null, 2) };
+        } catch(e) {
+          return { success: false, data: 'Invalid JSON: \n' + (e.message || e) };
+        }
+      };
+
+      // Format Button Action
+      formatBtn.addEventListener('click', () => {
+        if (!inputEl.value.trim()) {
+          outputEl.textContent = "Please paste some JSON first.";
+          outputEl.className = "";
+          return;
+        }
+
+        const result = jsonBeautify(inputEl.value);
+        outputEl.textContent = result.data;
+        
+        // Apply error styling if it fails
+        if (!result.success) {
+          outputEl.classList.add('error-text');
+        } else {
+          outputEl.classList.remove('error-text');
+        }
+      });
+
+      // Clear Button Action
+      clearBtn.addEventListener('click', () => {
+        inputEl.value = '';
+        outputEl.textContent = 'Result will appear here...';
+        outputEl.classList.remove('error-text');
+      });
+
+      // Copy to Clipboard Action
+      copyBtn.addEventListener('click', () => {
+        const textToCopy = outputEl.textContent;
+        if (textToCopy && textToCopy !== 'Result will appear here...') {
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+            copyBtn.classList.add('success-state');
+            setTimeout(() => {
+              copyBtn.innerHTML = originalHTML;
+              copyBtn.classList.remove('success-state');
+            }, 2000);
+          });
+        }
+      });
+    });
+  </script>
+</body>
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
+</html>

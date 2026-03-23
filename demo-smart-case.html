@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Smart Case Converter</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-text-a-underline"></i></div>
+      <div class="tool-header-text">
+        <h1>Smart Case Converter</h1>
+        <p>Instantly transform text casing for coding or copywriting.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Input</h3>
+          <div class="panel-actions">
+            <select id="mode" style="padding: 0.4rem; border-radius: 6px;">
+              <option value="upper">UPPERCASE</option>
+              <option value="lower">lowercase</option>
+              <option value="title">Title Case</option>
+              <option value="camel">camelCase</option>
+            </select>
+            <button onclick="convert()" class="btn-primary"><i class="ph ph-arrows-left-right"></i> Convert</button>
+          </div>
+        </div>
+        <textarea id="text" placeholder="Enter your text here..."></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Output</h3></div>
+        <pre id="out">Output will appear here...</pre>
+      </div>
+    </main>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  <script>
+    function toTitleCase(s){ return s.replace(/\w\S*/g,(txt)=>txt.charAt(0).toUpperCase()+txt.substr(1).toLowerCase()); }
+    function toCamel(s){ return s.replace(/\s+/g,' ').trim().split(' ').map((w,i)=> i===0? w.toLowerCase(): w.charAt(0).toUpperCase()+w.slice(1)).join(''); }
+    function convert(){
+      const t=document.getElementById('text').value, m=document.getElementById('mode').value;
+      let r=t;
+      if(m==='upper') r=t.toUpperCase(); else if(m==='lower') r=t.toLowerCase(); else if(m==='title') r=toTitleCase(t); else if(m==='camel') r=toCamel(t);
+      document.getElementById('out').textContent=r;
+    }
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body></html>

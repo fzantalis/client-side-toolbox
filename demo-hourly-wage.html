@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Freelance Hourly Wage</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-currency-dollar"></i></div>
+      <div class="tool-header-text">
+        <h1>Real Hourly Wage Calculator</h1>
+        <p>Calculate your effective take-home pay after costs and taxes.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header"><h3>Project Details</h3></div>
+        <div class="panel-body">
+          <div class="form-group"><label>Project Fee ($)</label><input id="fee" type="number" step="0.01" placeholder="e.g. 1500"></div>
+          <div class="form-group"><label>Estimated Hours</label><input id="hours" type="number" step="0.1" placeholder="e.g. 20"></div>
+          <div class="form-group"><label>Software/Asset Costs ($)</label><input id="costs" type="number" step="0.01" placeholder="e.g. 50"></div>
+          <div class="form-group"><label>Estimated Taxes (%)</label><input id="tax" type="number" step="0.01" value="20"></div>
+          <button onclick="calc()" class="btn-primary" style="margin-top:auto;"><i class="ph ph-calculator"></i> Calculate Real Wage</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Real Hourly Wage</h3></div>
+        <div class="panel-body">
+          <div id="out" class="result-display">$0.00 / hr</div>
+        </div>
+      </div>
+    </main>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  <script>
+    function calc(){
+      const fee=+document.getElementById('fee').value||0, hours=+document.getElementById('hours').value||1, costs=+document.getElementById('costs').value||0, tax=(+document.getElementById('tax').value||0)/100;
+      const hourly = hours>0 ? ((fee-costs)*(1-tax))/hours : 0;
+      document.getElementById('out').textContent = '$' + hourly.toFixed(2) + ' / hr';
+    }
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body></html>

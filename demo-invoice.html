@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Invoice Generator</title>
+  <style>
+    /* Print-Specific Styles to make it look like a real document */
+    @media print {
+      body * { visibility: hidden; }
+      #printable-invoice, #printable-invoice * { visibility: visible; }
+      #printable-invoice { position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0; box-shadow: none; border: none; }
+      .no-print { display: none !important; }
+      body { background: white; }
+    }
+    
+    /* Invoice UI Styling */
+    .invoice-paper { background: white; padding: 2.5rem; border-radius: 8px; box-shadow: var(--shadow-md); color: #111827; }
+    [data-theme="dark"] .invoice-paper { background: #fff; /* Keep invoice white even in dark mode */ }
+    .inv-header { display: flex; justify-content: space-between; margin-bottom: 2rem; border-bottom: 2px solid #eee; padding-bottom: 1rem; }
+    .inv-inputs input { border: none; border-bottom: 1px dashed #ccc; border-radius: 0; padding: 4px; box-shadow: none; width: auto; background: transparent; color: #111; }
+    .inv-inputs input:focus { border-bottom: 1px solid var(--primary); outline: none; }
+    .inv-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    .inv-table th { text-align: left; padding: 10px; border-bottom: 2px solid #111; color: #111; }
+    .inv-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    .inv-totals { width: 300px; margin-left: auto; margin-top: 1rem; text-align: right; }
+    .inv-totals div { display: flex; justify-content: space-between; padding: 8px 0; }
+    .inv-totals .grand-total { font-weight: 700; font-size: 1.25rem; border-top: 2px solid #111; }
+  </style>
+</head>
+<body>
+  <div class="container no-print">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-receipt"></i></div>
+      <div class="tool-header-text">
+        <h1>Client-Side Invoice Generator</h1>
+        <p>Create, calculate, and save professional invoices. Data never leaves your device.</p>
+      </div>
+    </header>
+    
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+      <button onclick="addRow()" class="btn-secondary"><i class="ph ph-plus"></i> Add Item</button>
+      <button onclick="window.print()" class="btn-primary"><i class="ph ph-printer"></i> Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <div class="container" style="max-width: 900px;">
+    <div class="invoice-paper inv-inputs" id="printable-invoice">
+      
+      <div class="inv-header">
+        <div>
+          <h2 style="margin:0 0 10px 0; color:#111;">INVOICE</h2>
+          <input type="text" placeholder="Your Name / Company Name" style="font-size: 1.1rem; font-weight:600; width: 100%;"><br>
+          <input type="text" placeholder="Your Address"><br>
+          <input type="text" placeholder="Your Email / Phone">
+        </div>
+        <div style="text-align: right;">
+          <strong>Date:</strong> <input type="date" id="inv-date"><br><br>
+          <strong>Invoice #:</strong> <input type="text" placeholder="INV-001" style="width: 100px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 2rem;">
+        <strong style="color:#555;">Bill To:</strong><br>
+        <input type="text" placeholder="Client Name" style="font-size: 1.1rem; width: 300px;"><br>
+        <input type="text" placeholder="Client Address" style="width: 300px;"><br>
+      </div>
+
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="width:100px;">Qty/Hrs</th>
+            <th style="width:120px;">Rate</th>
+            <th style="width:120px; text-align:right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="items-body">
+          </tbody>
+      </table>
+
+      <div class="inv-totals">
+        <div><span>Subtotal:</span> <span id="subtotal">$0.00</span></div>
+        <div><span>Tax (%):</span> <span><input type="number" id="taxRate" value="0" style="width:50px; text-align:right;" oninput="calcTotals()"></span></div>
+        <div class="grand-total"><span>Total:</span> <span id="total">$0.00</span></div>
+      </div>
+
+    </div>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Set today's date automatically
+    document.getElementById('inv-date').valueAsDate = new Date();
+
+    const tbody = document.getElementById('items-body');
+
+    function addRow() {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" placeholder="Item description..." style="width:100%;"></td>
+        <td><input type="number" class="qty" value="1" min="0" step="0.5" style="width:80px;" oninput="calcTotals()"></td>
+        <td><input type="number" class="rate" value="0.00" min="0" step="1" style="width:100px;" oninput="calcTotals()"></td>
+        <td style="text-align:right;" class="row-amt">$0.00</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function calcTotals() {
+      let subtotal = 0;
+      const rows = tbody.querySelectorAll('tr');
+      
+      rows.forEach(row => {
+        const qty = parseFloat(row.querySelector('.qty').value) || 0;
+        const rate = parseFloat(row.querySelector('.rate').value) || 0;
+        const amt = qty * rate;
+        row.querySelector('.row-amt').textContent = '$' + amt.toFixed(2);
+        subtotal += amt;
+      });
+
+      const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+      const taxAmount = subtotal * (taxRate / 100);
+      const total = subtotal + taxAmount;
+
+      document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('total').textContent = '$' + total.toFixed(2);
+    }
+
+    // Initialize with one empty row
+    addRow();
+  </script>
+  <script src="script.js"></script>
+  <script src="theme-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  
+  <title>File Hash Checker</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-fingerprint"></i></div>
+      <div class="tool-header-text">
+        <h1>Local File Hash</h1>
+        <p>Generate SHA-256 checksums locally to verify file integrity.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header"><h3>Select File</h3></div>
+        <div class="panel-body">
+          <input type="file" id="file" style="padding:2rem; border:2px dashed var(--primary); text-align:center; cursor:pointer;" />
+          <p style="font-size:0.85rem; color:var(--text-muted); text-align:center;">Files are processed in RAM. Nothing is uploaded.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>SHA-256 Checksum</h3></div>
+        <div class="panel-body" style="justify-content:center;">
+          <pre id="out" style="word-break: break-all; font-size: 1.2rem; text-align:center;">Select a file to calculate...</pre>
+          <p id="method-used" style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 1rem;"></p>
+        </div>
+      </div>
+    </main>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    document.getElementById('file').addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const outEl = document.getElementById('out');
+      const methodEl = document.getElementById('method-used');
+      
+      outEl.textContent = "Calculating... (This may take a moment for large files)";
+      methodEl.textContent = "";
+
+      try {
+        const buffer = await file.arrayBuffer();
+        
+        // 1. Try Native Browser Crypto API (Blazing fast, requires HTTPS or localhost)
+        if (window.crypto && window.crypto.subtle) {
+          const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          
+          outEl.textContent = hashHex;
+          methodEl.textContent = "Calculated using native Web Crypto API ⚡";
+        } 
+        // 2. Fallback to JS Library (Works anywhere, slightly slower for massive files)
+        else {
+          const hashHex = sha256(buffer);
+          
+          outEl.textContent = hashHex;
+          methodEl.textContent = "Calculated using JS fallback (Non-HTTPS environment) 🐢";
+        }
+      } catch(err) {
+        outEl.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

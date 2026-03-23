@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Privacy Policy - Client-Side Toolbox</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="hero" style="padding-top: 1rem; padding-bottom: 1rem; text-align: left; align-items: flex-start;">
+      <h1 style="font-size: 2.5rem;">Privacy Policy</h1>
+      <p>Last updated: <span id="date"></span></p>
+    </header>
+
+    <main class="workspace" style="display: block;">
+      <div class="panel" style="padding: 2rem; line-height: 1.6;">
+        
+        <h3 style="color: var(--text-main); margin-bottom: 0.5rem;">1. Core Philosophy: Local Processing</h3>
+        <p>The core functionality of the Client-Side Toolbox is built on absolute privacy. All tools (including password generation, JSON formatting, and hash checking) execute <strong>100% locally within your browser</strong>. We do not have access to, collect, store, or transmit any data you enter into these tools to any external servers.</p>
+
+        <h3 style="color: var(--text-main); margin-top: 1.5rem; margin-bottom: 0.5rem;">2. Third-Party Advertisers (Google AdSense)</h3>
+        <p>To keep this tool free, we use Google AdSense to display advertisements. Because of this:</p>
+        <ul style="margin-left: 1.5rem; color: var(--text-muted); margin-bottom: 1rem;">
+          <li>Third party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites.</li>
+          <li>Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our sites and/or other sites on the Internet.</li>
+          <li>Users may opt out of personalized advertising by visiting <a href="https://myadcenter.google.com/" target="_blank" style="color: var(--primary);">Ads Settings</a>.</li>
+        </ul>
+
+        <h3 style="color: var(--text-main); margin-top: 1.5rem; margin-bottom: 0.5rem;">3. Analytics and Hosting</h3>
+        <p>This site is hosted on GitHub Pages, which may collect basic, anonymous server logs (such as IP addresses and browser types) for security and network performance purposes. We do not use this data to track individual users.</p>
+
+        <h3 style="color: var(--text-main); margin-top: 1.5rem; margin-bottom: 0.5rem;">4. Contact</h3>
+        <p>If you have any questions regarding this privacy policy, you can contact us at: <strong>[Your Email Here]</strong></p>
+
+      </div>
+    </main>
+  </div>
+  <script>document.getElementById('date').textContent = new Date().toLocaleDateString();</script>
+  <script src="theme-toggle.js"></script>
+</body>
+</html>
