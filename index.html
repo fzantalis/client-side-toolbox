@@ -7,238 +7,328 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <title>Client-Side Toolbox</title>
+  <style>
+    .card.coming-soon {
+      opacity: 0.55;
+      cursor: default;
+      pointer-events: none;
+      position: relative;
+    }
+    .card.coming-soon::after {
+      content: 'Coming Soon';
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--border);
+      color: var(--text-muted);
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+    }
+  </style>
 </head>
 <body>
-  
-  <div class="hero-nav">
-    <a href="https://buymeacoffee.com/yourusername" target="_blank" class="btn-coffee">
-      <i class="ph-fill ph-coffee"></i> Buy me a coffee
-    </a>
-  </div>
 
-  <div class="container" style="padding-top: 0;">
-    <header class="hero" style="padding-top: 1rem;">
-      <div class="hero-text">
-        <h1 style="font-size: 3rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Client-Side Toolbox</h1>
-        <p>A suite of powerful developer and business utilities that run entirely in your browser.</p>
+<div class="hero-nav">
+  <a href="https://buymeacoffee.com/yourusername" target="_blank" class="btn-coffee">
+    <i class="ph-fill ph-coffee"></i> Buy me a coffee
+  </a>
+</div>
+
+<div class="container" style="padding-top: 0;">
+  <header class="hero" style="padding-top: 1rem;">
+    <div class="hero-text">
+      <h1 style="font-size: 3rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Client-Side Toolbox</h1>
+      <p>A suite of powerful developer and business utilities that run entirely in your browser.</p>
+    </div>
+    <div class="features-banner">
+      <div class="feature-item">
+        <i class="ph-fill ph-shield-check"></i>
+        <div><strong>100% Private</strong><span>Zero server uploads</span></div>
       </div>
-      
-      <div class="features-banner">
-        <div class="feature-item">
-          <i class="ph-fill ph-shield-check"></i>
-          <div><strong>100% Private</strong><span>Zero server uploads</span></div>
-        </div>
-        <div class="feature-item">
-          <i class="ph-fill ph-lightning"></i>
-          <div><strong>Blazing Fast</strong><span>Instant local processing</span></div>
-        </div>
-        <div class="feature-item">
-          <i class="ph-fill ph-wifi-slash"></i>
-          <div><strong>Offline Ready</strong><span>Works without internet</span></div>
-        </div>
+      <div class="feature-item">
+        <i class="ph-fill ph-lightning"></i>
+        <div><strong>Blazing Fast</strong><span>Instant local processing</span></div>
       </div>
-
-      <div class="search-container">
-        <i class="ph ph-magnifying-glass"></i>
-        <input type="text" id="searchInput" placeholder="Search tools (e.g., 'JWT', 'Markdown')...">
+      <div class="feature-item">
+        <i class="ph-fill ph-wifi-slash"></i>
+        <div><strong>Offline Ready</strong><span>Works without internet</span></div>
       </div>
-    </header>
+    </div>
+    <div class="search-container">
+      <i class="ph ph-magnifying-glass"></i>
+      <input type="text" id="searchInput" placeholder="Search tools (e.g., 'JWT', 'Markdown')...">
+    </div>
+  </header>
 
-    <nav class="nav-pills">
-      <a href="#text-data" class="active">Text & Data</a>
-      <a href="#design-media">Design & Media</a>
-      <a href="#business-math">Business & Math</a>
-      <a href="#security-encoding">Security & Encoding</a>
-    </nav>
+  <nav class="nav-pills">
+    <a href="#text-data" class="active">Text & Data</a>
+    <a href="#design-media">Design & Media</a>
+    <a href="#business-math">Business & Math</a>
+    <a href="#security-encoding">Security & Encoding</a>
+    <a href="#developer">Developer</a>
+  </nav>
 
-    <main>
-      <section id="text-data" class="tool-section">
-        <div class="section-header">
-          <i class="ph-fill ph-text-aa"></i>
-          <h2>Text & Data</h2>
-        </div>
-        <div class="card-grid">
-          <a href="demo-json.html" class="card">
-            <div class="card-icon"><i class="ph ph-brackets-curly"></i></div>
-            <h4>JSON Beautifier</h4>
-            <p>Format, validate, and minify JSON data instantly in your browser.</p>
-          </a>
-          <a href="demo-csv-to-json.html" class="card">
-            <div class="card-icon"><i class="ph ph-table"></i></div>
-            <h4>CSV Converter</h4>
-            <p>Transform raw CSV data into clean JSON or SQL insert statements.</p>
-          </a>
-          <a href="demo-smart-case.html" class="card">
-            <div class="card-icon"><i class="ph ph-text-a-underline"></i></div>
-            <h4>Smart Case Converter</h4>
-            <p>Switch between camelCase, snake_case, PascalCase, and more.</p>
-          </a>
-          <a href="demo-markdown.html" class="card">
-            <div class="card-icon"><i class="ph ph-markdown-logo"></i></div>
-            <h4>Markdown Editor</h4>
-            <p>Real-time Markdown rendering and HTML export.</p>
-          </a>
-          <a href="demo-diff.html" class="card">
-            <div class="card-icon"><i class="ph ph-files"></i></div>
-            <h4>Text Diff Checker</h4>
-            <p>Compare two blocks of text or code to find exact line changes.</p>
-          </a>
-        </div>
-      </section>
+  <main>
 
-      <section id="design-media" class="tool-section">
-        <div class="section-header">
-          <i class="ph-fill ph-palette"></i>
-          <h2>Design & Media</h2>
-        </div>
-        <div class="card-grid">
-          <a href="demo-webp.html" class="card">
-            <div class="card-icon"><i class="ph ph-image"></i></div>
-            <h4>WebP Converter</h4>
-            <p>Compress bulk images to next-gen WebP format without losing quality.</p>
-          </a>
-          <a href="demo-color-extractor.html" class="card">
-            <div class="card-icon"><i class="ph ph-eyedropper"></i></div>
-            <h4>Color Extractor</h4>
-            <p>Upload an image to extract its dominant color palette and hex codes.</p>
-          </a>
-          <a href="demo-css.html" class="card">
-            <div class="card-icon"><i class="ph ph-squares-four"></i></div>
-            <h4>Box-Shadow Generator</h4>
-            <p>Visually tweak and generate complex layered CSS box-shadows.</p>
-          </a>
-          <a href="demo-qr.html" class="card">
-            <div class="card-icon"><i class="ph ph-qr-code"></i></div>
-            <h4>QR Code Generator</h4>
-            <p>Instantly generate tracking-free QR codes for links and text.</p>
-          </a>
-          <a href="demo-svg.html" class="card">
-            <div class="card-icon"><i class="ph ph-bezier-curve"></i></div>
-            <h4>SVG Optimizer</h4>
-            <p>Clean and minify messy SVG code exports to save space.</p>
-          </a>
-        </div>
-      </section>
-
-      <section id="business-math" class="tool-section">
-        <div class="section-header">
-          <i class="ph-fill ph-calculator"></i>
-          <h2>Business & Productivity</h2>
-        </div>
-        <div class="card-grid">
-          <a href="demo-hourly-wage.html" class="card">
-            <div class="card-icon"><i class="ph ph-currency-dollar"></i></div>
-            <h4>Hourly Wage Calculator</h4>
-            <p>Calculate your effective hourly rate after software costs and taxes.</p>
-          </a>
-          <a href="demo-invoice.html" class="card">
-            <div class="card-icon"><i class="ph ph-receipt"></i></div>
-            <h4>Invoice Generator</h4>
-            <p>Generate and download professional PDF invoices directly in the browser.</p>
-          </a>
-          <a href="demo-timezone.html" class="card">
-            <div class="card-icon"><i class="ph ph-globe"></i></div>
-            <h4>Timezone Overlap</h4>
-            <p>Find overlapping meeting times across multiple global timezones.</p>
-          </a>
-        </div>
-      </section>
-
-      <section id="security-encoding" class="tool-section">
-        <div class="section-header">
-          <i class="ph-fill ph-shield-check"></i>
-          <h2>Security & Encoding</h2>
-        </div>
-        <div class="card-grid">
-          <a href="demo-url-encoder.html" class="card">
-            <div class="card-icon"><i class="ph ph-link"></i></div>
-            <h4>URL Encoder/Decoder</h4>
-            <p>Safely encode URLs for data transfer or decode them to read parameters.</p>
-          </a>
-          <a href="demo-password.html" class="card">
-            <div class="card-icon"><i class="ph ph-password"></i></div>
-            <h4>Password Generator</h4>
-            <p>Generate highly secure, localized passwords instantly.</p>
-          </a>
-          <a href="demo-base64-image.html" class="card">
-            <div class="card-icon"><i class="ph ph-file-code"></i></div>
-            <h4>Base64 Image Encoder</h4>
-            <p>Encode images into Base64 data strings for inline HTML/CSS embedding.</p>
-          </a>
-          <a href="demo-jwt.html" class="card">
-            <div class="card-icon"><i class="ph ph-key"></i></div>
-            <h4>JWT Decoder</h4>
-            <p>Decode JSON Web Tokens securely without uploading them to a server.</p>
-          </a>
-          <a href="demo-hash.html" class="card">
-            <div class="card-icon"><i class="ph ph-fingerprint"></i></div>
-            <h4>File Hash Checker</h4>
-            <p>Verify file integrity locally by calculating SHA-256 checksums.</p>
-          </a>
-        </div>
-      </section>
-
-    </main>
-    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
-      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
-      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
-        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
-        <span>&bull;</span>
-        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+    <!-- TEXT & DATA -->
+    <section id="text-data" class="tool-section">
+      <div class="section-header">
+        <i class="ph-fill ph-text-aa"></i>
+        <h2>Text & Data</h2>
       </div>
-    </footer>
-  </div>
+      <div class="card-grid">
+        <a href="demo-json.html" class="card">
+          <div class="card-icon"><i class="ph ph-brackets-curly"></i></div>
+          <h4>JSON Beautifier</h4>
+          <p>Format, validate, and minify JSON data instantly in your browser.</p>
+        </a>
+        <a href="demo-csv-to-json.html" class="card">
+          <div class="card-icon"><i class="ph ph-table"></i></div>
+          <h4>CSV Converter</h4>
+          <p>Transform raw CSV data into clean JSON or SQL insert statements.</p>
+        </a>
+        <a href="demo-smart-case.html" class="card">
+          <div class="card-icon"><i class="ph ph-text-a-underline"></i></div>
+          <h4>Smart Case Converter</h4>
+          <p>Switch between camelCase, snake_case, PascalCase, and more.</p>
+        </a>
+        <a href="demo-markdown.html" class="card">
+          <div class="card-icon"><i class="ph ph-markdown-logo"></i></div>
+          <h4>Markdown Editor</h4>
+          <p>Real-time Markdown rendering and HTML export.</p>
+        </a>
+        <a href="demo-diff.html" class="card">
+          <div class="card-icon"><i class="ph ph-files"></i></div>
+          <h4>Text Diff Checker</h4>
+          <p>Compare two blocks of text or code to find exact line changes.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-code"></i></div>
+          <h4>SQL Formatter</h4>
+          <p>Beautify and syntax-highlight SQL queries without sending them anywhere.</p>
+        </a>
+      </div>
+    </section>
 
-  <script>
-    // Smooth Scrolling for Nav Pills
-    document.querySelectorAll('.nav-pills a').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        
-        // Update active state
-        document.querySelectorAll('.nav-pills a').forEach(a => a.classList.remove('active'));
-        this.classList.add('active');
+    <!-- DESIGN & MEDIA -->
+    <section id="design-media" class="tool-section">
+      <div class="section-header">
+        <i class="ph-fill ph-palette"></i>
+        <h2>Design & Media</h2>
+      </div>
+      <div class="card-grid">
+        <a href="demo-webp.html" class="card">
+          <div class="card-icon"><i class="ph ph-image"></i></div>
+          <h4>WebP Converter</h4>
+          <p>Compress bulk images to next-gen WebP format without losing quality.</p>
+        </a>
+        <a href="demo-color-extractor.html" class="card">
+          <div class="card-icon"><i class="ph ph-eyedropper"></i></div>
+          <h4>Color Extractor</h4>
+          <p>Upload an image to extract its dominant color palette and hex codes.</p>
+        </a>
+        <a href="demo-exif.html" class="card">
+          <div class="card-icon"><i class="ph ph-camera"></i></div>
+          <h4>EXIF Viewer</h4>
+          <p>Inspect hidden photo metadata — camera, GPS location, exposure, and more.</p>
+        </a>
+        <a href="demo-qr.html" class="card">
+          <div class="card-icon"><i class="ph ph-qr-code"></i></div>
+          <h4>QR Code Generator</h4>
+          <p>Instantly generate tracking-free QR codes for links and text.</p>
+        </a>
+        <a href="demo-svg.html" class="card">
+          <div class="card-icon"><i class="ph ph-bezier-curve"></i></div>
+          <h4>SVG Optimizer</h4>
+          <p>Clean and minify messy SVG code exports to save space.</p>
+        </a>
+        <a href="demo-css.html" class="card">
+          <div class="card-icon"><i class="ph ph-squares-four"></i></div>
+          <h4>Box-Shadow Generator</h4>
+          <p>Visually tweak and generate complex layered CSS box-shadows.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-gradient"></i></div>
+          <h4>CSS Gradient Builder</h4>
+          <p>Visual editor that outputs clean linear, radial, and conic gradients.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-app-window"></i></div>
+          <h4>Favicon Generator</h4>
+          <p>Upload an image and get back a .ico + all Apple/Android icon sizes.</p>
+        </a>
+      </div>
+    </section>
 
-        // Scroll
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+    <!-- BUSINESS & PRODUCTIVITY -->
+    <section id="business-math" class="tool-section">
+      <div class="section-header">
+        <i class="ph-fill ph-calculator"></i>
+        <h2>Business & Productivity</h2>
+      </div>
+      <div class="card-grid">
+        <a href="demo-hourly-wage.html" class="card">
+          <div class="card-icon"><i class="ph ph-currency-dollar"></i></div>
+          <h4>Hourly Wage Calculator</h4>
+          <p>Calculate your effective hourly rate after software costs and taxes.</p>
+        </a>
+        <a href="demo-invoice.html" class="card">
+          <div class="card-icon"><i class="ph ph-receipt"></i></div>
+          <h4>Invoice Generator</h4>
+          <p>Generate and download professional PDF invoices directly in the browser.</p>
+        </a>
+        <a href="demo-timezone.html" class="card">
+          <div class="card-icon"><i class="ph ph-globe"></i></div>
+          <h4>Timezone Overlap</h4>
+          <p>Find overlapping meeting times across multiple global timezones.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-users"></i></div>
+          <h4>Meeting Cost Calculator</h4>
+          <p>Enter attendee count and salaries, watch the meeting cost tick up in real time.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-bank"></i></div>
+          <h4>Loan Calculator</h4>
+          <p>Full amortization table with monthly breakdown and interest chart.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- SECURITY & ENCODING -->
+    <section id="security-encoding" class="tool-section">
+      <div class="section-header">
+        <i class="ph-fill ph-shield-check"></i>
+        <h2>Security & Encoding</h2>
+      </div>
+      <div class="card-grid">
+        <a href="demo-url-encoder.html" class="card">
+          <div class="card-icon"><i class="ph ph-link"></i></div>
+          <h4>URL Encoder/Decoder</h4>
+          <p>Safely encode URLs for data transfer or decode them to read parameters.</p>
+        </a>
+        <a href="demo-password.html" class="card">
+          <div class="card-icon"><i class="ph ph-password"></i></div>
+          <h4>Password Generator</h4>
+          <p>Generate highly secure, localized passwords instantly.</p>
+        </a>
+        <a href="demo-base64-image.html" class="card">
+          <div class="card-icon"><i class="ph ph-file-code"></i></div>
+          <h4>Base64 Image Encoder</h4>
+          <p>Encode images into Base64 data strings for inline HTML/CSS embedding.</p>
+        </a>
+        <a href="demo-jwt.html" class="card">
+          <div class="card-icon"><i class="ph ph-key"></i></div>
+          <h4>JWT Decoder</h4>
+          <p>Decode JSON Web Tokens securely without uploading them to a server.</p>
+        </a>
+        <a href="demo-hash.html" class="card">
+          <div class="card-icon"><i class="ph ph-fingerprint"></i></div>
+          <h4>File Hash Checker</h4>
+          <p>Verify file integrity locally by calculating SHA-256 checksums.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- DEVELOPER -->
+    <section id="developer" class="tool-section">
+      <div class="section-header">
+        <i class="ph-fill ph-terminal-window"></i>
+        <h2>Developer</h2>
+      </div>
+      <div class="card-grid">
+        <a href="demo-regex.html" class="card">
+          <div class="card-icon"><i class="ph ph-magnifying-glass"></i></div>
+          <h4>Regex Tester</h4>
+          <p>Live match highlighting, capture group inspector, and a full cheat sheet.</p>
+        </a>
+        <a href="demo-cron.html" class="card">
+          <div class="card-icon"><i class="ph ph-clock-countdown"></i></div>
+          <h4>Cron Expression Builder</h4>
+          <p>Build and validate cron schedules with a plain-English description and next-run preview.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-arrows-left-right"></i></div>
+          <h4>YAML ↔ JSON Converter</h4>
+          <p>Convert between YAML, JSON, and TOML config formats instantly.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-smiley"></i></div>
+          <h4>Emoji / Unicode Inspector</h4>
+          <p>Pick any emoji to reveal its codepoints, HTML entity, CSS escape, and name.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-person-simple-run"></i></div>
+          <h4>Fake Data Generator</h4>
+          <p>Generate realistic names, emails, addresses, and UUIDs for testing.</p>
+        </a>
+        <!-- PLACEHOLDER -->
+        <a href="#" class="card coming-soon">
+          <div class="card-icon"><i class="ph ph-file-zip"></i></div>
+          <h4>ZIP Inspector</h4>
+          <p>Peek inside a .zip archive and inspect its contents without extracting.</p>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+      <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Smooth Scrolling for Nav Pills
+  document.querySelectorAll('.nav-pills a').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.querySelectorAll('.nav-pills a').forEach(a => a.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelector(this.getAttribute('href')).scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
       });
     });
+  });
 
-    // Real-time Search functionality
-    const searchInput = document.getElementById('searchInput');
-    const cards = document.querySelectorAll('.card');
-    const sections = document.querySelectorAll('.tool-section');
+  // Real-time Search functionality
+  const searchInput = document.getElementById('searchInput');
+  const cards = document.querySelectorAll('.card');
+  const sections = document.querySelectorAll('.tool-section');
 
-    searchInput.addEventListener('input', function(e) {
-      const searchTerm = e.target.value.toLowerCase();
-
-      cards.forEach(card => {
-        const title = card.querySelector('h4').textContent.toLowerCase();
-        const desc = card.querySelector('p').textContent.toLowerCase();
-        
-        if (title.includes(searchTerm) || desc.includes(searchTerm)) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      // Hide empty sections
-      sections.forEach(section => {
-        const visibleCards = section.querySelectorAll('.card[style="display: flex;"], .card:not([style*="display: none"])');
-        if (visibleCards.length === 0 && searchTerm !== '') {
-          section.style.display = 'none';
-        } else {
-          section.style.display = 'block';
-        }
-      });
+  searchInput.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    cards.forEach(card => {
+      const title = card.querySelector('h4').textContent.toLowerCase();
+      const desc  = card.querySelector('p').textContent.toLowerCase();
+      card.style.display = (title.includes(searchTerm) || desc.includes(searchTerm)) ? 'flex' : 'none';
     });
-  </script>
-  
-  <script src="script.js"></script>
-  <script src="theme-toggle.js"></script>
+    sections.forEach(section => {
+      const visibleCards = [...section.querySelectorAll('.card')].filter(c => c.style.display !== 'none');
+      section.style.display = (visibleCards.length === 0 && searchTerm !== '') ? 'none' : 'block';
+    });
+  });
+</script>
+
+<script src="script.js"></script>
+<script src="theme-toggle.js"></script>
 </body>
 </html>
