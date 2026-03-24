@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Subnet Calculator</title>
+  <style>
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .input-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .text-input {
+      font-family: 'Fira Code', monospace;
+      padding: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      width: 100%;
+    }
+    .select-input {
+      padding: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+      min-width: 100px;
+    }
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .data-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .data-card strong {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .data-card span {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+    .error-msg {
+      color: #dc3545;
+      background: #f8d7da;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border: 1px solid #f5c6cb;
+      font-family: 'Inter', sans-serif;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-share-network"></i></div>
+      <div class="tool-header-text">
+        <h1>CIDR / Subnet Calculator</h1>
+        <p>Calculate network addresses, subnet masks, and usable host ranges locally.</p>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header"><h3>Network Input</h3></div>
+        <div class="panel-body">
+          <div id="error-output" class="error-msg"></div>
+          
+          <div class="input-group">
+            <label for="ip-address" style="font-weight: 500;">IP Address & CIDR Routing Prefix</label>
+            <div class="input-row">
+              <input type="text" id="ip-address" class="text-input" placeholder="e.g., 192.168.1.100" value="192.168.1.0">
+              <span style="font-size: 1.5rem; color: var(--text-muted);">/</span>
+              <select id="cidr-suffix" class="select-input">
+                </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Subnet Details</h3></div>
+        <div class="panel-body data-grid">
+          
+          <div class="data-card">
+            <strong>Network Address</strong>
+            <span id="out-network">-</span>
+          </div>
+          
+          <div class="data-card">
+            <strong>Subnet Mask</strong>
+            <span id="out-mask">-</span>
+          </div>
+          
+          <div class="data-card">
+            <strong>Usable Host Range</strong>
+            <span id="out-range">-</span>
+          </div>
+
+          <div class="data-card">
+            <strong>Broadcast Address</strong>
+            <span id="out-broadcast">-</span>
+          </div>
+
+          <div class="data-card" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column;">
+              <strong>Total Usable Hosts</strong>
+              <span id="out-hosts">-</span>
+            </div>
+            <div style="display: flex; flex-direction: column; text-align: right;">
+              <strong>Total IPs</strong>
+              <span id="out-total-ips">-</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const ipInput = document.getElementById('ip-address');
+    const cidrSelect = document.getElementById('cidr-suffix');
+    const errorOutput = document.getElementById('error-output');
+
+    // Populate CIDR Dropdown (/0 to /32)
+    for (let i = 32; i >= 0; i--) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i;
+      if (i === 24) option.selected = true; // Default to /24
+      cidrSelect.appendChild(option);
+    }
+
+    // Event Listeners for Real-time Calculation
+    ipInput.addEventListener('input', calculateSubnet);
+    cidrSelect.addEventListener('change', calculateSubnet);
+
+    // Helpers for IP Math
+    function ipToInt(ip) {
+      return ip.split('.').reduce((int, oct) => (int << 8) + parseInt(oct, 10), 0) >>> 0;
+    }
+
+    function intToIp(int) {
+      return [
+        (int >>> 24) & 255,
+        (int >>> 16) & 255,
+        (int >>> 8) & 255,
+        int & 255
+      ].join('.');
+    }
+
+    function calculateSubnet() {
+      const ipStr = ipInput.value.trim();
+      const cidr = parseInt(cidrSelect.value, 10);
+      
+      errorOutput.style.display = 'none';
+
+      // Basic IPv4 Validation Regex
+      const ipRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
+      if (!ipRegex.test(ipStr)) {
+        if (ipStr.length > 6) {
+           errorOutput.textContent = "Invalid IPv4 address format.";
+           errorOutput.style.display = 'block';
+        }
+        resetOutputs();
+        return;
+      }
+
+      try {
+        const ipInt = ipToInt(ipStr);
+        
+        // Calculate Subnet Mask
+        const maskInt = cidr === 0 ? 0 : (0xFFFFFFFF << (32 - cidr)) >>> 0;
+        
+        // Calculate Network and Broadcast
+        const netInt = (ipInt & maskInt) >>> 0;
+        const bcastInt = (netInt | ~maskInt) >>> 0;
+        
+        // Calculate Host Range
+        const firstHostInt = netInt + 1;
+        const lastHostInt = bcastInt - 1;
+        
+        // Calculate Host Counts
+        // Use BigInt for large numbers to avoid JS precision issues on /0
+        const totalIps = 2n ** BigInt(32 - cidr);
+        let usableHosts = totalIps - 2n;
+        
+        // Handle edge cases for /31 (Point-to-Point) and /32 (Single Host)
+        if (cidr === 32) usableHosts = 1n;
+        if (cidr === 31) usableHosts = 2n;
+        if (cidr === 32) {
+             document.getElementById('out-range').textContent = "N/A (Single Host)";
+        } else if (cidr === 31) {
+             document.getElementById('out-range').textContent = `${intToIp(netInt)} - ${intToIp(bcastInt)}`;
+        } else {
+             document.getElementById('out-range').textContent = `${intToIp(firstHostInt)} - ${intToIp(lastHostInt)}`;
+        }
+
+        // Update UI
+        document.getElementById('out-network').textContent = intToIp(netInt);
+        document.getElementById('out-mask').textContent = intToIp(maskInt);
+        document.getElementById('out-broadcast').textContent = intToIp(bcastInt);
+        document.getElementById('out-hosts').textContent = usableHosts.toLocaleString();
+        document.getElementById('out-total-ips').textContent = totalIps.toLocaleString();
+
+      } catch (err) {
+        errorOutput.textContent = "Calculation error.";
+        errorOutput.style.display = 'block';
+      }
+    }
+
+    function resetOutputs() {
+      document.getElementById('out-network').textContent = "-";
+      document.getElementById('out-mask').textContent = "-";
+      document.getElementById('out-range').textContent = "-";
+      document.getElementById('out-broadcast').textContent = "-";
+      document.getElementById('out-hosts').textContent = "-";
+      document.getElementById('out-total-ips').textContent = "-";
+    }
+
+    // Run once on load
+    calculateSubnet();
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
