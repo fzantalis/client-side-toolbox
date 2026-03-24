@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <!-- QR code generation -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <title>P2P File Transfer - Client-Side Toolbox</title>
   <style>
     /* ── Page layout ── */
@@ -529,14 +529,16 @@ function setupDataChannel(chan, side) {
 
 // ── QR ──────────────────────────────────────────────────────────────
 async function generateQR(text) {
-  try {
-    await QRCode.toCanvas(document.getElementById('qrCanvas'), text, {
-      width: 140,
-      margin: 1
-    });
-  } catch (e) {
-    console.error("QR error", e);
-  }
+  const canvas = document.getElementById('qrCanvas');
+
+  // clear previous QR
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+  new QRCode(canvas, {
+    text: text,
+    width: 140,
+    height: 140
+  });
 }
 
 // ── RECEIVER FILE HANDLING (unchanged) ──────────────────────────────
