@@ -372,3 +372,25 @@ canvas { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); m
 /* Dark mode tweaks for ads */
 [data-theme="dark"] .ad-box { background: var(--card-bg); }
 [data-theme="dark"] .ad-img { background-color: #334155 !important; }
+
+/* --- Mobile Adjustments --- */
+@media (max-width: 480px) {
+  .data-card span {
+    font-size: 0.95rem; /* Slightly smaller for mobile screens */
+    overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  }
+  
+  /* Stack the two-column card on mobile to prevent squishing */
+  .data-grid .data-card[style*="flex-direction: row"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+  }
+  
+  .data-grid .data-card[style*="flex-direction: row"] > div {
+    text-align: left !important;
+  }
+}
+
