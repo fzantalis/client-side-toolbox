@@ -1,266 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate Viewer - Client-Side Toolbox</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
-    
-    <style>
-        .tool-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        textarea {
-            width: 100%;
-            height: 200px;
-            font-family: monospace;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color, #ccc);
-            background: var(--bg-color, #fff);
-            color: var(--text-color, #333);
-            resize: vertical;
-        }
-        .file-upload {
-            padding: 2rem 1rem;
-            border: 2px dashed var(--border-color, #ccc);
-            border-radius: 8px;
-            text-align: center;
-            background: var(--bg-secondary, #f9f9f9);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .file-upload:hover {
-            border-color: #007bff;
-            background: rgba(0, 123, 255, 0.05);
-        }
-        .output-card {
-            background: var(--bg-secondary, #f9f9f9);
-            border: 1px solid var(--border-color, #e0e0e0);
-            border-radius: 8px;
-            padding: 1.5rem;
-            display: none;
-        }
-        .cert-field {
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-color, #e0e0e0);
-            word-wrap: break-word;
-        }
-        .cert-field:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        .cert-field strong {
-            display: inline-block;
-            min-width: 180px;
-            color: var(--text-muted, #666);
-        }
-        .cert-field span {
-            font-family: monospace;
-            font-size: 0.95em;
-        }
-        .error-msg {
-            color: #dc3545;
-            background: #f8d7da;
-            padding: 1rem;
-            border-radius: 8px;
-            display: none;
-            border: 1px solid #f5c6cb;
-        }
-        .btn-primary {
-            padding: 0.75rem 1.5rem;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
+  <title>Certificate Viewer</title>
+  <style>
+    /* Minimal inline additions to complement your existing style.css */
+    .file-drop-area {
+      padding: 2rem 1rem;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--surface);
+    }
+    .file-drop-area:hover, .file-drop-area.dragover {
+      border-color: var(--primary);
+      background: rgba(0, 123, 255, 0.05);
+    }
+    .cert-input {
+      width: 100%;
+      height: 180px;
+      font-family: 'Fira Code', monospace;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      resize: vertical;
+    }
+    .cert-btn {
+      padding: 0.75rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+    }
+    .cert-btn:hover {
+      opacity: 0.9;
+    }
+    .cert-property {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      word-wrap: break-word;
+    }
+    .cert-property:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .cert-property strong {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+    .cert-property span {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.95rem;
+    }
+    .error-msg {
+      color: #dc3545;
+      background: #f8d7da;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border: 1px solid #f5c6cb;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
 </head>
 <body>
-
-    <header style="padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color, #eee);">
-        <a href="index.html" style="text-decoration: none; color: inherit;">← Back to Toolbox</a>
-        <button id="theme-toggle" style="background:none; border:none; cursor:pointer; font-size:1.5rem;" title="Toggle dark mode">🌓</button>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-certificate"></i></div>
+      <div class="tool-header-text">
+        <h1>Certificate Viewer</h1>
+        <p>Inspect standard X.509 certificates (.pem, .crt, .cer) securely in your browser.</p>
+      </div>
     </header>
 
-    <main class="tool-container">
-        <div>
-            <h1 style="margin-top: 0;">Certificate Inspector</h1>
-            <p>Inspect standard X.509 certificates (.pem, .crt, .cer) securely in your browser. Handles both ASCII (PEM) and binary (DER) encoded files locally.</p>
-        </div>
-
-        <div class="input-group">
-            <label class="file-upload" for="cert-file">
-                <strong>Click to browse</strong> or drag & drop a certificate file here<br>
-                <small style="color: var(--text-muted, #666); margin-top: 0.5rem; display: block;">Accepts .pem, .crt, .cer</small>
-            </label>
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header"><h3>Input Certificate</h3></div>
+        <div class="panel-body" style="display: flex; flex-direction: column; gap: 1rem;">
+          
+          <label class="file-drop-area" id="drop-area">
+            <strong>Click to browse</strong> or drag & drop a certificate file here<br>
+            <small style="color: var(--text-muted); margin-top: 0.5rem; display: block;">Accepts .pem, .crt, .cer</small>
             <input type="file" id="cert-file" accept=".pem,.crt,.cer,.txt" style="display: none;">
+          </label>
+          
+          <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">— OR PASTE PEM TEXT —</div>
+          
+          <textarea id="cert-text" class="cert-input" placeholder="-----BEGIN CERTIFICATE-----&#10;MII...&#10;-----END CERTIFICATE-----"></textarea>
+          
+          <button id="parse-btn" class="cert-btn">Inspect Certificate</button>
         </div>
+      </div>
 
-        <div class="input-group">
-            <label for="cert-text">Or paste certificate content (PEM format):</label>
-            <textarea id="cert-text" placeholder="-----BEGIN CERTIFICATE-----&#10;MII...&#10;-----END CERTIFICATE-----"></textarea>
+      <div class="panel">
+        <div class="panel-header"><h3>Certificate Details</h3></div>
+        <div class="panel-body" id="output-container">
+          
+          <div id="error-output" class="error-msg" style="display: none;"></div>
+          
+          <div id="cert-data" style="display: none;">
+            <div class="cert-property"><strong>Subject</strong> <span id="out-subject"></span></div>
+            <div class="cert-property"><strong>Issuer</strong> <span id="out-issuer"></span></div>
+            <div class="cert-property"><strong>Valid From</strong> <span id="out-valid-from"></span></div>
+            <div class="cert-property"><strong>Valid To</strong> <span id="out-valid-to"></span></div>
+            <div class="cert-property"><strong>Status</strong> <span id="out-status"></span></div>
+            <div class="cert-property"><strong>Serial Number</strong> <span id="out-serial"></span></div>
+            <div class="cert-property"><strong>SHA-1 Fingerprint</strong> <span id="out-fingerprint"></span></div>
+            <div class="cert-property"><strong>Subject Alternative Names (SAN)</strong> <span id="out-sans"></span></div>
+            <div class="cert-property"><strong>Public Key</strong> <span id="out-pubkey"></span></div>
+          </div>
+          
+          <div id="empty-state" style="color: var(--text-muted); text-align: center; padding: 2rem 0; font-style: italic;">
+            Details will appear here once a certificate is parsed.
+          </div>
+
         </div>
-
-        <button id="parse-btn" class="btn-primary">Inspect Certificate</button>
-
-        <div id="error-output" class="error-msg"></div>
-
-        <div id="cert-output" class="output-card">
-            <h3 style="margin-top: 0; margin-bottom: 1rem;">Certificate Details</h3>
-            <div class="cert-field"><strong>Subject:</strong> <span id="out-subject"></span></div>
-            <div class="cert-field"><strong>Issuer:</strong> <span id="out-issuer"></span></div>
-            <div class="cert-field"><strong>Valid From:</strong> <span id="out-valid-from"></span></div>
-            <div class="cert-field"><strong>Valid To:</strong> <span id="out-valid-to"></span></div>
-            <div class="cert-field"><strong>Status:</strong> <span id="out-status"></span></div>
-            <div class="cert-field"><strong>Serial Number:</strong> <span id="out-serial"></span></div>
-            <div class="cert-field"><strong>SHA-1 Fingerprint:</strong> <span id="out-fingerprint"></span></div>
-            <div class="cert-field"><strong>Subject Alt Names (SAN):</strong> <span id="out-sans"></span></div>
-            <div class="cert-field"><strong>Public Key Type:</strong> <span id="out-pubkey"></span></div>
-        </div>
+      </div>
     </main>
 
-    <script src="theme-toggle.js"></script>
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const parseBtn = document.getElementById('parse-btn');
+    const fileInput = document.getElementById('cert-file');
+    const dropArea = document.getElementById('drop-area');
     
-    <script>
-        document.getElementById('parse-btn').addEventListener('click', parseCertificate);
-        document.getElementById('cert-file').addEventListener('change', handleFileUpload);
+    // UI Elements
+    const errorOutput = document.getElementById('error-output');
+    const certData = document.getElementById('cert-data');
+    const emptyState = document.getElementById('empty-state');
 
-        // Allow drag and drop on the upload area
-        const fileUploadLabel = document.querySelector('.file-upload');
-        fileUploadLabel.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileUploadLabel.style.borderColor = '#007bff';
-        });
-        fileUploadLabel.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            fileUploadLabel.style.borderColor = 'var(--border-color, #ccc)';
-        });
-        fileUploadLabel.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileUploadLabel.style.borderColor = 'var(--border-color, #ccc)';
-            if (e.dataTransfer.files.length) {
-                document.getElementById('cert-file').files = e.dataTransfer.files;
-                handleFileUpload({ target: { files: e.dataTransfer.files } });
-            }
-        });
+    // Event Listeners
+    parseBtn.addEventListener('click', parseCertificate);
+    fileInput.addEventListener('change', handleFileUpload);
 
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+    // Drag and Drop handlers
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('dragover');
+    });
+    dropArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+    });
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            handleFileUpload({ target: { files: e.dataTransfer.files } });
+        }
+    });
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                let content = e.target.result;
-                
-                // Smart detect: Check if it's a binary DER file by looking for non-printable chars or missing PEM headers
-                const isPEM = content.includes('-----BEGIN CERTIFICATE-----');
-                
-                if (!isPEM) {
-                     // Auto-convert binary DER file to PEM format for the textarea
-                     const base64 = forge.util.encode64(content);
-                     // Split into 64-character lines
-                     const pem = '-----BEGIN CERTIFICATE-----\n' + base64.match(/.{1,64}/g).join('\n') + '\n-----END CERTIFICATE-----';
-                     document.getElementById('cert-text').value = pem;
-                } else {
-                     document.getElementById('cert-text').value = content;
-                }
-                
-                parseCertificate(); // Auto-parse upon uploading
-            };
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            let content = e.target.result;
             
-            // Read as binary string to safely handle both text (PEM) and raw bytes (DER)
-            reader.readAsBinaryString(file);
-        }
-
-        function formatAttributes(attributes) {
-            if (!attributes) return 'None';
-            return attributes.map(attr => `${attr.shortName || attr.name}=${attr.value}`).join(', ');
-        }
-
-        function parseCertificate() {
-            const certText = document.getElementById('cert-text').value.trim();
-            const errorOutput = document.getElementById('error-output');
-            const certOutput = document.getElementById('cert-output');
+            // Smart detect: Check if it's a binary DER file
+            const isPEM = content.includes('-----BEGIN CERTIFICATE-----');
             
-            errorOutput.style.display = 'none';
-            certOutput.style.display = 'none';
-
-            if (!certText) {
-                errorOutput.textContent = 'Please paste a PEM certificate or upload a file first.';
-                errorOutput.style.display = 'block';
-                return;
+            if (!isPEM) {
+                 // Auto-convert binary DER file to PEM format for the textarea
+                 const base64 = forge.util.encode64(content);
+                 const pem = '-----BEGIN CERTIFICATE-----\n' + base64.match(/.{1,64}/g).join('\n') + '\n-----END CERTIFICATE-----';
+                 document.getElementById('cert-text').value = pem;
+            } else {
+                 document.getElementById('cert-text').value = content;
             }
+            
+            parseCertificate(); 
+        };
+        
+        // Read as binary string to safely handle both text (PEM) and raw bytes (DER)
+        reader.readAsBinaryString(file);
+    }
 
-            try {
-                // Parse the PEM X.509
-                const cert = forge.pki.certificateFromPem(certText);
-                
-                // Extract Dates and check expiration
-                const validFrom = cert.validity.notBefore;
-                const validTo = cert.validity.notAfter;
-                const now = new Date();
-                let status = 'Valid 🟢';
-                if (now < validFrom) status = 'Not Yet Valid 🟡';
-                if (now > validTo) status = 'Expired 🔴';
-                
-                // Extract Serial
-                const serial = cert.serialNumber.match(/.{1,2}/g).join(':').toUpperCase();
-                
-                // Extract Fingerprint (SHA-1 is standard for visual cert fingerprints)
-                const der = forge.asn1.toDer(forge.pki.certificateToAsn1(cert)).getBytes();
-                const md = forge.md.sha1.create();
-                md.update(der);
-                const fingerprint = md.digest().toHex().match(/.{1,2}/g).join(':').toUpperCase();
+    function formatAttributes(attributes) {
+        if (!attributes || attributes.length === 0) return 'None';
+        return attributes.map(attr => `${attr.shortName || attr.name}=${attr.value}`).join(', ');
+    }
 
-                // Extract Subject Alternative Names (SANs)
-                let sansText = 'None';
-                const sanExt = cert.getExtension('subjectAltName');
-                if (sanExt && sanExt.altNames) {
-                    sansText = sanExt.altNames.map(an => an.value).join(', ');
-                }
+    function parseCertificate() {
+        const certText = document.getElementById('cert-text').value.trim();
+        
+        // Reset state
+        errorOutput.style.display = 'none';
+        certData.style.display = 'none';
+        emptyState.style.display = 'none';
 
-                // Public Key Info
-                const pubKeyAlgo = cert.publicKey.n ? `RSA (${cert.publicKey.n.bitLength()} bits)` : 'ECC / Other';
-
-                // Populate the UI
-                document.getElementById('out-subject').textContent = formatAttributes(cert.subject.attributes);
-                document.getElementById('out-issuer').textContent = formatAttributes(cert.issuer.attributes);
-                document.getElementById('out-valid-from').textContent = validFrom.toUTCString();
-                document.getElementById('out-valid-to').textContent = validTo.toUTCString();
-                document.getElementById('out-status').textContent = status;
-                document.getElementById('out-serial').textContent = serial;
-                document.getElementById('out-fingerprint').textContent = fingerprint;
-                document.getElementById('out-sans').textContent = sansText;
-                document.getElementById('out-pubkey').textContent = pubKeyAlgo;
-                
-                certOutput.style.display = 'block';
-
-            } catch (err) {
-                console.error(err);
-                errorOutput.textContent = 'Failed to parse certificate. Please ensure it is a valid X.509 certificate. Error: ' + err.message;
-                errorOutput.style.display = 'block';
-            }
+        if (!certText) {
+            showError('Please paste a PEM certificate or upload a file first.');
+            return;
         }
-    </script>
+
+        try {
+            const cert = forge.pki.certificateFromPem(certText);
+            
+            // Dates & Status
+            const validFrom = cert.validity.notBefore;
+            const validTo = cert.validity.notAfter;
+            const now = new Date();
+            let status = '<span style="color: #10b981;">Valid 🟢</span>';
+            if (now < validFrom) status = '<span style="color: #f59e0b;">Not Yet Valid 🟡</span>';
+            if (now > validTo) status = '<span style="color: #ef4444;">Expired 🔴</span>';
+            
+            // Serial
+            const serial = cert.serialNumber.match(/.{1,2}/g).join(':').toUpperCase();
+            
+            // Fingerprint
+            const der = forge.asn1.toDer(forge.pki.certificateToAsn1(cert)).getBytes();
+            const md = forge.md.sha1.create();
+            md.update(der);
+            const fingerprint = md.digest().toHex().match(/.{1,2}/g).join(':').toUpperCase();
+
+            // SANs
+            let sansText = 'None';
+            const sanExt = cert.getExtension('subjectAltName');
+            if (sanExt && sanExt.altNames) {
+                sansText = sanExt.altNames.map(an => an.value).join(', ');
+            }
+
+            // Public Key
+            const pubKeyAlgo = cert.publicKey.n ? `RSA (${cert.publicKey.n.bitLength()} bits)` : 'ECC / Other';
+
+            // Map to UI
+            document.getElementById('out-subject').textContent = formatAttributes(cert.subject.attributes);
+            document.getElementById('out-issuer').textContent = formatAttributes(cert.issuer.attributes);
+            document.getElementById('out-valid-from').textContent = validFrom.toUTCString();
+            document.getElementById('out-valid-to').textContent = validTo.toUTCString();
+            document.getElementById('out-status').innerHTML = status;
+            document.getElementById('out-serial').textContent = serial;
+            document.getElementById('out-fingerprint').textContent = fingerprint;
+            document.getElementById('out-sans').textContent = sansText;
+            document.getElementById('out-pubkey').textContent = pubKeyAlgo;
+            
+            certData.style.display = 'block';
+
+        } catch (err) {
+            console.error(err);
+            showError('Failed to parse certificate. Please ensure it is a valid X.509 certificate.');
+        }
+    }
+
+    function showError(msg) {
+        errorOutput.textContent = msg;
+        errorOutput.style.display = 'block';
+    }
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
