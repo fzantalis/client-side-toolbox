@@ -379,18 +379,23 @@
 let pc = null;
 let dc = null;
 
+// Adding more reliable STUN servers to prevent "ICE Failed"
 const ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' }
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
   ]
 };
 
-// ── 1. Role Selection (The fix for your ReferenceError) ──
+// ── Role Selection ──
 window.selectRole = function(role) {
   console.log("Role selected:", role);
   document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('role' + role.charAt(0).toUpperCase() + role.slice(1)).classList.add('selected');
+  const card = document.getElementById('role' + role.charAt(0).toUpperCase() + role.slice(1));
+  if(card) card.classList.add('selected');
   
   document.getElementById('senderPanel').classList.toggle('active', role === 'sender');
   document.getElementById('receiverPanel').classList.toggle('active', role === 'receiver');
@@ -402,7 +407,7 @@ window.reset = function() {
   location.reload(); 
 };
 
-// ── 2. Connection Helpers ──
+// ── Connection Helpers ──
 async function waitForIce(pc) {
   return new Promise(resolve => {
     if (pc.iceGatheringState === 'complete') return resolve();
@@ -413,7 +418,8 @@ async function waitForIce(pc) {
       }
     };
     pc.addEventListener('icegatheringstatechange', check);
-    setTimeout(resolve, 3500); // 3.5s timeout fallback
+    // Increased timeout for slow networks
+    setTimeout(resolve, 5000); 
   });
 }
 
@@ -425,49 +431,67 @@ function setStatus(side, state, msg) {
   }
 }
 
-// ── 3. Sender Logic ──
+// ── Sender Logic ──
 async function initSender() {
+  if(pc) pc.close();
   pc = new RTCPeerConnection(ICE_CONFIG);
   
   dc = pc.createDataChannel("fileTransfer", { ordered: true });
   setupDataHandlers(dc, 'sender');
 
+  // Monitor ICE failure
+  pc.oniceconnectionstatechange = () => {
+    if(pc.iceConnectionState === 'failed') {
+      setStatus('sender', 'error', 'Connection failed. Try again on the same Wi-Fi.');
+    }
+  };
+
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
-  setStatus('sender', 'connecting', 'Generating QR & Code...');
+  setStatus('sender', 'connecting', 'Gathering network paths (ICE)...');
   await waitForIce(pc);
 
   const encoded = btoa(JSON.stringify(pc.localDescription));
   document.getElementById('offerBox').textContent = encoded;
   
-  // Render QR
+  // Clear and Render QR
   const qrContainer = document.getElementById('qrCanvas');
   qrContainer.innerHTML = '';
-  new QRCode(qrContainer, { text: encoded, width: 128, height: 128 });
+  new QRCode(qrContainer, { text: encoded, width: 140, height: 140, correctLevel: QRCode.CorrectLevel.L });
 
-  setStatus('sender', 'idle', 'Offer ready. Send it to the receiver!');
+  setStatus('sender', 'idle', 'Offer ready. Share it!');
 }
 
 document.getElementById('connectBtn').onclick = async () => {
   const answerStr = document.getElementById('answerInput').value.trim();
   if (!answerStr) return;
+  
+  // Prevent "stable state" error by checking if we already have an answer
+  if (pc.signalingState !== "have-local-offer") {
+    console.warn("Signaling state is not 'have-local-offer'. State is:", pc.signalingState);
+    return;
+  }
+
   try {
     const answer = JSON.parse(atob(answerStr));
     await pc.setRemoteDescription(new RTCSessionDescription(answer));
-    setStatus('sender', 'connecting', 'Connecting to peer...');
+    setStatus('sender', 'connecting', 'Handshake complete. Connecting...');
   } catch (e) {
+    console.error(e);
     setStatus('sender', 'error', 'Invalid Answer code.');
   }
 };
 
-// ── 4. Receiver Logic ──
+// ── Receiver Logic ──
 document.getElementById('acceptBtn').onclick = async () => {
   const offerStr = document.getElementById('offerInput').value.trim();
   if (!offerStr) return;
 
   try {
+    if(pc) pc.close();
     pc = new RTCPeerConnection(ICE_CONFIG);
+    
     pc.ondatachannel = (event) => {
       dc = event.channel;
       setupDataHandlers(dc, 'receiver');
@@ -479,37 +503,37 @@ document.getElementById('acceptBtn').onclick = async () => {
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
 
-    setStatus('receiver', 'connecting', 'Generating answer...');
+    setStatus('receiver', 'connecting', 'Finalizing network paths...');
     await waitForIce(pc);
 
     const encoded = btoa(JSON.stringify(pc.localDescription));
     document.getElementById('answerBox').textContent = encoded;
     document.getElementById('receiverStep2').classList.remove('hidden');
-    setStatus('receiver', 'idle', 'Answer ready. Send it back to sender.');
+    setStatus('receiver', 'idle', 'Answer ready. Share it back!');
   } catch (e) {
+    console.error(e);
     setStatus('receiver', 'error', 'Invalid Offer code.');
   }
 };
 
-// ── 5. Data Handling ──
+// ── Data Handling ──
 function setupDataHandlers(channel, side) {
   channel.onopen = () => {
-    setStatus(side, 'connected', 'P2P Connected! Ready to transfer.');
+    setStatus(side, 'connected', 'P2P Connected! Ready to send.');
     if(side === 'sender') document.getElementById('senderDropZone').classList.remove('disabled');
   };
   
-  channel.onmessage = (e) => {
-    // Basic confirmation for now
-    console.log("Message received:", e.data);
-  };
+  channel.onclose = () => setStatus(side, 'idle', 'Disconnected.');
 }
 
-// Copy button listeners
+// Copy Handlers
 document.getElementById('copyOfferBtn').onclick = () => {
   navigator.clipboard.writeText(document.getElementById('offerBox').textContent);
+  alert("Offer copied!");
 };
 document.getElementById('copyAnswerBtn').onclick = () => {
   navigator.clipboard.writeText(document.getElementById('answerBox').textContent);
+  alert("Answer copied!");
 };
 </script>
 <script src="theme-toggle.js"></script>
