@@ -224,12 +224,15 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
-  height: calc(100vh - 250px);
-  min-height: 500px;
+  height: auto; /* Let the container grow on mobile */
+  min-height: calc(100vh - 250px);
 }
 
 @media (min-width: 768px) {
-  .workspace { grid-template-columns: 1fr 1fr; }
+  .workspace { 
+    grid-template-columns: 1fr 1fr; 
+    height: calc(100vh - 250px); /* Apply fixed height only on desktop */
+  }
 }
 
 .panel {
@@ -318,7 +321,15 @@ button {
 .success-state { color: #10b981; border-color: #10b981; }
 
 /* Form Layouts for Workspace Panels */
-.panel-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; flex-grow: 1; background: var(--card-bg); }
+.panel-body { 
+  padding: 1.5rem; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1rem; 
+  flex-grow: 1; 
+  background: var(--card-bg); 
+  overflow-y: auto; /* Added for scrollability inside panels */
+}
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
 .form-group label { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
 .checkbox-group { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-main); font-size: 0.9rem;}
@@ -373,16 +384,19 @@ canvas { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); m
 [data-theme="dark"] .ad-box { background: var(--card-bg); }
 [data-theme="dark"] .ad-img { background-color: #334155 !important; }
 
+/* --- Subnet App Specific Data Formatting --- */
+.data-card span {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
 /* --- Mobile Adjustments --- */
 @media (max-width: 480px) {
   .data-card span {
-    font-size: 0.95rem; /* Slightly smaller for mobile screens */
-    overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
+    font-size: 0.95rem;
   }
   
-  /* Stack the two-column card on mobile to prevent squishing */
   .data-grid .data-card[style*="flex-direction: row"] {
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -393,4 +407,3 @@ canvas { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); m
     text-align: left !important;
   }
 }
-
