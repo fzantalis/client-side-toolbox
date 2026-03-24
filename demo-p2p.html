@@ -1,729 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <!-- QR code generation -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  <title>P2P File Transfer - Client-Side Toolbox</title>
-  <style>
-    /* ── Page layout ── */
-    .p2p-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    @media (max-width: 760px) { .p2p-grid { grid-template-columns: 1fr; } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2P File Transfer (Client Only)</title>
 
-    /* ── Role selector ── */
-    .role-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-    .role-card {
-      padding: 1.25rem;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      cursor: pointer;
-      text-align: center;
-      transition: all .2s;
-      background: var(--surface);
-    }
-    .role-card:hover { border-color: var(--primary); }
-    .role-card.selected { border-color: var(--primary); background: rgba(99,102,241,.06); }
-    .role-card i { font-size: 2.2rem; color: var(--primary); display: block; margin-bottom: .5rem; }
-    .role-card h4 { margin: 0 0 .3rem; font-size: 1rem; }
-    .role-card p  { margin: 0; font-size: .8rem; color: var(--text-muted); }
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
-    /* ── Steps ── */
-    .step-panel { display: none; }
-    .step-panel.active { display: block; }
-
-    .step-title {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      font-size: .72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--text-muted);
-      margin-bottom: .75rem;
-    }
-    .step-num {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: #fff;
-      font-size: .65rem;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    /* ── Code boxes ── */
-    .code-box {
-      font-family: 'Fira Code', monospace;
-      font-size: .78rem;
-      word-break: break-all;
-      padding: .75rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      line-height: 1.5;
-      max-height: 120px;
-      overflow-y: auto;
-      color: var(--primary);
-    }
-    textarea.code-box {
-      width: 100%;
-      box-sizing: border-box;
-      resize: vertical;
-      min-height: 90px;
-      color: var(--text);
-      background: var(--bg);
-    }
-    textarea.code-box:focus { outline: none; border-color: var(--primary); }
-
-    /* ── Connection status ── */
-    .conn-status {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      padding: .65rem .9rem;
-      border-radius: 8px;
-      font-size: .85rem;
-      font-weight: 500;
-      border: 1px solid transparent;
-      margin-bottom: .75rem;
-    }
-    .conn-status.idle        { background: var(--surface); border-color: var(--border); color: var(--text-muted); }
-    .conn-status.connecting  { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.3); color: #f59e0b; }
-    .conn-status.connected   { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.3); color: #10b981; }
-    .conn-status.error       { background: rgba(239,68,68,.08);  border-color: rgba(239,68,68,.3);  color: #ef4444; }
-    .pulse { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
-    .conn-status.idle       .pulse { background: var(--border); }
-    .conn-status.connecting .pulse { background: #f59e0b; animation: blink .8s infinite; }
-    .conn-status.connected  .pulse { background: #10b981; }
-    .conn-status.error      .pulse { background: #ef4444; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-    /* ── Drop zone ── */
-    .drop-zone {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all .2s;
-      color: var(--text-muted);
-    }
-    .drop-zone:hover, .drop-zone.dragging { border-color: var(--primary); background: rgba(99,102,241,.04); }
-    .drop-zone i { font-size: 2.5rem; margin-bottom: .5rem; display: block; }
-    .drop-zone input { display: none; }
-    .drop-zone.disabled { opacity: .4; pointer-events: none; }
-
-    /* ── File queue ── */
-    .file-list { list-style: none; padding: 0; margin: .75rem 0 0; }
-    .file-item {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      padding: .55rem .5rem;
-      border-bottom: 1px solid var(--border);
-      font-size: .85rem;
-    }
-    .file-item:last-child { border-bottom: none; }
-    .file-icon { font-size: 1.2rem; color: var(--primary); flex-shrink: 0; }
-    .file-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .file-size { color: var(--text-muted); font-size: .78rem; white-space: nowrap; }
-    .file-status { font-size: .75rem; font-weight: 600; white-space: nowrap; }
-    .file-status.pending  { color: var(--text-muted); }
-    .file-status.sending  { color: #f59e0b; }
-    .file-status.done     { color: #10b981; }
-    .file-status.error    { color: #ef4444; }
-
-    /* ── Progress bar ── */
-    .progress-wrap { margin-top: .4rem; }
-    .progress-bar-bg { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-    .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width .1s; width: 0%; }
-    .progress-label { font-size: .72rem; color: var(--text-muted); margin-top: .2rem; }
-
-    /* ── Received files ── */
-    .recv-list { list-style: none; padding: 0; margin: .75rem 0 0; }
-    .recv-item {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      padding: .55rem .5rem;
-      border-bottom: 1px solid var(--border);
-      font-size: .85rem;
-    }
-    .recv-item:last-child { border-bottom: none; }
-
-    /* ── QR code ── */
-    #qrCanvas { display: block; margin: .75rem auto 0; }
-
-    /* ── Privacy note ── */
-    .privacy-note {
-      display: flex;
-      align-items: flex-start;
-      gap: .75rem;
-      padding: .9rem 1.1rem;
-      background: rgba(16,185,129,.07);
-      border: 1px solid rgba(16,185,129,.25);
-      border-radius: 8px;
-      margin-top: 1rem;
-      font-size: .85rem;
-      color: var(--text-muted);
-    }
-    .privacy-note i { color: #10b981; font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
-
-    /* ── How it works ── */
-    .how-steps {
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: .75rem;
-      margin-bottom: 1.5rem;
-    }
-    @media (max-width: 600px) { .how-steps { grid-template-columns: 1fr; } }
-    .how-step {
-      padding: 1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      text-align: center;
-    }
-    .how-step i { font-size: 1.8rem; color: var(--primary); display: block; margin-bottom: .4rem; }
-    .how-step h5 { margin: 0 0 .25rem; font-size: .85rem; }
-    .how-step p  { margin: 0; font-size: .78rem; color: var(--text-muted); }
-
-    .hidden { display: none !important; }
-  </style>
+<style>
+body { font-family: sans-serif; background:#0f172a; color:#e5e7eb; padding:20px; }
+textarea { width:100%; height:100px; margin-top:10px; }
+button { margin-top:10px; padding:10px; cursor:pointer; }
+#qr { margin-top:15px; }
+</style>
 </head>
 <body>
-<div class="container">
-  <a href="index.html" class="breadcrumb">
-    <i class="ph ph-arrow-left"></i> Back to Toolbox
-  </a>
 
-  <header class="tool-header">
-    <div class="card-icon"><i class="ph ph-share-network"></i></div>
-    <div class="tool-header-text">
-      <h1>P2P File Transfer</h1>
-      <p>Send files directly between browsers using WebRTC — no server, no cloud, no size limit.</p>
-    </div>
-  </header>
+<h2>P2P File Transfer (Client Only)</h2>
 
-  <main style="display:flex;flex-direction:column;gap:1rem;">
+<button onclick="startSender()">Start as Sender</button>
+<button onclick="startReceiver()">Start as Receiver</button>
 
-    <!-- How it works -->
-    <div class="panel">
-      <div class="panel-header"><h3>How it works</h3></div>
-      <div class="how-steps">
-        <div class="how-step">
-          <i class="ph ph-handshake"></i>
-          <h5>1. Exchange codes</h5>
-          <p>Sender generates a connection offer. Receiver pastes it to accept.</p>
-        </div>
-        <div class="how-step">
-          <i class="ph ph-arrows-left-right"></i>
-          <h5>2. Direct channel opens</h5>
-          <p>WebRTC creates a direct encrypted tunnel between both browsers.</p>
-        </div>
-        <div class="how-step">
-          <i class="ph ph-files"></i>
-          <h5>3. Transfer files</h5>
-          <p>Files stream peer-to-peer. Nothing touches a server.</p>
-        </div>
-      </div>
+<hr>
 
-      <!-- Role selector -->
-      <div id="roleSection">
-        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem;">Choose your role to get started:</p>
-        <div class="role-cards">
-          <div class="role-card" id="roleSender" onclick="selectRole('sender')">
-            <i class="ph ph-upload-simple"></i>
-            <h4>Send Files</h4>
-            <p>I want to send files to someone</p>
-          </div>
-          <div class="role-card" id="roleReceiver" onclick="selectRole('receiver')">
-            <i class="ph ph-download-simple"></i>
-            <h4>Receive Files</h4>
-            <p>I have a code from a sender</p>
-          </div>
-        </div>
-      </div>
-    </div>
+<div id="sender" style="display:none;">
+  <h3>Sender</h3>
+  <b>Offer:</b>
+  <textarea id="offer"></textarea>
+  <canvas id="qr"></canvas>
 
-    <!-- ── SENDER FLOW ── -->
-    <div class="panel step-panel" id="senderPanel">
-      <div class="panel-header">
-        <h3><i class="ph ph-upload-simple" style="color:var(--primary)"></i> Sender</h3>
-        <button class="btn-secondary" onclick="reset()"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
-      </div>
+  <b>Paste Answer:</b>
+  <textarea id="answer"></textarea>
+  <button onclick="connectSender()">Connect</button>
 
-      <div class="conn-status idle" id="senderStatus">
-        <span class="pulse"></span> Waiting to connect…
-      </div>
+  <input type="file" id="fileInput">
+  <button onclick="sendFile()">Send File</button>
+</div>
 
-      <div class="p2p-grid">
-        <!-- Left: signalling -->
-        <div>
-          <!-- Step 1: your offer -->
-          <div id="senderStep1">
-            <div class="step-title"><span class="step-num">1</span> Your connection offer</div>
-            <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.6rem;">Share this code (or QR) with the receiver. They paste it on their side.</p>
-            <div class="code-box" id="offerBox">Generating offer…</div>
-            <canvas id="qrCanvas" width="140" height="140"></canvas>
-            <div style="display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap;">
-              <button class="btn-secondary" id="copyOfferBtn"><i class="ph ph-copy"></i> Copy offer</button>
-            </div>
-          </div>
+<div id="receiver" style="display:none;">
+  <h3>Receiver</h3>
+  <b>Paste Offer:</b>
+  <textarea id="offerIn"></textarea>
+  <button onclick="acceptOffer()">Accept</button>
 
-          <!-- Step 2: paste answer -->
-          <div id="senderStep2" style="margin-top:1.25rem;">
-            <div class="step-title"><span class="step-num">2</span> Paste receiver's answer</div>
-            <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.6rem;">Once the receiver accepts, they'll give you an answer code. Paste it here.</p>
-            <textarea class="code-box" id="answerInput" placeholder="Paste answer code here…" rows="4"></textarea>
-            <button class="btn-primary" style="margin-top:.5rem;" id="connectBtn"><i class="ph ph-plug"></i> Connect</button>
-          </div>
-        </div>
+  <b>Answer:</b>
+  <textarea id="answerOut"></textarea>
 
-        <!-- Right: file drop -->
-        <div>
-          <div class="step-title"><span class="step-num">3</span> Queue files to send</div>
-          <div class="drop-zone disabled" id="senderDropZone">
-            <input type="file" id="senderFileInput" multiple>
-            <i class="ph ph-files"></i>
-            <strong>Drop files here</strong>
-            <p style="margin:.3rem 0 0;font-size:.8rem;">or click to browse — any size, any type</p>
-          </div>
-          <ul class="file-list" id="senderFileList"></ul>
-          <div class="progress-wrap hidden" id="senderProgress">
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
-            <div class="progress-label" id="progressLabel">0%</div>
-          </div>
-          <button class="btn-primary hidden" id="sendFilesBtn" style="margin-top:.75rem;width:100%;">
-            <i class="ph ph-paper-plane-tilt"></i> Send all files
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── RECEIVER FLOW ── -->
-    <div class="panel step-panel" id="receiverPanel">
-      <div class="panel-header">
-        <h3><i class="ph ph-download-simple" style="color:var(--primary)"></i> Receiver</h3>
-        <button class="btn-secondary" onclick="reset()"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
-      </div>
-
-      <div class="conn-status idle" id="receiverStatus">
-        <span class="pulse"></span> Waiting to connect…
-      </div>
-
-      <div class="p2p-grid">
-        <!-- Left: signalling -->
-        <div>
-          <div class="step-title"><span class="step-num">1</span> Paste sender's offer</div>
-          <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.6rem;">The sender will give you a connection offer code. Paste it here.</p>
-          <textarea class="code-box" id="offerInput" placeholder="Paste offer code here…" rows="4"></textarea>
-          <button class="btn-primary" style="margin-top:.5rem;" id="acceptBtn"><i class="ph ph-check"></i> Accept offer</button>
-
-          <div id="receiverStep2" class="hidden" style="margin-top:1.25rem;">
-            <div class="step-title"><span class="step-num">2</span> Your answer code</div>
-            <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.6rem;">Send this back to the sender so they can finalise the connection.</p>
-            <div class="code-box" id="answerBox">Generating answer…</div>
-            <button class="btn-secondary" style="margin-top:.5rem;" id="copyAnswerBtn"><i class="ph ph-copy"></i> Copy answer</button>
-          </div>
-        </div>
-
-        <!-- Right: received files -->
-        <div>
-          <div class="step-title"><span class="step-num">3</span> Received files</div>
-          <div id="recvPlaceholder" style="color:var(--text-muted);font-size:.85rem;padding:1rem 0;">Files sent by the sender will appear here for download.</div>
-          <ul class="recv-list" id="recvList"></ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="privacy-note">
-      <i class="ph-fill ph-shield-check"></i>
-      <span><strong>100% private.</strong> Files travel directly between browsers via an encrypted WebRTC DataChannel. No file data is sent to any server. The signalling codes (SDP) contain only connection metadata, never file content.</span>
-    </div>
-
-  </main>
-
-  <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.9rem;">
-    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
-    <div style="display:flex;justify-content:center;gap:1rem;margin-top:.5rem;">
-      <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
-      <span>&bull;</span>
-      <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
-    </div>
-  </footer>
+  <h4>Received:</h4>
+  <div id="downloads"></div>
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
-let pc = null;          // RTCPeerConnection
-let dc = null;          // RTCDataChannel
-let role = null;        // 'sender' | 'receiver'
+let pc, dc;
 
-const ICE_CONFIG = {
+const ICE = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: "stun:stun.l.google.com:19302" }
   ]
 };
-const CHUNK_SIZE = 64 * 1024; // 64 KB chunks
 
-// ── Role selection ──────────────────────────────────────────────────────────
-function selectRole(r) {
-  role = r;
-  document.getElementById('roleSender').classList.toggle('selected', r === 'sender');
-  document.getElementById('roleReceiver').classList.toggle('selected', r === 'receiver');
-  document.getElementById('senderPanel').classList.toggle('active', r === 'sender');
-  document.getElementById('receiverPanel').classList.toggle('active', r === 'receiver');
-  if (r === 'sender') initSender();
+function waitIce(pc) {
+  return new Promise(res => {
+    if (pc.iceGatheringState === "complete") return res();
+    pc.addEventListener("icegatheringstatechange", () => {
+      if (pc.iceGatheringState === "complete") res();
+    });
+  });
 }
 
-function reset() {
-  if (pc) { pc.close(); pc = null; }
-  dc = null; role = null;
-  document.getElementById('roleSender').classList.remove('selected');
-  document.getElementById('roleReceiver').classList.remove('selected');
-  document.getElementById('senderPanel').classList.remove('active');
-  document.getElementById('receiverPanel').classList.remove('active');
-  document.getElementById('senderFileList').innerHTML = '';
-  document.getElementById('recvList').innerHTML = '';
-  document.getElementById('offerBox').textContent = 'Generating offer…';
-  document.getElementById('answerInput').value = '';
-  document.getElementById('offerInput').value = '';
-  document.getElementById('receiverStep2').classList.add('hidden');
-  setStatus('sender', 'idle', 'Waiting to connect…');
-  setStatus('receiver', 'idle', 'Waiting to connect…');
-  document.getElementById('senderDropZone').classList.add('disabled');
-  document.getElementById('sendFilesBtn').classList.add('hidden');
-  document.getElementById('senderProgress').classList.add('hidden');
-  senderFiles = [];
-}
+function encode(x){ return btoa(JSON.stringify(x)); }
+function decode(x){ return JSON.parse(atob(x)); }
 
-// ── Status helpers ──────────────────────────────────────────────────────────
-function setStatus(side, state, msg) {
-  const el = document.getElementById(side + 'Status');
-  el.className = 'conn-status ' + state;
-  el.innerHTML = `<span class="pulse"></span> ${msg}`;
-}
-
-// ── Encode/decode SDP as base64 ──────────────────────────────────────────────
-const encodeSDP = obj => btoa(JSON.stringify(obj));
-const decodeSDP = str => JSON.parse(atob(str.trim()));
-
-// ── SENDER ──────────────────────────────────────────────────────────────────
-async function initSender() {
-  pc = new RTCPeerConnection(ICE_CONFIG);
-  dc = pc.createDataChannel('fileTransfer', { ordered: true });
-  setupDataChannel(dc, 'sender');
-
-  pc.onicecandidate = () => {
-    if (pc.localDescription && pc.iceGatheringState === 'complete') {
-      const code = encodeSDP(pc.localDescription);
-      document.getElementById('offerBox').textContent = code;
-      generateQR(code);
-    }
+function logState() {
+  pc.onconnectionstatechange = () => {
+    console.log("STATE:", pc.connectionState);
   };
+}
 
-  pc.onicegatheringstatechange = () => {
-    if (pc.iceGatheringState === 'complete') {
-      const code = encodeSDP(pc.localDescription);
-      document.getElementById('offerBox').textContent = code;
-      generateQR(code);
-    }
-  };
+function startSender() {
+  document.getElementById("sender").style.display="block";
+  pc = new RTCPeerConnection(ICE);
+  logState();
 
+  dc = pc.createDataChannel("file");
+  setupSendChannel();
+
+  createOffer();
+}
+
+async function createOffer() {
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
-  setStatus('sender', 'connecting', 'Offer created — share it with the receiver.');
+
+  await waitIce(pc);
+
+  const code = encode(pc.localDescription);
+  document.getElementById("offer").value = code;
+
+  QRCode.toCanvas(document.getElementById("qr"), code);
 }
 
-document.getElementById('connectBtn').addEventListener('click', async () => {
-  const raw = document.getElementById('answerInput').value.trim();
-  if (!raw) return;
-  try {
-    const answer = decodeSDP(raw);
-    await pc.setRemoteDescription(answer);
-    setStatus('sender', 'connecting', 'Answer accepted — establishing connection…');
-  } catch(e) {
-    setStatus('sender', 'error', 'Invalid answer code. Please check and try again.');
-  }
-});
+async function connectSender() {
+  const ans = decode(document.getElementById("answer").value);
+  await pc.setRemoteDescription(ans);
+}
 
-// ── RECEIVER ──────────────────────────────────────────────────────────────────
-document.getElementById('acceptBtn').addEventListener('click', async () => {
-  const raw = document.getElementById('offerInput').value.trim();
-  if (!raw) return;
-  try {
-    pc = new RTCPeerConnection(ICE_CONFIG);
+function startReceiver() {
+  document.getElementById("receiver").style.display="block";
+}
 
-    pc.ondatachannel = e => {
-      dc = e.channel;
-      setupDataChannel(dc, 'receiver');
-    };
+async function acceptOffer() {
+  pc = new RTCPeerConnection(ICE);
+  logState();
 
-    pc.onicecandidate = () => {};
-    pc.onicegatheringstatechange = () => {
-      if (pc.iceGatheringState === 'complete') {
-        const code = encodeSDP(pc.localDescription);
-        document.getElementById('answerBox').textContent = code;
-        document.getElementById('receiverStep2').classList.remove('hidden');
-        setStatus('receiver', 'connecting', 'Answer ready — send it back to the sender.');
-      }
-    };
-
-    const offer = decodeSDP(raw);
-    await pc.setRemoteDescription(offer);
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-  } catch(e) {
-    setStatus('receiver', 'error', 'Invalid offer code. Please check and try again.');
-  }
-});
-
-// ── DataChannel setup ──────────────────────────────────────────────────────
-function setupDataChannel(chan, side) {
-  chan.binaryType = 'arraybuffer';
-
-  chan.onopen = () => {
-    setStatus(side, 'connected', 'Connected! ' + (side === 'sender' ? 'Drop files and send.' : 'Waiting for files…'));
-    if (side === 'sender') {
-      document.getElementById('senderDropZone').classList.remove('disabled');
-    }
+  pc.ondatachannel = e => {
+    dc = e.channel;
+    setupReceiveChannel();
   };
 
-  chan.onclose = () => setStatus(side, 'idle', 'Connection closed.');
-  chan.onerror = e => setStatus(side, 'error', 'Connection error: ' + e.message);
+  const offer = decode(document.getElementById("offerIn").value);
+  await pc.setRemoteDescription(offer);
 
-  if (side === 'receiver') {
-    setupReceiver(chan);
-  }
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  await waitIce(pc);
+
+  const code = encode(pc.localDescription);
+  document.getElementById("answerOut").value = code;
 }
 
-// ── File sending ──────────────────────────────────────────────────────────
-let senderFiles = [];
-
-const senderDrop = document.getElementById('senderDropZone');
-const senderInput = document.getElementById('senderFileInput');
-
-senderDrop.addEventListener('click', () => senderInput.click());
-senderDrop.addEventListener('dragover', e => { e.preventDefault(); senderDrop.classList.add('dragging'); });
-senderDrop.addEventListener('dragleave', () => senderDrop.classList.remove('dragging'));
-senderDrop.addEventListener('drop', e => {
-  e.preventDefault();
-  senderDrop.classList.remove('dragging');
-  addFiles([...e.dataTransfer.files]);
-});
-senderInput.addEventListener('change', () => addFiles([...senderInput.files]));
-
-function addFiles(files) {
-  files.forEach(f => {
-    senderFiles.push({ file: f, status: 'pending' });
-    addFileToList(f, senderFiles.length - 1);
-  });
-  if (senderFiles.length > 0 && dc && dc.readyState === 'open') {
-    document.getElementById('sendFilesBtn').classList.remove('hidden');
-  }
+function setupSendChannel() {
+  dc.onopen = () => console.log("Sender connected");
 }
 
-function addFileToList(file, idx) {
-  const li = document.createElement('li');
-  li.className = 'file-item';
-  li.id = 'file-' + idx;
-  li.innerHTML = `
-    <i class="ph ph-file file-icon"></i>
-    <span class="file-name" title="${file.name}">${file.name}</span>
-    <span class="file-size">${fmtSize(file.size)}</span>
-    <span class="file-status pending" id="fstatus-${idx}">Queued</span>
-  `;
-  document.getElementById('senderFileList').appendChild(li);
+function setupReceiveChannel() {
+  let chunks = [];
+  let name = "";
+
+  dc.onmessage = e => {
+    if (typeof e.data === "string") {
+      const meta = JSON.parse(e.data);
+      name = meta.name;
+      chunks = [];
+    } else {
+      chunks.push(e.data);
+      if (e.data.byteLength < 64000) {
+        const blob = new Blob(chunks);
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        a.textContent = "Download " + name;
+        document.getElementById("downloads").appendChild(a);
+        document.getElementById("downloads").appendChild(document.createElement("br"));
+      }
+    }
+  };
 }
 
-document.getElementById('sendFilesBtn').addEventListener('click', sendAllFiles);
+function sendFile() {
+  const file = document.getElementById("fileInput").files[0];
+  if (!file) return;
 
-async function sendAllFiles() {
-  document.getElementById('sendFilesBtn').classList.add('hidden');
-  document.getElementById('senderProgress').classList.remove('hidden');
+  dc.send(JSON.stringify({ name: file.name }));
 
-  const totalSize = senderFiles.reduce((a, f) => a + f.file.size, 0);
-  let sentTotal = 0;
-
-  for (let i = 0; i < senderFiles.length; i++) {
-    const entry = senderFiles[i];
-    if (entry.status !== 'pending') continue;
-    entry.status = 'sending';
-    updateFileStatus(i, 'sending', 'Sending…');
-
-    await sendFile(entry.file, (sent) => {
-      sentTotal += sent;
-      const pct = totalSize > 0 ? Math.round((sentTotal / totalSize) * 100) : 0;
-      document.getElementById('progressFill').style.width = pct + '%';
-      document.getElementById('progressLabel').textContent = `${pct}% — ${fmtSize(sentTotal)} / ${fmtSize(totalSize)}`;
-    });
-
-    entry.status = 'done';
-    updateFileStatus(i, 'done', 'Sent ✓');
-  }
-
-  document.getElementById('progressLabel').textContent = `All files sent!`;
-}
-
-function sendFile(file, onProgress) {
-  return new Promise(async (resolve) => {
-    const meta = JSON.stringify({ type: 'meta', name: file.name, size: file.size, mime: file.type });
-    dc.send(meta);
-
-    const buffer = await file.arrayBuffer();
+  const reader = new FileReader();
+  reader.onload = e => {
+    const buffer = e.target.result;
     let offset = 0;
 
-    const sendChunk = () => {
-      while (offset < buffer.byteLength) {
-        if (dc.bufferedAmount > 1024 * 1024) {
-          // Backpressure — wait for drain
-          dc.onbufferedamountlow = () => { dc.onbufferedamountlow = null; sendChunk(); };
-          dc.bufferedAmountLowThreshold = 512 * 1024;
-          return;
-        }
-        const chunk = buffer.slice(offset, offset + CHUNK_SIZE);
-        dc.send(chunk);
-        onProgress(chunk.byteLength);
-        offset += chunk.byteLength;
-      }
-      // Signal end of file
-      dc.send(JSON.stringify({ type: 'eof', name: file.name }));
-      resolve();
-    };
+    function sendChunk() {
+      const chunk = buffer.slice(offset, offset + 64000);
+      dc.send(chunk);
+      offset += chunk.byteLength;
 
-    sendChunk();
-  });
-}
-
-function updateFileStatus(idx, cls, txt) {
-  const el = document.getElementById('fstatus-' + idx);
-  if (el) { el.className = 'file-status ' + cls; el.textContent = txt; }
-}
-
-// ── File receiving ──────────────────────────────────────────────────────────
-function setupReceiver(chan) {
-  let currentFile = null;
-  let receivedChunks = [];
-  let receivedSize = 0;
-
-  chan.onmessage = e => {
-    if (typeof e.data === 'string') {
-      const msg = JSON.parse(e.data);
-      if (msg.type === 'meta') {
-        currentFile = msg;
-        receivedChunks = [];
-        receivedSize = 0;
-        addRecvItem(msg.name, msg.size, 'receiving');
-        document.getElementById('recvPlaceholder').style.display = 'none';
-      } else if (msg.type === 'eof') {
-        if (currentFile) {
-          const blob = new Blob(receivedChunks, { type: currentFile.mime || 'application/octet-stream' });
-          updateRecvItem(currentFile.name, blob);
-          currentFile = null;
-          receivedChunks = [];
-        }
-      }
-    } else {
-      // Binary chunk
-      receivedChunks.push(e.data);
-      receivedSize += e.data.byteLength;
-      if (currentFile) {
-        const pct = Math.round((receivedSize / currentFile.size) * 100);
-        updateRecvProgress(currentFile.name, pct);
+      if (offset < buffer.byteLength) {
+        setTimeout(sendChunk, 0);
       }
     }
+
+    sendChunk();
   };
+  reader.readAsArrayBuffer(file);
 }
-
-function addRecvItem(name, size, state) {
-  const existing = document.getElementById('recv-' + cssId(name));
-  if (existing) return;
-  const li = document.createElement('li');
-  li.className = 'recv-item';
-  li.id = 'recv-' + cssId(name);
-  li.innerHTML = `
-    <i class="ph ph-file-arrow-down" style="font-size:1.2rem;color:var(--primary);flex-shrink:0;"></i>
-    <div style="flex:1;min-width:0;">
-      <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.85rem;" title="${name}">${name}</div>
-      <div style="font-size:.75rem;color:var(--text-muted);">${fmtSize(size)}</div>
-      <div class="progress-bar-bg" style="margin-top:.3rem;"><div class="progress-bar-fill" id="rprog-${cssId(name)}" style="width:0%"></div></div>
-    </div>
-    <span id="rdl-${cssId(name)}" style="font-size:.78rem;color:var(--text-muted);">0%</span>
-  `;
-  document.getElementById('recvList').appendChild(li);
-}
-
-function updateRecvProgress(name, pct) {
-  const bar = document.getElementById('rprog-' + cssId(name));
-  const lbl = document.getElementById('rdl-' + cssId(name));
-  if (bar) bar.style.width = pct + '%';
-  if (lbl) lbl.textContent = pct + '%';
-}
-
-function updateRecvItem(name, blob) {
-  const url = URL.createObjectURL(blob);
-  const lbl = document.getElementById('rdl-' + cssId(name));
-  if (lbl) {
-    lbl.innerHTML = `<a href="${url}" download="${name}" style="color:var(--primary);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem;"><i class="ph ph-download-simple"></i> Save</a>`;
-  }
-  const bar = document.getElementById('rprog-' + cssId(name));
-  if (bar) { bar.style.width = '100%'; bar.style.background = '#10b981'; }
-}
-
-// ── Utils ──────────────────────────────────────────────────────────────────
-const cssId = s => s.replace(/[^a-zA-Z0-9]/g, '_');
-
-function fmtSize(bytes) {
-  if (bytes === 0) return '0 B';
-  const k = 1024, sizes = ['B','KB','MB','GB','TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-}
-
-async function generateQR(text) {
-  try {
-    await QRCode.toCanvas(document.getElementById('qrCanvas'), text, { width: 140, margin: 1 });
-  } catch {}
-}
-
-// ── Copy buttons ──────────────────────────────────────────────────────────
-function setupCopy(btnId, sourceId, isTextarea) {
-  document.getElementById(btnId).addEventListener('click', () => {
-    const el = document.getElementById(sourceId);
-    const text = isTextarea ? el.value : el.textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById(btnId);
-      const orig = btn.innerHTML;
-      btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
-      setTimeout(() => { btn.innerHTML = orig; }, 2000);
-    });
-  });
-}
-setupCopy('copyOfferBtn', 'offerBox', false);
-setupCopy('copyAnswerBtn', 'answerBox', false);
 </script>
 
-<script src="theme-toggle.js"></script>
-<script src="script.js"></script>
 </body>
 </html>
