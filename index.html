@@ -7,28 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <title>Client-Side Toolbox</title>
-  <style>
-    .card.coming-soon {
-      opacity: 0.55;
-      cursor: default;
-      pointer-events: none;
-      position: relative;
-    }
-    .card.coming-soon::after {
-      content: 'Coming Soon';
-      position: absolute;
-      top: 0.6rem;
-      right: 0.6rem;
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      background: var(--border);
-      color: var(--text-muted);
-      padding: 0.15rem 0.5rem;
-      border-radius: 20px;
-    }
-  </style>
 </head>
 <body>
 
@@ -65,10 +43,10 @@
   </header>
 
   <nav class="nav-pills">
-    <a href="#text-data" class="active">Text & Data</a>
-    <a href="#design-media">Design & Media</a>
-    <a href="#business-math">Business & Math</a>
-    <a href="#security-encoding">Security & Encoding</a>
+    <a href="#text-data" class="active">Text &amp; Data</a>
+    <a href="#design-media">Design &amp; Media</a>
+    <a href="#business-math">Business &amp; Math</a>
+    <a href="#security-encoding">Security &amp; Encoding</a>
     <a href="#developer">Developer</a>
   </nav>
 
@@ -78,7 +56,7 @@
     <section id="text-data" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-text-aa"></i>
-        <h2>Text & Data</h2>
+        <h2>Text &amp; Data</h2>
       </div>
       <div class="card-grid">
         <a href="demo-json.html" class="card">
@@ -90,6 +68,11 @@
           <div class="card-icon"><i class="ph ph-table"></i></div>
           <h4>CSV Converter</h4>
           <p>Transform raw CSV data into clean JSON or SQL insert statements.</p>
+        </a>
+        <a href="demo-csv-explorer.html" class="card">
+          <div class="card-icon"><i class="ph ph-magnifying-glass-plus"></i></div>
+          <h4>CSV Explorer</h4>
+          <p>Load, sort, filter, and explore large CSV files directly in the browser.</p>
         </a>
         <a href="demo-smart-case.html" class="card">
           <div class="card-icon"><i class="ph ph-text-a-underline"></i></div>
@@ -106,12 +89,6 @@
           <h4>Text Diff Checker</h4>
           <p>Compare two blocks of text or code to find exact line changes.</p>
         </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-code"></i></div>
-          <h4>SQL Formatter</h4>
-          <p>Beautify and syntax-highlight SQL queries without sending them anywhere.</p>
-        </a>
       </div>
     </section>
 
@@ -119,13 +96,18 @@
     <section id="design-media" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-palette"></i>
-        <h2>Design & Media</h2>
+        <h2>Design &amp; Media</h2>
       </div>
       <div class="card-grid">
         <a href="demo-webp.html" class="card">
           <div class="card-icon"><i class="ph ph-image"></i></div>
           <h4>WebP Converter</h4>
           <p>Compress bulk images to next-gen WebP format without losing quality.</p>
+        </a>
+        <a href="demo-video-converter.html" class="card">
+          <div class="card-icon"><i class="ph ph-film-strip"></i></div>
+          <h4>Video Converter</h4>
+          <p>Convert and compress video files entirely in the browser — no uploads needed.</p>
         </a>
         <a href="demo-color-extractor.html" class="card">
           <div class="card-icon"><i class="ph ph-eyedropper"></i></div>
@@ -147,23 +129,6 @@
           <h4>SVG Optimizer</h4>
           <p>Clean and minify messy SVG code exports to save space.</p>
         </a>
-        <a href="demo-css.html" class="card">
-          <div class="card-icon"><i class="ph ph-squares-four"></i></div>
-          <h4>Box-Shadow Generator</h4>
-          <p>Visually tweak and generate complex layered CSS box-shadows.</p>
-        </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-gradient"></i></div>
-          <h4>CSS Gradient Builder</h4>
-          <p>Visual editor that outputs clean linear, radial, and conic gradients.</p>
-        </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-app-window"></i></div>
-          <h4>Favicon Generator</h4>
-          <p>Upload an image and get back a .ico + all Apple/Android icon sizes.</p>
-        </a>
       </div>
     </section>
 
@@ -171,7 +136,7 @@
     <section id="business-math" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-calculator"></i>
-        <h2>Business & Productivity</h2>
+        <h2>Business &amp; Productivity</h2>
       </div>
       <div class="card-grid">
         <a href="demo-hourly-wage.html" class="card">
@@ -189,17 +154,10 @@
           <h4>Timezone Overlap</h4>
           <p>Find overlapping meeting times across multiple global timezones.</p>
         </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-users"></i></div>
-          <h4>Meeting Cost Calculator</h4>
-          <p>Enter attendee count and salaries, watch the meeting cost tick up in real time.</p>
-        </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-bank"></i></div>
-          <h4>Loan Calculator</h4>
-          <p>Full amortization table with monthly breakdown and interest chart.</p>
+        <a href="demo-p2p.html" class="card">
+          <div class="card-icon"><i class="ph ph-share-network"></i></div>
+          <h4>P2P File Transfer</h4>
+          <p>Send files directly to another browser over an encrypted peer-to-peer connection.</p>
         </a>
       </div>
     </section>
@@ -208,7 +166,7 @@
     <section id="security-encoding" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-shield-check"></i>
-        <h2>Security & Encoding</h2>
+        <h2>Security &amp; Encoding</h2>
       </div>
       <div class="card-grid">
         <a href="demo-url-encoder.html" class="card">
@@ -226,10 +184,10 @@
           <h4>Base64 Image Encoder</h4>
           <p>Encode images into Base64 data strings for inline HTML/CSS embedding.</p>
         </a>
-        <a href="demo-jwt.html" class="card">
+        <a href="demo-jwt-builder.html" class="card">
           <div class="card-icon"><i class="ph ph-key"></i></div>
-          <h4>JWT Decoder</h4>
-          <p>Decode JSON Web Tokens securely without uploading them to a server.</p>
+          <h4>JWT Builder &amp; Decoder</h4>
+          <p>Craft, sign, and decode JSON Web Tokens securely without leaving the browser.</p>
         </a>
         <a href="demo-hash.html" class="card">
           <div class="card-icon"><i class="ph ph-fingerprint"></i></div>
@@ -256,29 +214,10 @@
           <h4>Cron Expression Builder</h4>
           <p>Build and validate cron schedules with a plain-English description and next-run preview.</p>
         </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-arrows-left-right"></i></div>
-          <h4>YAML ↔ JSON Converter</h4>
-          <p>Convert between YAML, JSON, and TOML config formats instantly.</p>
-        </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-smiley"></i></div>
-          <h4>Emoji / Unicode Inspector</h4>
-          <p>Pick any emoji to reveal its codepoints, HTML entity, CSS escape, and name.</p>
-        </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-person-simple-run"></i></div>
-          <h4>Fake Data Generator</h4>
-          <p>Generate realistic names, emails, addresses, and UUIDs for testing.</p>
-        </a>
-        <!-- PLACEHOLDER -->
-        <a href="#" class="card coming-soon">
-          <div class="card-icon"><i class="ph ph-file-zip"></i></div>
-          <h4>ZIP Inspector</h4>
-          <p>Peek inside a .zip archive and inspect its contents without extracting.</p>
+        <a href="demo-erd.html" class="card">
+          <div class="card-icon"><i class="ph ph-graph"></i></div>
+          <h4>ERD Builder</h4>
+          <p>Design entity-relationship diagrams visually and export them as SQL or an image.</p>
         </a>
       </div>
     </section>
