@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>JWT Builder - Client-Side Toolbox</title>
+  <style>
+    /* ── Layout ── */
+    .jwt-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 820px) { .jwt-layout { grid-template-columns: 1fr; } }
+
+    /* ── Colour-coded token display ── */
+    .token-display {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+      line-height: 1.8;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      min-height: 72px;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: border-color .15s;
+      position: relative;
+    }
+    .token-display:hover { border-color: var(--primary); }
+    .token-display .part-header { color: var(--primary); }
+    .token-display .part-payload { color: #f59e0b; }
+    .token-display .part-sig    { color: #10b981; }
+    .token-display .dot         { color: var(--text-muted); }
+    .copy-hint {
+      position: absolute;
+      bottom: 0.5rem;
+      right: 0.75rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ── Token legend ── */
+    .token-legend {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.78rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+    /* ── Section labels ── */
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 0.9rem 0 0.4rem;
+    }
+    .field-label:first-child { margin-top: 0; }
+
+    /* ── Algo selector ── */
+    .algo-pills {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+    .algo-pill {
+      padding: 0.3rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+      transition: all .15s;
+    }
+    .algo-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* ── JSON editor ── */
+    .json-editor {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      resize: vertical;
+      min-height: 130px;
+      transition: border-color .15s;
+    }
+    .json-editor:focus { outline: none; border-color: var(--primary); }
+    .json-editor.error { border-color: #ef4444; }
+
+    /* ── Secret input ── */
+    .secret-wrap {
+      position: relative;
+    }
+    .secret-wrap input {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88rem;
+      padding: 0.55rem 2.5rem 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color .15s;
+    }
+    .secret-wrap input:focus { outline: none; border-color: var(--primary); }
+    .secret-toggle {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      padding: 0;
+    }
+    .gen-secret {
+      font-size: 0.78rem;
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2rem 0;
+      margin-top: 0.3rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .gen-secret:hover { text-decoration: underline; }
+
+    /* ── Claim shortcuts ── */
+    .claim-shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .claim-btn {
+      padding: 0.2rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+    .claim-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── Validation banner ── */
+    .validation-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      border: 1px solid transparent;
+    }
+    .validation-bar.valid   { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.25); color: #10b981; }
+    .validation-bar.invalid { background: rgba(239,68,68,.08);  border-color: rgba(239,68,68,.25);  color: #ef4444; }
+    .validation-bar.empty   { background: var(--surface); border-color: var(--border); color: var(--text-muted); }
+
+    /* ── Decoded view ── */
+    .decoded-section { margin-top: 0.75rem; }
+    .decoded-part {
+      border-radius: 8px;
+      margin-bottom: 0.6rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .decoded-part-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      cursor: pointer;
+    }
+    .decoded-part-header.hdr  { background: rgba(99,102,241,.1);  color: var(--primary); }
+    .decoded-part-header.pay  { background: rgba(245,158,11,.1);  color: #f59e0b; }
+    .decoded-part-header.sig  { background: rgba(16,185,129,.1);  color: #10b981; }
+    .decoded-part pre {
+      margin: 0;
+      padding: 0.65rem 0.75rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      background: var(--bg);
+    }
+
+    /* ── Expiry helpers ── */
+    .exp-shortcuts {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+    .exp-btn {
+      padding: 0.2rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+    .exp-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+      gap: 0;
+    }
+    .tab-btn {
+      padding: 0.55rem 1rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all .15s;
+      margin-bottom: -1px;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="breadcrumb">
+    <i class="ph ph-arrow-left"></i> Back to Toolbox
+  </a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-seal-check"></i></div>
+    <div class="tool-header-text">
+      <h1>JWT Builder</h1>
+      <p>Construct, sign, and inspect JSON Web Tokens with HMAC algorithms — entirely in your browser.</p>
+    </div>
+  </header>
+
+  <main style="display:flex;flex-direction:column;gap:1rem;">
+
+    <!-- Token output -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Signed Token</h3>
+        <div class="panel-actions">
+          <button id="copyTokenBtn" class="btn-secondary"><i class="ph ph-copy"></i> Copy Token</button>
+        </div>
+      </div>
+
+      <div class="token-display" id="tokenDisplay" title="Click to copy">
+        <span class="part-header" id="tdHeader"></span><span class="dot" id="tdDot1"></span><span class="part-payload" id="tdPayload"></span><span class="dot" id="tdDot2"></span><span class="part-sig" id="tdSig"></span>
+        <span class="copy-hint">click to copy</span>
+      </div>
+
+      <div class="token-legend">
+        <span><span class="legend-dot" style="background:var(--primary)"></span>Header</span>
+        <span><span class="legend-dot" style="background:#f59e0b"></span>Payload</span>
+        <span><span class="legend-dot" style="background:#10b981"></span>Signature</span>
+      </div>
+
+      <div class="validation-bar empty" id="validationBar">
+        <i class="ph ph-info"></i> Fill in the payload and secret below to generate a token.
+      </div>
+    </div>
+
+    <div class="jwt-layout">
+
+      <!-- LEFT: Builder -->
+      <div class="panel">
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="builder">Builder</button>
+          <button class="tab-btn" data-tab="decode">Decode / Verify</button>
+        </div>
+
+        <!-- Builder tab -->
+        <div id="tabBuilder">
+          <p class="field-label">Algorithm</p>
+          <div class="algo-pills">
+            <button class="algo-pill active" data-algo="HS256">HS256</button>
+            <button class="algo-pill" data-algo="HS384">HS384</button>
+            <button class="algo-pill" data-algo="HS512">HS512</button>
+          </div>
+
+          <p class="field-label">Payload claims</p>
+          <div class="claim-shortcuts" id="claimShortcuts">
+            <button class="claim-btn" data-claim="sub">+ sub</button>
+            <button class="claim-btn" data-claim="iss">+ iss</button>
+            <button class="claim-btn" data-claim="aud">+ aud</button>
+            <button class="claim-btn" data-claim="jti">+ jti</button>
+            <button class="claim-btn" data-claim="iat">+ iat (now)</button>
+            <button class="claim-btn" data-claim="nbf">+ nbf (now)</button>
+            <button class="claim-btn" data-claim="exp">+ exp</button>
+          </div>
+          <textarea class="json-editor" id="payloadEditor" rows="7" spellcheck="false">{
+  "sub": "1234567890",
+  "name": "Jane Doe",
+  "iat": 1700000000
+}</textarea>
+          <div class="exp-shortcuts" id="expShortcuts" style="display:none;">
+            <span style="font-size:0.75rem;color:var(--text-muted);margin-right:.25rem;">exp in:</span>
+            <button class="exp-btn" data-exp="300">5m</button>
+            <button class="exp-btn" data-exp="3600">1h</button>
+            <button class="exp-btn" data-exp="86400">24h</button>
+            <button class="exp-btn" data-exp="604800">7d</button>
+            <button class="exp-btn" data-exp="2592000">30d</button>
+          </div>
+
+          <p class="field-label" style="margin-top:1rem;">Signing secret</p>
+          <div class="secret-wrap">
+            <input type="password" id="secretInput" placeholder="your-256-bit-secret" autocomplete="off" spellcheck="false">
+            <button class="secret-toggle" id="secretToggle" title="Show/hide secret"><i class="ph ph-eye"></i></button>
+          </div>
+          <button class="gen-secret" id="genSecret"><i class="ph ph-shuffle"></i> Generate random secret</button>
+        </div>
+
+        <!-- Decode tab -->
+        <div id="tabDecode" style="display:none;">
+          <p class="field-label">Paste a JWT to decode & verify</p>
+          <textarea class="json-editor" id="decodeInput" rows="5" spellcheck="false" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+          <p class="field-label" style="margin-top:0.75rem;">Secret (optional, for signature verification)</p>
+          <div class="secret-wrap">
+            <input type="password" id="verifySecret" placeholder="leave blank to skip verification" autocomplete="off" spellcheck="false">
+            <button class="secret-toggle" id="verifySecretToggle" title="Show/hide"><i class="ph ph-eye"></i></button>
+          </div>
+          <div class="validation-bar empty" id="decodeStatus" style="margin-top:0.75rem;margin-bottom:0;">
+            <i class="ph ph-info"></i> Paste a token above.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Decoded view -->
+      <div class="panel">
+        <div class="panel-header"><h3>Decoded</h3></div>
+        <div class="decoded-section" id="decodedSection">
+          <p style="color:var(--text-muted);font-size:0.875rem;">The decoded token parts will appear here.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="display:flex;justify-content:center;gap:1rem;margin-top:.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ── Utilities ──────────────────────────────────────────────────────────────
+const b64url = s => btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+const b64urlEncode = obj => b64url(JSON.stringify(obj));
+const b64urlDecode = s => {
+  s = s.replace(/-/g,'+').replace(/_/g,'/');
+  while (s.length % 4) s += '=';
+  try { return JSON.parse(atob(s)); } catch { return null; }
+};
+
+const ALGOS = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
+let currentAlgo = 'HS256';
+
+async function hmacSign(secret, message, hash) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret),
+    { name: 'HMAC', hash }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+async function buildToken() {
+  const payloadRaw = document.getElementById('payloadEditor').value.trim();
+  const secret     = document.getElementById('secretInput').value;
+  const pe         = document.getElementById('payloadEditor');
+  const vBar       = document.getElementById('validationBar');
+
+  let payload;
+  try { payload = JSON.parse(payloadRaw); pe.classList.remove('error'); }
+  catch {
+    pe.classList.add('error');
+    setTokenDisplay('', '', '');
+    vBar.className = 'validation-bar invalid';
+    vBar.innerHTML = '<i class="ph ph-warning-circle"></i> Payload is not valid JSON.';
+    renderDecoded(null, null, null, false);
+    return;
+  }
+
+  const header = { alg: currentAlgo, typ: 'JWT' };
+  const hEnc = b64urlEncode(header);
+  const pEnc = b64urlEncode(payload);
+  const signing = `${hEnc}.${pEnc}`;
+
+  if (!secret) {
+    setTokenDisplay(hEnc, pEnc, '…');
+    vBar.className = 'validation-bar empty';
+    vBar.innerHTML = '<i class="ph ph-lock-open"></i> Enter a secret to sign the token.';
+    renderDecoded(header, payload, null, false);
+    return;
+  }
+
+  const sig = await hmacSign(secret, signing, ALGOS[currentAlgo]);
+  const token = `${signing}.${sig}`;
+  setTokenDisplay(hEnc, pEnc, sig);
+
+  vBar.className = 'validation-bar valid';
+  vBar.innerHTML = '<i class="ph ph-check-circle"></i> Token signed successfully with ' + currentAlgo + '.';
+  renderDecoded(header, payload, sig, true);
+  document.getElementById('copyTokenBtn').dataset.token = token;
+}
+
+function setTokenDisplay(h, p, s) {
+  document.getElementById('tdHeader').textContent  = h;
+  document.getElementById('tdPayload').textContent = p ? '.' + p : '';
+  document.getElementById('tdSig').textContent     = s ? '.' + s : '';
+  document.getElementById('tdDot1').textContent = '';
+  document.getElementById('tdDot2').textContent = '';
+  if (h && p) {
+    document.getElementById('tdHeader').textContent  = h;
+    document.getElementById('tdDot1').textContent    = '.';
+    document.getElementById('tdPayload').textContent = p;
+    document.getElementById('tdDot2').textContent    = s ? '.' : '';
+    document.getElementById('tdSig').textContent     = s || '';
+  }
+}
+
+function renderDecoded(header, payload, sig, signed) {
+  const el = document.getElementById('decodedSection');
+  if (!header && !payload) {
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:0.875rem;">The decoded token parts will appear here.</p>';
+    return;
+  }
+  const fmt = obj => JSON.stringify(obj, null, 2);
+  const expiryNote = payload && payload.exp
+    ? (() => {
+        const d = new Date(payload.exp * 1000);
+        const diff = payload.exp * 1000 - Date.now();
+        const rel = diff > 0
+          ? `expires in ${humanDur(diff)}`
+          : `<span style="color:#ef4444">expired ${humanDur(-diff)} ago</span>`;
+        return `\n<span style="color:var(--text-muted);font-size:.75rem;">⏱ exp → ${d.toLocaleString()} (${rel})</span>`;
+      })()
+    : '';
+
+  el.innerHTML = `
+    <div class="decoded-part">
+      <div class="decoded-part-header hdr"><i class="ph ph-brackets-curly"></i> Header</div>
+      <pre>${fmt(header)}</pre>
+    </div>
+    <div class="decoded-part">
+      <div class="decoded-part-header pay"><i class="ph ph-list"></i> Payload</div>
+      <pre>${fmt(payload)}${expiryNote}</pre>
+    </div>
+    <div class="decoded-part">
+      <div class="decoded-part-header sig"><i class="ph ph-seal-check"></i> Signature</div>
+      <pre>${sig ? sig : '<span style="color:var(--text-muted)">not yet signed</span>'}${signed ? '\n<span style="color:#10b981;font-size:.75rem;">✓ Signature present</span>' : ''}</pre>
+    </div>`;
+}
+
+function humanDur(ms) {
+  const s = Math.floor(ms/1000);
+  if (s < 60) return s + 's';
+  if (s < 3600) return Math.floor(s/60) + 'm';
+  if (s < 86400) return Math.floor(s/3600) + 'h';
+  return Math.floor(s/86400) + 'd';
+}
+
+// ── Algo pills ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.algo-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.algo-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentAlgo = btn.dataset.algo;
+    buildToken();
+  });
+});
+
+// ── Payload editor ──────────────────────────────────────────────────────────
+document.getElementById('payloadEditor').addEventListener('input', buildToken);
+
+// ── Claim shortcuts ──────────────────────────────────────────────────────────
+const CLAIM_DEFAULTS = {
+  sub:  '"user_id_here"',
+  iss:  '"https://your-app.com"',
+  aud:  '"https://api.your-app.com"',
+  jti:  `"${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}"`,
+  iat:  Math.floor(Date.now()/1000),
+  nbf:  Math.floor(Date.now()/1000),
+  exp:  Math.floor(Date.now()/1000) + 3600,
+};
+document.querySelectorAll('.claim-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.claim;
+    const ed  = document.getElementById('payloadEditor');
+    try {
+      const obj = JSON.parse(ed.value);
+      obj[key] = CLAIM_DEFAULTS[key];
+      if (key === 'exp') document.getElementById('expShortcuts').style.display = 'flex';
+      ed.value = JSON.stringify(obj, null, 2);
+      buildToken();
+    } catch { /* invalid json, ignore */ }
+  });
+});
+
+// ── Exp shortcuts ──────────────────────────────────────────────────────────
+document.querySelectorAll('.exp-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const secs = parseInt(btn.dataset.exp);
+    const ed = document.getElementById('payloadEditor');
+    try {
+      const obj = JSON.parse(ed.value);
+      obj.exp = Math.floor(Date.now()/1000) + secs;
+      ed.value = JSON.stringify(obj, null, 2);
+      buildToken();
+    } catch {}
+  });
+});
+
+// Check if exp claim is already in payload on load
+try {
+  if (JSON.parse(document.getElementById('payloadEditor').value).exp)
+    document.getElementById('expShortcuts').style.display = 'flex';
+} catch {}
+
+// ── Secret input ──────────────────────────────────────────────────────────
+document.getElementById('secretInput').addEventListener('input', buildToken);
+document.getElementById('secretToggle').addEventListener('click', () => {
+  const inp = document.getElementById('secretInput');
+  const ico = document.querySelector('#secretToggle i');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  ico.className = inp.type === 'password' ? 'ph ph-eye' : 'ph ph-eye-slash';
+});
+
+document.getElementById('genSecret').addEventListener('click', () => {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  const secret = [...arr].map(b => b.toString(16).padStart(2,'0')).join('');
+  document.getElementById('secretInput').value = secret;
+  document.getElementById('secretInput').type = 'text';
+  document.querySelector('#secretToggle i').className = 'ph ph-eye-slash';
+  buildToken();
+});
+
+// ── Copy token ──────────────────────────────────────────────────────────────
+document.getElementById('copyTokenBtn').addEventListener('click', async () => {
+  const h = document.getElementById('tdHeader').textContent;
+  const p = document.getElementById('tdPayload').textContent;
+  const s = document.getElementById('tdSig').textContent;
+  const token = h + p + s;
+  if (!token || token === '…') return;
+  await navigator.clipboard.writeText(token);
+  const btn = document.getElementById('copyTokenBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+  setTimeout(() => { btn.innerHTML = orig; }, 2000);
+});
+
+document.getElementById('tokenDisplay').addEventListener('click', () => {
+  document.getElementById('copyTokenBtn').click();
+});
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tabBuilder').style.display = btn.dataset.tab === 'builder' ? '' : 'none';
+    document.getElementById('tabDecode').style.display  = btn.dataset.tab === 'decode'  ? '' : 'none';
+  });
+});
+
+// ── Decode tab ──────────────────────────────────────────────────────────────
+async function decodeAndVerify() {
+  const raw = document.getElementById('decodeInput').value.trim();
+  const verifySecretVal = document.getElementById('verifySecret').value;
+  const statusEl = document.getElementById('decodeStatus');
+  const decodedEl = document.getElementById('decodedSection');
+
+  if (!raw) {
+    statusEl.className = 'validation-bar empty';
+    statusEl.innerHTML = '<i class="ph ph-info"></i> Paste a token above.';
+    decodedEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.875rem;">The decoded token parts will appear here.</p>';
+    setTokenDisplay('','','');
+    return;
+  }
+
+  const parts = raw.split('.');
+  if (parts.length !== 3) {
+    statusEl.className = 'validation-bar invalid';
+    statusEl.innerHTML = '<i class="ph ph-warning-circle"></i> Not a valid JWT (expected 3 parts).';
+    return;
+  }
+
+  const header  = b64urlDecode(parts[0]);
+  const payload = b64urlDecode(parts[1]);
+  const sig     = parts[2];
+
+  if (!header || !payload) {
+    statusEl.className = 'validation-bar invalid';
+    statusEl.innerHTML = '<i class="ph ph-warning-circle"></i> Could not decode header or payload.';
+    return;
+  }
+
+  setTokenDisplay(parts[0], parts[1], parts[2]);
+
+  if (verifySecretVal && header.alg && ALGOS[header.alg]) {
+    const expectedSig = await hmacSign(verifySecretVal, `${parts[0]}.${parts[1]}`, ALGOS[header.alg]);
+    if (expectedSig === sig) {
+      statusEl.className = 'validation-bar valid';
+      statusEl.innerHTML = '<i class="ph ph-check-circle"></i> Signature is valid ✓';
+    } else {
+      statusEl.className = 'validation-bar invalid';
+      statusEl.innerHTML = '<i class="ph ph-warning-circle"></i> Signature is INVALID — token may have been tampered with.';
+    }
+  } else {
+    statusEl.className = 'validation-bar empty';
+    statusEl.innerHTML = '<i class="ph ph-info"></i> Token decoded. Enter a secret above to verify signature.';
+  }
+
+  renderDecoded(header, payload, sig, false);
+}
+
+document.getElementById('decodeInput').addEventListener('input', decodeAndVerify);
+document.getElementById('verifySecret').addEventListener('input', decodeAndVerify);
+document.getElementById('verifySecretToggle').addEventListener('click', () => {
+  const inp = document.getElementById('verifySecret');
+  const ico = document.querySelector('#verifySecretToggle i');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  ico.className = inp.type === 'password' ? 'ph ph-eye' : 'ph ph-eye-slash';
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+buildToken();
+</script>
+
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
