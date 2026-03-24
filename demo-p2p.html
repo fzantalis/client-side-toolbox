@@ -375,169 +375,121 @@
 <!-- KEEP YOUR ENTIRE HTML EXACTLY AS IS ABOVE -->
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
 let pc = null;
 let dc = null;
-let role = null;
 
 const ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' }
   ]
 };
 
-// Helper to wait for ICE gathering to finish so the code contains everything needed
-function waitForIceComplete(pc) {
+// --- HELPER: Wait for ICE Candidates ---
+function waitForIce(pc) {
   return new Promise(resolve => {
     if (pc.iceGatheringState === 'complete') return resolve();
-    pc.addEventListener('icegatheringstatechange', () => {
-      if (pc.iceGatheringState === 'complete') resolve();
-    });
-    // Fallback: resolve anyway after 3 seconds if ICE is taking too long
-    setTimeout(resolve, 3000);
+    const check = () => {
+      if (pc.iceGatheringState === 'complete') {
+        pc.removeEventListener('icegatheringstatechange', check);
+        resolve();
+      }
+    };
+    pc.addEventListener('icegatheringstatechange', check);
+    // Safety timeout: 4 seconds
+    setTimeout(resolve, 4000);
   });
 }
 
-// ── Role selection ──────────────────────────────────────────────────────────
-function selectRole(r) {
-  role = r;
-  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('role' + r.charAt(0).toUpperCase() + r.slice(1)).classList.add('selected');
-  
-  document.getElementById('senderPanel').classList.toggle('active', r === 'sender');
-  document.getElementById('receiverPanel').classList.toggle('active', r === 'receiver');
-  
-  if (r === 'sender') initSender();
-}
-
-function reset() {
-  if (pc) { pc.close(); pc = null; }
-  dc = null; role = null;
-  location.reload(); // Simplest way to clear all WebRTC states
-}
-
-function setStatus(side, state, msg) {
-  const el = document.getElementById(side + 'Status');
-  if(!el) return;
-  el.className = 'conn-status ' + state;
-  el.innerHTML = `<span class="pulse"></span> ${msg}`;
-}
-
-const encodeSDP = obj => btoa(JSON.stringify(obj));
-const decodeSDP = str => JSON.parse(atob(str.trim()));
-
-// ── SENDER ──────────────────────────────────────────────────────────
+// --- SENDER LOGIC ---
 async function initSender() {
+  if(pc) pc.close();
   pc = new RTCPeerConnection(ICE_CONFIG);
-
-  // Create Data Channel first (Sender must create it)
-  dc = pc.createDataChannel('fileTransfer', { ordered: true });
-  setupDataChannel(dc, 'sender');
+  
+  // Sender MUST create the data channel
+  dc = pc.createDataChannel("fileTransfer", { reliable: true });
+  setupDataHandlers(dc);
 
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
-  setStatus('sender', 'connecting', 'Generating connection code...');
-  
-  await waitForIceComplete(pc);
+  setStatus('sender', 'connecting', 'Gathering network paths...');
+  await waitForIce(pc);
 
-  const code = encodeSDP(pc.localDescription);
-  document.getElementById('offerBox').textContent = code;
-  generateQR(code);
-  setStatus('sender', 'idle', 'Offer ready — share it with the receiver.');
+  const encoded = btoa(JSON.stringify(pc.localDescription));
+  document.getElementById('offerBox').textContent = encoded;
+  renderQR(encoded);
+  setStatus('sender', 'idle', 'Offer ready. Share it!');
 }
 
-// Sender clicks "Connect" after pasting Receiver's answer
-document.getElementById('connectBtn').addEventListener('click', async () => {
-  const raw = document.getElementById('answerInput').value.trim();
-  if (!raw) return;
+document.getElementById('connectBtn').onclick = async () => {
+  const answerStr = document.getElementById('answerInput').value.trim();
+  if (!answerStr || pc.signalingState !== "have-local-offer") return;
 
   try {
-    const answer = decodeSDP(raw);
+    const answer = JSON.parse(atob(answerStr));
     await pc.setRemoteDescription(new RTCSessionDescription(answer));
-    setStatus('sender', 'connecting', 'Handshake complete. Connecting...');
-  } catch (e) {
-    console.error(e);
-    setStatus('sender', 'error', 'Invalid answer code.');
+  } catch (err) {
+    setStatus('sender', 'error', 'Invalid Answer Code');
   }
-});
+};
 
-// ── RECEIVER ──────────────────────────────────────────────────────────
-document.getElementById('acceptBtn').addEventListener('click', async () => {
-  const raw = document.getElementById('offerInput').value.trim();
-  if (!raw) return;
+// --- RECEIVER LOGIC ---
+document.getElementById('acceptBtn').onclick = async () => {
+  const offerStr = document.getElementById('offerInput').value.trim();
+  if (!offerStr) return;
 
   try {
+    if(pc) pc.close();
     pc = new RTCPeerConnection(ICE_CONFIG);
     
-    // Receiver listens for the channel created by sender
-    pc.ondatachannel = e => {
-      dc = e.channel;
-      setupDataChannel(dc, 'receiver');
+    // Receiver listens for the sender's channel
+    pc.ondatachannel = (event) => {
+      dc = event.channel;
+      setupDataHandlers(dc);
     };
 
-    const offer = decodeSDP(raw);
+    const offer = JSON.parse(atob(offerStr));
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
-
+    
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
 
-    setStatus('receiver', 'connecting', 'Generating answer...');
-    await waitForIceComplete(pc);
+    setStatus('receiver', 'connecting', 'Finalizing answer...');
+    await waitForIce(pc);
 
-    const code = encodeSDP(pc.localDescription);
-    document.getElementById('answerBox').textContent = code;
+    const encoded = btoa(JSON.stringify(pc.localDescription));
+    document.getElementById('answerBox').textContent = encoded;
     document.getElementById('receiverStep2').classList.remove('hidden');
-    setStatus('receiver', 'idle', 'Answer ready. Send this back to the Sender.');
-  } catch (e) {
-    console.error(e);
-    setStatus('receiver', 'error', 'Invalid offer code.');
+    setStatus('receiver', 'idle', 'Answer ready. Send it back!');
+  } catch (err) {
+    setStatus('receiver', 'error', 'Invalid Offer Code');
   }
-});
+};
 
-// ── DataChannel Logic ───────────────────────────────────────────────
-function setupDataChannel(chan, side) {
-  chan.onopen = () => {
-    setStatus(side, 'connected', 'Connected! You can now transfer files.');
-    if (side === 'sender') {
-      document.getElementById('senderDropZone').classList.remove('disabled');
-    }
-  };
-  chan.onclose = () => setStatus(side, 'idle', 'Connection closed.');
+// --- DATA CHANNEL HANDLERS ---
+function setupDataHandlers(channel) {
+  channel.binaryType = 'arraybuffer';
   
-  if (side === 'receiver') {
-      setupFileReceiver(chan);
-  }
+  channel.onopen = () => {
+    const side = document.getElementById('senderPanel').classList.contains('active') ? 'sender' : 'receiver';
+    setStatus(side, 'connected', 'P2P Tunnel Established!');
+    if(side === 'sender') document.getElementById('senderDropZone').classList.remove('disabled');
+  };
+
+  channel.onmessage = (e) => handleIncomingData(e.data);
 }
 
-// ── QR Generation ───────────────────────────────────────────────────
-function generateQR(text) {
+function renderQR(text) {
   const container = document.getElementById('qrCanvas');
-  container.innerHTML = ""; // Clear previous
+  container.innerHTML = ''; // Clear old QR
   new QRCode(container, {
     text: text,
-    width: 160,
-    height: 160,
-    correctLevel: QRCode.CorrectLevel.L // Lowered level to keep QR simple for long SDP strings
+    width: 150,
+    height: 150,
+    correctLevel: QRCode.CorrectLevel.L // Low error correction = simpler QR for long strings
   });
-}
-
-// Simple copy to clipboard helper
-document.getElementById('copyOfferBtn')?.addEventListener('click', () => {
-    navigator.clipboard.writeText(document.getElementById('offerBox').textContent);
-});
-
-document.getElementById('copyAnswerBtn')?.addEventListener('click', () => {
-    navigator.clipboard.writeText(document.getElementById('answerBox').textContent);
-});
-
-// Logic for receiving files (Minimal version)
-function setupFileReceiver(chan) {
-    chan.onmessage = (event) => {
-        // Implement your file chunking logic here as per your original code
-        console.log("Received data:", event.data);
-    };
 }
 </script>
 <script src="theme-toggle.js"></script>
