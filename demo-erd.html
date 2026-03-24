@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>JSON → ERD Diagram - Client-Side Toolbox</title>
+  <style>
+    .erd-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    @media (max-width: 820px) { .erd-layout { grid-template-columns: 1fr; } }
+
+    .json-editor {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      resize: vertical;
+      min-height: 280px;
+      transition: border-color .15s;
+    }
+    .json-editor:focus { outline: none; border-color: var(--primary); }
+    .json-editor.error { border-color: #ef4444; }
+
+    .err-msg { font-size: 0.82rem; color: #ef4444; margin-top: 0.4rem; display: none; }
+    .err-msg.visible { display: block; }
+
+    /* Canvas */
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      min-height: 520px;
+      cursor: grab;
+      user-select: none;
+    }
+    .diagram-wrap:active { cursor: grabbing; }
+    #erdSvg {
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+    }
+
+    /* Entity boxes */
+    .erd-entity rect { stroke-width: 1.5; rx: 8; }
+    .erd-header { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; }
+    .erd-field  { font-family: 'Fira Code', monospace; font-size: 10.5px; }
+    .erd-type   { font-family: 'Fira Code', monospace; font-size: 10px; opacity: 0.6; }
+
+    .diagram-toolbar {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.4rem;
+    }
+    .diagram-btn {
+      width: 32px; height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: all .15s;
+    }
+    .diagram-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    .empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+    .empty-state i { font-size: 3rem; }
+
+    .presets { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+    .preset-btn {
+      padding: 0.2rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+    .preset-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    .field-label {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted); margin: 0.75rem 0 0.35rem;
+    }
+    .field-label:first-child { margin-top: 0; }
+
+    .mode-pills { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; }
+    .mode-pill {
+      padding: 0.25rem 0.65rem; border: 1px solid var(--border); border-radius: 20px;
+      background: transparent; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+      color: var(--text-muted); transition: all .15s;
+    }
+    .mode-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="breadcrumb">
+    <i class="ph ph-arrow-left"></i> Back to Toolbox
+  </a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-graph"></i></div>
+    <div class="tool-header-text">
+      <h1>JSON → ERD Diagram</h1>
+      <p>Paste a JSON object, array, or schema and instantly visualise the entity structure and relationships.</p>
+    </div>
+  </header>
+
+  <main style="display:flex;flex-direction:column;gap:1rem;">
+    <div class="panel" style="width:100%;box-sizing:border-box;">
+      <div class="panel-header">
+        <h3>Input &amp; Diagram</h3>
+        <div class="panel-actions">
+          <button class="btn-secondary" id="exportSvgBtn"><i class="ph ph-download-simple"></i> Export SVG</button>
+        </div>
+      </div>
+
+      <div class="erd-layout">
+        <!-- Left: input -->
+        <div>
+          <p class="field-label">Input mode</p>
+          <div class="mode-pills">
+            <button class="mode-pill active" data-mode="auto">Auto-detect</button>
+            <button class="mode-pill" data-mode="schema">JSON Schema</button>
+            <button class="mode-pill" data-mode="data">Data array</button>
+          </div>
+
+          <p class="field-label">Quick examples</p>
+          <div class="presets" id="presetBtns"></div>
+
+          <p class="field-label">JSON input</p>
+          <textarea class="json-editor" id="jsonInput" spellcheck="false" placeholder="Paste JSON here…"></textarea>
+          <div class="err-msg" id="errMsg"></div>
+          <button class="btn-primary" style="margin-top:0.6rem;width:100%;" id="renderBtn">
+            <i class="ph ph-flow-arrow"></i> Generate Diagram
+          </button>
+        </div>
+
+        <!-- Right: diagram -->
+        <div>
+          <div class="diagram-wrap" id="diagramWrap">
+            <svg id="erdSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="empty-state" id="emptyState">
+              <i class="ph ph-graph"></i>
+              <span>Diagram will appear here</span>
+            </div>
+            <div class="diagram-toolbar">
+              <button class="diagram-btn" id="zoomInBtn" title="Zoom in"><i class="ph ph-plus"></i></button>
+              <button class="diagram-btn" id="zoomOutBtn" title="Zoom out"><i class="ph ph-minus"></i></button>
+              <button class="diagram-btn" id="fitBtn" title="Fit to screen"><i class="ph ph-arrows-out"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="display:flex;justify-content:center;gap:1rem;margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ── Presets ──────────────────────────────────────────────────────────────────
+const PRESETS = {
+  'E-Commerce': JSON.stringify({
+    User: { id: 'integer (PK)', email: 'string', name: 'string', created_at: 'datetime' },
+    Product: { id: 'integer (PK)', name: 'string', price: 'float', stock: 'integer', category_id: 'integer (FK→Category)' },
+    Category: { id: 'integer (PK)', name: 'string', parent_id: 'integer (FK→Category)' },
+    Order: { id: 'integer (PK)', user_id: 'integer (FK→User)', total: 'float', status: 'string', created_at: 'datetime' },
+    OrderItem: { id: 'integer (PK)', order_id: 'integer (FK→Order)', product_id: 'integer (FK→Product)', quantity: 'integer', price: 'float' },
+  }, null, 2),
+  'Blog': JSON.stringify({
+    Author: { id: 'integer (PK)', name: 'string', email: 'string', bio: 'text' },
+    Post: { id: 'integer (PK)', author_id: 'integer (FK→Author)', title: 'string', body: 'text', published_at: 'datetime' },
+    Tag: { id: 'integer (PK)', name: 'string', slug: 'string' },
+    PostTag: { post_id: 'integer (FK→Post)', tag_id: 'integer (FK→Tag)' },
+    Comment: { id: 'integer (PK)', post_id: 'integer (FK→Post)', author_id: 'integer (FK→Author)', body: 'text', created_at: 'datetime' },
+  }, null, 2),
+  'SaaS App': JSON.stringify({
+    Organization: { id: 'uuid (PK)', name: 'string', plan: 'string', created_at: 'datetime' },
+    User: { id: 'uuid (PK)', org_id: 'uuid (FK→Organization)', email: 'string', role: 'string' },
+    Project: { id: 'uuid (PK)', org_id: 'uuid (FK→Organization)', name: 'string', status: 'string' },
+    Task: { id: 'uuid (PK)', project_id: 'uuid (FK→Project)', assignee_id: 'uuid (FK→User)', title: 'string', priority: 'string', due_date: 'date' },
+    AuditLog: { id: 'uuid (PK)', user_id: 'uuid (FK→User)', action: 'string', resource: 'string', created_at: 'datetime' },
+  }, null, 2),
+  'Social Network': JSON.stringify([
+    { id: 1, username: 'alice', email: 'alice@example.com', bio: 'Developer', follower_count: 120, following: [2,3], posts: [{ id: 1, content: 'Hello!', likes: 10, comments: [{ id: 1, user_id: 2, text: 'Nice!' }] }] },
+    { id: 2, username: 'bob',   email: 'bob@example.com',   bio: 'Designer',  follower_count: 89 },
+  ], null, 2),
+};
+
+document.querySelectorAll('.mode-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+const presetContainer = document.getElementById('presetBtns');
+Object.keys(PRESETS).forEach(name => {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.textContent = name;
+  btn.addEventListener('click', () => {
+    document.getElementById('jsonInput').value = PRESETS[name];
+    render();
+  });
+  presetContainer.appendChild(btn);
+});
+
+// ── Parsing ──────────────────────────────────────────────────────────────────
+function parseToEntities(json) {
+  // Returns: { entities: [{name, fields:[{name,type,isPK,isFK,refEntity}]}], relations: [{from,to,fromField,label}] }
+  if (Array.isArray(json) && json.length > 0 && typeof json[0] === 'object') {
+    return parseFromArray('Root', json);
+  }
+  if (typeof json === 'object' && json !== null) {
+    // Check if it's a map of entity definitions
+    const vals = Object.values(json);
+    if (vals.every(v => typeof v === 'object' && !Array.isArray(v))) {
+      return parseFromEntityMap(json);
+    }
+    return parseFromObject('Root', json);
+  }
+  throw new Error('Expected a JSON object or array');
+}
+
+function parseFromEntityMap(map) {
+  const entities = [];
+  const relations = [];
+  for (const [entityName, fields] of Object.entries(map)) {
+    const ent = { name: entityName, fields: [] };
+    for (const [fieldName, typeStr] of Object.entries(fields)) {
+      const type = String(typeStr);
+      const isPK = type.includes('PK');
+      const fkMatch = type.match(/FK→(\w+)/);
+      const isFK = !!fkMatch;
+      const refEntity = fkMatch ? fkMatch[1] : null;
+      const cleanType = type.replace(/\s*\(.*?\)/g, '').trim();
+      ent.fields.push({ name: fieldName, type: cleanType, isPK, isFK, refEntity });
+      if (isFK && refEntity) {
+        relations.push({ from: entityName, to: refEntity, fromField: fieldName, label: `${fieldName}` });
+      }
+    }
+    entities.push(ent);
+  }
+  return { entities, relations };
+}
+
+function parseFromArray(name, arr) {
+  const sample = arr[0];
+  return parseFromObject(name, sample);
+}
+
+function parseFromObject(name, obj, depth = 0) {
+  const entities = [];
+  const relations = [];
+  const ent = { name, fields: [] };
+
+  for (const [key, val] of Object.entries(obj)) {
+    if (val === null || typeof val !== 'object') {
+      const type = val === null ? 'null' : typeof val === 'number' ? (Number.isInteger(val) ? 'integer' : 'float') : typeof val;
+      ent.fields.push({ name: key, type, isPK: key === 'id', isFK: false });
+    } else if (Array.isArray(val)) {
+      if (val.length > 0 && typeof val[0] === 'object') {
+        const childName = cap(key.replace(/s$/, ''));
+        const childResult = parseFromObject(childName, val[0], depth + 1);
+        entities.push(...childResult.entities);
+        relations.push(...childResult.relations);
+        if (!childResult.entities.find(e => e.name === childName)) {
+          childResult.entities.push({ name: childName, fields: [] });
+        }
+        relations.push({ from: name, to: childName, fromField: key, label: `1:N` });
+        ent.fields.push({ name: key, type: `${childName}[]`, isPK: false, isFK: false });
+      } else {
+        ent.fields.push({ name: key, type: `${typeof val[0]}[]`, isPK: false, isFK: false });
+      }
+    } else {
+      const childName = cap(key);
+      const childResult = parseFromObject(childName, val, depth + 1);
+      entities.push(...childResult.entities);
+      relations.push(...childResult.relations);
+      relations.push({ from: name, to: childName, fromField: key, label: `1:1` });
+      ent.fields.push({ name: key, type: childName, isPK: false, isFK: true, refEntity: childName });
+    }
+  }
+
+  entities.unshift(ent);
+  return { entities, relations };
+}
+
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+// ── Layout ──────────────────────────────────────────────────────────────────
+function layoutEntities(entities) {
+  const COLS = Math.ceil(Math.sqrt(entities.length));
+  const COL_W = 220, ROW_H = 200;
+  return entities.map((ent, i) => ({
+    ...ent,
+    x: 40 + (i % COLS) * (COL_W + 60),
+    y: 40 + Math.floor(i / COLS) * (ROW_H + 40),
+    w: COL_W,
+  }));
+}
+
+// ── SVG rendering ──────────────────────────────────────────────────────────
+const COLORS = ['#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#84cc16','#ec4899','#14b8a6'];
+let viewBox = { x: 0, y: 0, scale: 1 };
+let laidOutEntities = [];
+let svgRelations = [];
+
+function render() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  const err = document.getElementById('errMsg');
+  const ed  = document.getElementById('jsonInput');
+  const empty = document.getElementById('emptyState');
+  if (!raw) return;
+
+  let json;
+  try { json = JSON.parse(raw); ed.classList.remove('error'); err.classList.remove('visible'); }
+  catch(e) { ed.classList.add('error'); err.textContent = 'Invalid JSON: ' + e.message; err.classList.add('visible'); return; }
+
+  try {
+    const { entities, relations } = parseToEntities(json);
+    laidOutEntities = layoutEntities(entities);
+    svgRelations = relations;
+    empty.style.display = 'none';
+    drawSvg(laidOutEntities, relations);
+  } catch(e) {
+    err.textContent = e.message; err.classList.add('visible');
+  }
+}
+
+function drawSvg(entities, relations) {
+  const svg = document.getElementById('erdSvg');
+  svg.innerHTML = '';
+
+  const FIELD_H = 22, HEADER_H = 32, PADDING = 12;
+
+  // Compute entity heights
+  entities.forEach(ent => {
+    ent.h = HEADER_H + ent.fields.length * FIELD_H + PADDING;
+  });
+
+  // Total canvas size
+  const maxX = Math.max(...entities.map(e => e.x + e.w)) + 60;
+  const maxY = Math.max(...entities.map(e => e.y + e.h)) + 60;
+  svg.setAttribute('viewBox', `0 0 ${maxX} ${maxY}`);
+  svg.setAttribute('width', maxX);
+  svg.setAttribute('height', maxY);
+
+  const defs = svgEl('defs');
+  // Arrow marker
+  const marker = svgEl('marker', { id: 'arrow', markerWidth: '10', markerHeight: '7', refX: '9', refY: '3.5', orient: 'auto' });
+  const poly = svgEl('polygon', { points: '0 0, 10 3.5, 0 7', fill: '#94a3b8' });
+  marker.appendChild(poly); defs.appendChild(marker); svg.appendChild(defs);
+
+  // Draw relations
+  relations.forEach(rel => {
+    const from = entities.find(e => e.name === rel.from);
+    const to   = entities.find(e => e.name === rel.to);
+    if (!from || !to) return;
+
+    const x1 = from.x + from.w / 2, y1 = from.y + from.h / 2;
+    const x2 = to.x + to.w / 2,     y2 = to.y + to.h / 2;
+    const mx  = (x1 + x2) / 2;
+
+    const path = svgEl('path', {
+      d: `M ${x1} ${y1} C ${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`,
+      stroke: '#94a3b8', 'stroke-width': '1.5', fill: 'none',
+      'stroke-dasharray': '5,3', 'marker-end': 'url(#arrow)'
+    });
+    svg.appendChild(path);
+
+    if (rel.label) {
+      const lbl = svgEl('text', { x: mx, y: (y1+y2)/2 - 6, 'text-anchor': 'middle', 'font-size': '9', fill: '#94a3b8', 'font-family': 'Inter,sans-serif' });
+      lbl.textContent = rel.label;
+      svg.appendChild(lbl);
+    }
+  });
+
+  // Draw entities
+  entities.forEach((ent, i) => {
+    const color = COLORS[i % COLORS.length];
+    const g = svgEl('g', { class: 'erd-entity', transform: `translate(${ent.x},${ent.y})` });
+
+    // Shadow
+    const shadow = svgEl('rect', { x: 3, y: 3, width: ent.w, height: ent.h, rx: 8, fill: 'rgba(0,0,0,0.08)' });
+    g.appendChild(shadow);
+
+    // Body
+    const body = svgEl('rect', { width: ent.w, height: ent.h, rx: 8, fill: 'var(--bg,#fff)', stroke: color, 'stroke-width': 1.5 });
+    g.appendChild(body);
+
+    // Header bg
+    const hdr = svgEl('rect', { width: ent.w, height: HEADER_H, rx: 8, fill: color });
+    const hdrBottom = svgEl('rect', { y: HEADER_H/2, width: ent.w, height: HEADER_H/2, fill: color });
+    g.appendChild(hdr); g.appendChild(hdrBottom);
+
+    // Entity name
+    const title = svgEl('text', { x: ent.w/2, y: HEADER_H/2 + 5, 'text-anchor': 'middle', 'font-family': 'Inter,sans-serif', 'font-size': 12, 'font-weight': 700, fill: '#fff', class: 'erd-header' });
+    title.textContent = ent.name;
+    g.appendChild(title);
+
+    // Divider
+    const div = svgEl('line', { x1: 0, y1: HEADER_H, x2: ent.w, y2: HEADER_H, stroke: color, 'stroke-width': 1 });
+    g.appendChild(div);
+
+    // Fields
+    ent.fields.forEach((field, fi) => {
+      const fy = HEADER_H + fi * FIELD_H + FIELD_H/2 + 4;
+
+      if (field.isPK) {
+        const keyIcon = svgEl('text', { x: 8, y: fy, 'font-size': 9, fill: '#f59e0b', 'font-family': 'Inter' });
+        keyIcon.textContent = '🔑';
+        g.appendChild(keyIcon);
+      } else if (field.isFK) {
+        const fkIcon = svgEl('text', { x: 8, y: fy, 'font-size': 9, fill: '#6366f1', 'font-family': 'Inter' });
+        fkIcon.textContent = '🔗';
+        g.appendChild(fkIcon);
+      }
+
+      const fname = svgEl('text', { x: field.isPK || field.isFK ? 22 : 10, y: fy, 'font-size': 10.5, 'font-family': '"Fira Code",monospace', fill: 'var(--text,#1e293b)', class: 'erd-field' });
+      fname.textContent = field.name.length > 18 ? field.name.slice(0,17)+'…' : field.name;
+      g.appendChild(fname);
+
+      const ftype = svgEl('text', { x: ent.w - 8, y: fy, 'text-anchor': 'end', 'font-size': 10, 'font-family': '"Fira Code",monospace', fill: '#94a3b8', class: 'erd-type' });
+      ftype.textContent = field.type;
+      g.appendChild(ftype);
+
+      if (fi < ent.fields.length - 1) {
+        const sep = svgEl('line', { x1: 0, y1: HEADER_H + (fi+1)*FIELD_H, x2: ent.w, y2: HEADER_H + (fi+1)*FIELD_H, stroke: 'var(--border,#e2e8f0)', 'stroke-width': 0.5 });
+        g.appendChild(sep);
+      }
+    });
+
+    svg.appendChild(g);
+  });
+}
+
+function svgEl(tag, attrs = {}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+
+// ── Pan & zoom ──────────────────────────────────────────────────────────────
+let isPanning = false, panStart = { x: 0, y: 0 }, svgTranslate = { x: 0, y: 0 }, svgScale = 1;
+const wrap = document.getElementById('diagramWrap');
+
+wrap.addEventListener('mousedown', e => { isPanning = true; panStart = { x: e.clientX - svgTranslate.x, y: e.clientY - svgTranslate.y }; });
+window.addEventListener('mouseup', () => { isPanning = false; });
+window.addEventListener('mousemove', e => {
+  if (!isPanning) return;
+  svgTranslate.x = e.clientX - panStart.x;
+  svgTranslate.y = e.clientY - panStart.y;
+  applyTransform();
+});
+wrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  svgScale = Math.max(0.3, Math.min(3, svgScale * (e.deltaY < 0 ? 1.1 : 0.9)));
+  applyTransform();
+}, { passive: false });
+
+document.getElementById('zoomInBtn').addEventListener('click', () => { svgScale = Math.min(3, svgScale * 1.2); applyTransform(); });
+document.getElementById('zoomOutBtn').addEventListener('click', () => { svgScale = Math.max(0.3, svgScale * 0.8); applyTransform(); });
+document.getElementById('fitBtn').addEventListener('click', () => { svgScale = 1; svgTranslate = { x: 0, y: 0 }; applyTransform(); });
+
+function applyTransform() {
+  document.getElementById('erdSvg').style.transform = `translate(${svgTranslate.x}px,${svgTranslate.y}px) scale(${svgScale})`;
+  document.getElementById('erdSvg').style.transformOrigin = '0 0';
+}
+
+// ── Export ──────────────────────────────────────────────────────────────────
+document.getElementById('exportSvgBtn').addEventListener('click', () => {
+  const svg = document.getElementById('erdSvg');
+  const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'erd-diagram.svg'; a.click();
+});
+
+// ── Events ──────────────────────────────────────────────────────────────────
+document.getElementById('renderBtn').addEventListener('click', render);
+document.getElementById('jsonInput').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') render();
+});
+
+// Init with a preset
+document.getElementById('jsonInput').value = PRESETS['E-Commerce'];
+render();
+</script>
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
