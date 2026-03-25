@@ -5,18 +5,53 @@
   <link rel="stylesheet" href="style.css"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script><title>Open Graph Generator</title>
   <style>
+    .responsive-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (min-width: 768px) { .responsive-grid { grid-template-columns: 1fr 1.2fr; } }
+    
     .input-group { margin-bottom: 1rem; }
     .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
-    .input-group input, .input-group textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: inherit; }
+    .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: inherit; }
     
-    /* Social Mockup Styles */
-    .mockup-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-secondary); max-width: 500px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    .mockup-img { width: 100%; height: 260px; object-fit: cover; background: #e1e8ed; border-bottom: 1px solid var(--border); }
-    .mockup-content { padding: 0.75rem 1rem; }
-    .mockup-domain { color: var(--text-muted); text-transform: lowercase; font-size: 0.85rem; margin-bottom: 0.25rem; }
-    .mockup-title { font-weight: bold; font-size: 1rem; margin-bottom: 0.25rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .mockup-desc { color: var(--text-muted); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    
+    /* Base Mockup Styles */
+    .mockup-container { padding: 1.5rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: center; overflow: hidden; }
+    .mockup-card { width: 100%; transition: all 0.3s ease; text-align: left; line-height: 1.5; }
+    .mockup-img-wrapper { width: 100%; background: #e1e8ed; display: flex; align-items: center; justify-content: center; color: #888; overflow: hidden; }
+    .mockup-img { width: 100%; height: 100%; object-fit: cover; }
+    .mockup-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mockup-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* 1. Facebook & LinkedIn Style */
+    .mockup-card.fb-style { background: #f0f2f5; border: 1px solid #ced0d4; max-width: 500px; }
+    [data-theme="dark"] .mockup-card.fb-style { background: #242526; border-color: #3e4042; }
+    .mockup-card.fb-style .mockup-img-wrapper { aspect-ratio: 1.91 / 1; border-bottom: 1px solid #ced0d4; }
+    [data-theme="dark"] .mockup-card.fb-style .mockup-img-wrapper { border-color: #3e4042; }
+    .mockup-card.fb-style .mockup-content { padding: 10px 12px; }
+    .mockup-card.fb-style .mockup-domain { text-transform: uppercase; font-size: 12px; color: #65676b; margin-bottom: 2px; }
+    [data-theme="dark"] .mockup-card.fb-style .mockup-domain { color: #b0b3b8; }
+    .mockup-card.fb-style .mockup-title { font-weight: 600; font-size: 16px; color: #050505; margin-bottom: 2px; }
+    [data-theme="dark"] .mockup-card.fb-style .mockup-title { color: #e4e6eb; }
+    .mockup-card.fb-style .mockup-desc { font-size: 14px; color: #65676b; }
+    [data-theme="dark"] .mockup-card.fb-style .mockup-desc { color: #b0b3b8; }
+
+    /* 2. Twitter / X Large Card Style */
+    .mockup-card.tw-style { border: 1px solid #cfd9de; border-radius: 16px; max-width: 500px; background: #fff; overflow: hidden; }
+    [data-theme="dark"] .mockup-card.tw-style { background: #000; border-color: #333639; }
+    .mockup-card.tw-style .mockup-img-wrapper { aspect-ratio: 1.91 / 1; border-bottom: 1px solid #cfd9de; }
+    [data-theme="dark"] .mockup-card.tw-style .mockup-img-wrapper { border-color: #333639; }
+    .mockup-card.tw-style .mockup-content { padding: 12px; }
+    .mockup-card.tw-style .mockup-domain { color: #536471; font-size: 15px; margin-bottom: 2px; }
+    [data-theme="dark"] .mockup-card.tw-style .mockup-domain { color: #71767b; }
+    .mockup-card.tw-style .mockup-title { color: #0f1419; font-size: 15px; }
+    [data-theme="dark"] .mockup-card.tw-style .mockup-title { color: #e7e9ea; }
+    .mockup-card.tw-style .mockup-desc { display: none; /* Twitter large cards usually hide the description text */ }
+
+    /* 3. Discord Embed Style */
+    .mockup-card.dc-style { background: #2b2d31; border-left: 4px solid #5865F2; border-radius: 4px; max-width: 450px; padding: 1rem; }
+    .mockup-card.dc-style .mockup-domain { color: #dbdee1; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    .mockup-card.dc-style .mockup-title { color: #00a8fc; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .mockup-card.dc-style .mockup-desc { color: #dbdee1; font-size: 14px; margin-bottom: 16px; }
+    .mockup-card.dc-style .mockup-img-wrapper { border-radius: 4px; width: 100%; max-width: 400px; height: auto; aspect-ratio: 16/9; }
+
     .code-output { width: 100%; height: 200px; padding: 1rem; background: #1e1e1e; color: #d4d4d4; font-family: 'Fira Code', monospace; font-size: 0.85rem; border-radius: 6px; border: none; resize: vertical; }
   </style>
 </head>
@@ -24,8 +59,9 @@
   <div class="container">
     <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
     <header class="tool-header"><div class="card-icon"><i class="ph ph-cards"></i></div>
-      <div class="tool-header-text"><h1>Open Graph Generator</h1><p>Preview social media share cards and generate HTML meta tags instantly.</p></div>
+      <div class="tool-header-text"><h1>Open Graph Generator</h1><p>Preview social media share cards across platforms and generate HTML tags.</p></div>
     </header>
+    
     <div class="responsive-grid">
       <div class="panel">
         <div class="panel-header"><h3>Site Details</h3></div>
@@ -45,26 +81,44 @@
           <div class="input-group">
             <label>Image (Local Preview)</label>
             <input type="file" id="og-img-file" accept="image/*">
-            <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">Note: For the actual code, you'll need to host this image and paste the URL below.</small>
           </div>
           <div class="input-group">
-            <label>Hosted Image URL (For Code Generation)</label>
+            <label>Hosted Image URL (For Code)</label>
             <input type="url" id="og-img-url" placeholder="https://example.com/image.jpg" value="https://example.com/og-image.jpg">
           </div>
         </div>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
         <div class="panel">
-          <div class="panel-header"><h3>Twitter / X Preview</h3></div>
-          <div style="margin-top: 1rem;">
-            <div class="mockup-card">
-              <img id="prev-img" class="mockup-img" src="" alt="Preview Image" style="display: none;">
-              <div id="prev-placeholder" class="mockup-img" style="display: flex; align-items: center; justify-content: center; color: #888;">No Image Set</div>
-              <div class="mockup-content">
-                <div id="prev-domain" class="mockup-domain">toolbox.com</div>
-                <div id="prev-title" class="mockup-title">The Ultimate Developer Toolbox</div>
-                <div id="prev-desc" class="mockup-desc">A suite of powerful developer and business utilities that run entirely in your browser.</div>
+          <div class="panel-header">
+            <h3>Live Preview</h3>
+            <select id="preview-platform" style="padding: 0.25rem 0.5rem; border-radius: 4px; background: var(--bg); color: var(--text); border: 1px solid var(--border);">
+              <option value="fb-style">Facebook / LinkedIn</option>
+              <option value="tw-style">Twitter / X (Large)</option>
+              <option value="dc-style">Discord Embed</option>
+            </select>
+          </div>
+          
+          <div class="mockup-container" style="margin-top: 1rem;">
+            <div id="mockup-card" class="mockup-card fb-style">
+              
+              <div id="discord-text" style="display: none;">
+                <div class="mockup-domain domain-text">toolbox.com</div>
+                <div class="mockup-title title-text">The Ultimate Developer Toolbox</div>
+                <div class="mockup-desc desc-text">A suite of powerful developer and business utilities that run entirely in your browser.</div>
+              </div>
+
+              <div class="mockup-img-wrapper">
+                <img id="prev-img" class="mockup-img" src="" alt="Preview Image" style="display: none;">
+                <span id="prev-placeholder">No Image</span>
+              </div>
+              
+              <div class="mockup-content" id="standard-text">
+                <div class="mockup-domain domain-text">toolbox.com</div>
+                <div class="mockup-title title-text">The Ultimate Developer Toolbox</div>
+                <div class="mockup-desc desc-text">A suite of powerful developer and business utilities that run entirely in your browser.</div>
               </div>
             </div>
           </div>
@@ -77,6 +131,7 @@
           </div>
           <textarea id="code-output" class="code-output" readonly></textarea>
         </div>
+
       </div>
     </div>
   </div>
@@ -84,6 +139,25 @@
   <script>
     const inputs = ['og-title', 'og-desc', 'og-url', 'og-img-url'];
     inputs.forEach(id => document.getElementById(id).addEventListener('input', updateAll));
+
+    // Handle platform switching
+    document.getElementById('preview-platform').addEventListener('change', function(e) {
+      const card = document.getElementById('mockup-card');
+      const standardText = document.getElementById('standard-text');
+      const discordText = document.getElementById('discord-text');
+      
+      // Reset classes
+      card.className = `mockup-card ${e.target.value}`;
+      
+      // Discord layout flip (Text on top, image on bottom)
+      if(e.target.value === 'dc-style') {
+        standardText.style.display = 'none';
+        discordText.style.display = 'block';
+      } else {
+        standardText.style.display = 'block';
+        discordText.style.display = 'none';
+      }
+    });
 
     // Handle local image preview
     document.getElementById('og-img-file').addEventListener('change', function(e) {
@@ -106,11 +180,16 @@
       const imgUrl = document.getElementById('og-img-url').value;
       
       // Extract domain for mockup
-      try { const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`); document.getElementById('prev-domain').innerText = urlObj.hostname; } 
-      catch(e) { document.getElementById('prev-domain').innerText = url; }
+      let domain = url;
+      try { 
+        const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`); 
+        domain = urlObj.hostname; 
+      } catch(e) {}
 
-      document.getElementById('prev-title').innerText = title;
-      document.getElementById('prev-desc').innerText = desc;
+      // Update all mockup text instances
+      document.querySelectorAll('.domain-text').forEach(el => el.innerText = domain);
+      document.querySelectorAll('.title-text').forEach(el => el.innerText = title);
+      document.querySelectorAll('.desc-text').forEach(el => el.innerText = desc);
 
       const htmlStr = `<title>${title}</title>
 <meta name="title" content="${title}" />
