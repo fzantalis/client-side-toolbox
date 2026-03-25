@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script><title>Open Graph Generator</title>
+  <style>
+    .input-group { margin-bottom: 1rem; }
+    .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+    .input-group input, .input-group textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: inherit; }
+    
+    /* Social Mockup Styles */
+    .mockup-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-secondary); max-width: 500px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .mockup-img { width: 100%; height: 260px; object-fit: cover; background: #e1e8ed; border-bottom: 1px solid var(--border); }
+    .mockup-content { padding: 0.75rem 1rem; }
+    .mockup-domain { color: var(--text-muted); text-transform: lowercase; font-size: 0.85rem; margin-bottom: 0.25rem; }
+    .mockup-title { font-weight: bold; font-size: 1rem; margin-bottom: 0.25rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mockup-desc { color: var(--text-muted); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    .code-output { width: 100%; height: 200px; padding: 1rem; background: #1e1e1e; color: #d4d4d4; font-family: 'Fira Code', monospace; font-size: 0.85rem; border-radius: 6px; border: none; resize: vertical; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header"><div class="card-icon"><i class="ph ph-cards"></i></div>
+      <div class="tool-header-text"><h1>Open Graph Generator</h1><p>Preview social media share cards and generate HTML meta tags instantly.</p></div>
+    </header>
+    
+    <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:1.5rem; margin-bottom:1.5rem;">
+      <div class="panel">
+        <div class="panel-header"><h3>Site Details</h3></div>
+        <div style="margin-top: 1rem;">
+          <div class="input-group">
+            <label>Title</label>
+            <input type="text" id="og-title" placeholder="e.g., The Ultimate Developer Toolbox" value="The Ultimate Developer Toolbox">
+          </div>
+          <div class="input-group">
+            <label>Description</label>
+            <textarea id="og-desc" rows="3" placeholder="A brief description of your page...">A suite of powerful developer and business utilities that run entirely in your browser.</textarea>
+          </div>
+          <div class="input-group">
+            <label>URL</label>
+            <input type="url" id="og-url" placeholder="https://example.com" value="https://toolbox.com">
+          </div>
+          <div class="input-group">
+            <label>Image (Local Preview)</label>
+            <input type="file" id="og-img-file" accept="image/*">
+            <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">Note: For the actual code, you'll need to host this image and paste the URL below.</small>
+          </div>
+          <div class="input-group">
+            <label>Hosted Image URL (For Code Generation)</label>
+            <input type="url" id="og-img-url" placeholder="https://example.com/image.jpg" value="https://example.com/og-image.jpg">
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="panel">
+          <div class="panel-header"><h3>Twitter / X Preview</h3></div>
+          <div style="margin-top: 1rem;">
+            <div class="mockup-card">
+              <img id="prev-img" class="mockup-img" src="" alt="Preview Image" style="display: none;">
+              <div id="prev-placeholder" class="mockup-img" style="display: flex; align-items: center; justify-content: center; color: #888;">No Image Set</div>
+              <div class="mockup-content">
+                <div id="prev-domain" class="mockup-domain">toolbox.com</div>
+                <div id="prev-title" class="mockup-title">The Ultimate Developer Toolbox</div>
+                <div id="prev-desc" class="mockup-desc">A suite of powerful developer and business utilities that run entirely in your browser.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Generated HTML</h3>
+            <button onclick="copyCode()" class="btn-primary">Copy Tags</button>
+          </div>
+          <textarea id="code-output" class="code-output" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inputs = ['og-title', 'og-desc', 'og-url', 'og-img-url'];
+    inputs.forEach(id => document.getElementById(id).addEventListener('input', updateAll));
+
+    // Handle local image preview
+    document.getElementById('og-img-file').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('prev-img').src = event.target.result;
+          document.getElementById('prev-img').style.display = 'block';
+          document.getElementById('prev-placeholder').style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function updateAll() {
+      const title = document.getElementById('og-title').value || 'Page Title';
+      const desc = document.getElementById('og-desc').value || 'Page description goes here...';
+      const url = document.getElementById('og-url').value || 'example.com';
+      const imgUrl = document.getElementById('og-img-url').value;
+      
+      // Extract domain for mockup
+      try { const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`); document.getElementById('prev-domain').innerText = urlObj.hostname; } 
+      catch(e) { document.getElementById('prev-domain').innerText = url; }
+
+      document.getElementById('prev-title').innerText = title;
+      document.getElementById('prev-desc').innerText = desc;
+
+      const htmlStr = `<title>${title}</title>
+<meta name="title" content="${title}" />
+<meta name="description" content="${desc}" />
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content="${url}" />
+<meta property="og:title" content="${title}" />
+<meta property="og:description" content="${desc}" />
+<meta property="og:image" content="${imgUrl}" />
+
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content="${url}" />
+<meta property="twitter:title" content="${title}" />
+<meta property="twitter:description" content="${desc}" />
+<meta property="twitter:image" content="${imgUrl}" />`;
+
+      document.getElementById('code-output').value = htmlStr;
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(document.getElementById('code-output').value);
+      alert('Copied to clipboard!');
+    }
+
+    updateAll(); // Initial render
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
