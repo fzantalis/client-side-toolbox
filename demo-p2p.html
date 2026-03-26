@@ -6,7 +6,6 @@
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <!-- QR code generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <title>P2P File Transfer - Client-Side Toolbox</title>
   <style>
@@ -155,7 +154,7 @@
     .progress-wrap { margin-top: .4rem; }
     .progress-bar-bg { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width .1s; width: 0%; }
-    .progress-label { font-size: .72rem; color: var(--text-muted); margin-top: .2rem; }
+    .progress-label { font-size: .72rem; color: var(--text-muted); margin-top: .2rem; text-align: right; }
 
     /* ── Received files ── */
     .recv-list { list-style: none; padding: 0; margin: .75rem 0 0; }
@@ -225,7 +224,6 @@
 
   <main style="display:flex;flex-direction:column;gap:1rem;">
 
-    <!-- How it works -->
     <div class="panel">
       <div class="panel-header"><h3>How it works</h3></div>
       <div class="how-steps">
@@ -246,7 +244,6 @@
         </div>
       </div>
 
-      <!-- Role selector -->
       <div id="roleSection">
         <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem;">Choose your role to get started:</p>
         <div class="role-cards">
@@ -264,7 +261,6 @@
       </div>
     </div>
 
-    <!-- ── SENDER FLOW ── -->
     <div class="panel step-panel" id="senderPanel">
       <div class="panel-header">
         <h3><i class="ph ph-upload-simple" style="color:var(--primary)"></i> Sender</h3>
@@ -276,9 +272,7 @@
       </div>
 
       <div class="p2p-grid">
-        <!-- Left: signalling -->
         <div>
-          <!-- Step 1: your offer -->
           <div id="senderStep1">
             <div class="step-title"><span class="step-num">1</span> Your connection offer</div>
             <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.6rem;">Share this code (or QR) with the receiver. They paste it on their side.</p>
@@ -289,7 +283,6 @@
             </div>
           </div>
 
-          <!-- Step 2: paste answer -->
           <div id="senderStep2" style="margin-top:1.25rem;">
             <div class="step-title"><span class="step-num">2</span> Paste receiver's answer</div>
             <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.6rem;">Once the receiver accepts, they'll give you an answer code. Paste it here.</p>
@@ -298,7 +291,6 @@
           </div>
         </div>
 
-        <!-- Right: file drop -->
         <div>
           <div class="step-title"><span class="step-num">3</span> Queue files to send</div>
           <div class="drop-zone disabled" id="senderDropZone">
@@ -319,7 +311,6 @@
       </div>
     </div>
 
-    <!-- ── RECEIVER FLOW ── -->
     <div class="panel step-panel" id="receiverPanel">
       <div class="panel-header">
         <h3><i class="ph ph-download-simple" style="color:var(--primary)"></i> Receiver</h3>
@@ -331,7 +322,6 @@
       </div>
 
       <div class="p2p-grid">
-        <!-- Left: signalling -->
         <div>
           <div class="step-title"><span class="step-num">1</span> Paste sender's offer</div>
           <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.6rem;">The sender will give you a connection offer code. Paste it here.</p>
@@ -346,11 +336,14 @@
           </div>
         </div>
 
-        <!-- Right: received files -->
         <div>
           <div class="step-title"><span class="step-num">3</span> Received files</div>
           <div id="recvPlaceholder" style="color:var(--text-muted);font-size:.85rem;padding:1rem 0;">Files sent by the sender will appear here for download.</div>
           <ul class="recv-list" id="recvList"></ul>
+          <div class="progress-wrap hidden" id="receiverProgress">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="recvProgressFill"></div></div>
+            <div class="progress-label" id="recvProgressLabel">0%</div>
+          </div>
         </div>
       </div>
     </div>
@@ -372,8 +365,6 @@
   </footer>
 </div>
 
-<!-- KEEP YOUR ENTIRE HTML EXACTLY AS IS ABOVE -->
-
 <script>
 // ── Global State ──
 let pc = null;
@@ -390,9 +381,28 @@ const ICE_CONFIG = {
   ]
 };
 
+// State for files
+let filesQueue = [];
+let receiveBuffer = [];
+let incomingMeta = null;
+let receivedBytes = 0;
+
+// Constants for transfer
+const CHUNK_SIZE = 16384; // 16KB per chunk (safe WebRTC limit)
+const MAX_BUFFER = 1024 * 1024; // 1MB backpressure threshold
+
+// Utility: Format bytes
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 // ── Role Selection ──
 window.selectRole = function(role) {
-  console.log("Role selected:", role);
   document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
   const card = document.getElementById('role' + role.charAt(0).toUpperCase() + role.slice(1));
   if(card) card.classList.add('selected');
@@ -418,7 +428,6 @@ async function waitForIce(pc) {
       }
     };
     pc.addEventListener('icegatheringstatechange', check);
-    // Increased timeout for slow networks
     setTimeout(resolve, 5000); 
   });
 }
@@ -437,9 +446,9 @@ async function initSender() {
   pc = new RTCPeerConnection(ICE_CONFIG);
   
   dc = pc.createDataChannel("fileTransfer", { ordered: true });
+  dc.binaryType = "arraybuffer"; // Important for transferring binary
   setupDataHandlers(dc, 'sender');
 
-  // Monitor ICE failure
   pc.oniceconnectionstatechange = () => {
     if(pc.iceConnectionState === 'failed') {
       setStatus('sender', 'error', 'Connection failed. Try again on the same Wi-Fi.');
@@ -455,7 +464,6 @@ async function initSender() {
   const encoded = btoa(JSON.stringify(pc.localDescription));
   document.getElementById('offerBox').textContent = encoded;
   
-  // Clear and Render QR
   const qrContainer = document.getElementById('qrCanvas');
   qrContainer.innerHTML = '';
   new QRCode(qrContainer, { text: encoded, width: 140, height: 140, correctLevel: QRCode.CorrectLevel.L });
@@ -467,7 +475,6 @@ document.getElementById('connectBtn').onclick = async () => {
   const answerStr = document.getElementById('answerInput').value.trim();
   if (!answerStr) return;
   
-  // Prevent "stable state" error by checking if we already have an answer
   if (pc.signalingState !== "have-local-offer") {
     console.warn("Signaling state is not 'have-local-offer'. State is:", pc.signalingState);
     return;
@@ -483,6 +490,110 @@ document.getElementById('connectBtn').onclick = async () => {
   }
 };
 
+// ── UI Integration: Sender File Selection ──
+const dropZone = document.getElementById('senderDropZone');
+const fileInput = document.getElementById('senderFileInput');
+
+dropZone.addEventListener('click', () => {
+    if (!dropZone.classList.contains('disabled')) fileInput.click();
+});
+dropZone.addEventListener('dragover', e => {
+    e.preventDefault(); 
+    if (!dropZone.classList.contains('disabled')) dropZone.classList.add('dragging');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragging');
+    if (!dropZone.classList.contains('disabled') && e.dataTransfer.files.length > 0) {
+        addFilesToQueue(e.dataTransfer.files);
+    }
+});
+fileInput.addEventListener('change', e => {
+    if (e.target.files.length > 0) addFilesToQueue(e.target.files);
+});
+
+function addFilesToQueue(files) {
+    const list = document.getElementById('senderFileList');
+    for (let file of files) {
+        filesQueue.push(file);
+        
+        const li = document.createElement('li');
+        li.className = 'file-item';
+        li.id = 'sender-file-' + (filesQueue.length - 1);
+        li.innerHTML = `
+            <i class="ph ph-file file-icon"></i>
+            <span class="file-name">${file.name}</span>
+            <span class="file-size">${formatBytes(file.size)}</span>
+            <span class="file-status pending">Pending</span>
+        `;
+        list.appendChild(li);
+    }
+    document.getElementById('sendFilesBtn').classList.remove('hidden');
+}
+
+function updateSenderFileStatus(index, statusClass, statusText) {
+    const el = document.getElementById('sender-file-' + index);
+    if(el) {
+        const statusEl = el.querySelector('.file-status');
+        statusEl.className = 'file-status ' + statusClass;
+        statusEl.textContent = statusText;
+    }
+}
+
+// ── Sending The Files (Chunking Loop) ──
+document.getElementById('sendFilesBtn').onclick = async () => {
+    if (!dc || dc.readyState !== 'open') return alert("Connection is not active.");
+    
+    document.getElementById('sendFilesBtn').classList.add('hidden');
+    document.getElementById('senderProgress').classList.remove('hidden');
+    dropZone.classList.add('disabled'); // Disable adding while sending
+
+    for (let i = 0; i < filesQueue.length; i++) {
+        const file = filesQueue[i];
+        updateSenderFileStatus(i, 'sending', 'Sending...');
+        
+        // Step 1: Send Metadata
+        dc.send(JSON.stringify({
+            type: 'header',
+            name: file.name,
+            size: file.size,
+            mime: file.type
+        }));
+
+        // Step 2: Slice and Send Chunks
+        const buffer = await file.arrayBuffer();
+        let offset = 0;
+
+        while (offset < buffer.byteLength) {
+            // Apply Backpressure (Crucial for large files)
+            if (dc.bufferedAmount > MAX_BUFFER) {
+                await new Promise(r => setTimeout(r, 10)); // wait 10ms
+                continue; // check again
+            }
+
+            const chunk = buffer.slice(offset, offset + CHUNK_SIZE);
+            dc.send(chunk);
+            offset += chunk.byteLength;
+
+            // Update Progress Bar
+            const percent = Math.floor((offset / buffer.byteLength) * 100);
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressLabel').textContent = `Sending ${file.name} — ${percent}%`;
+        }
+
+        // Step 3: Send EOF
+        dc.send(JSON.stringify({ type: 'eof' }));
+        updateSenderFileStatus(i, 'done', 'Done');
+    }
+    
+    // Cleanup UI when all files sent
+    document.getElementById('progressLabel').textContent = "All files sent!";
+    filesQueue = []; // Clear queue
+    dropZone.classList.remove('disabled');
+};
+
+
 // ── Receiver Logic ──
 document.getElementById('acceptBtn').onclick = async () => {
   const offerStr = document.getElementById('offerInput').value.trim();
@@ -494,6 +605,7 @@ document.getElementById('acceptBtn').onclick = async () => {
     
     pc.ondatachannel = (event) => {
       dc = event.channel;
+      dc.binaryType = "arraybuffer";
       setupDataHandlers(dc, 'receiver');
     };
 
@@ -516,14 +628,78 @@ document.getElementById('acceptBtn').onclick = async () => {
   }
 };
 
-// ── Data Handling ──
+// ── Data Handling (For Both Sides) ──
 function setupDataHandlers(channel, side) {
   channel.onopen = () => {
-    setStatus(side, 'connected', 'P2P Connected! Ready to send.');
+    setStatus(side, 'connected', 'P2P Connected! Ready.');
     if(side === 'sender') document.getElementById('senderDropZone').classList.remove('disabled');
   };
   
   channel.onclose = () => setStatus(side, 'idle', 'Disconnected.');
+
+  // The Magic: Handling incoming messages
+  channel.onmessage = (event) => {
+      if (side !== 'receiver') return; // Only receiver handles incoming files in this flow
+
+      if (typeof event.data === 'string') {
+          const msg = JSON.parse(event.data);
+          
+          if (msg.type === 'header') {
+              // Prepare for new file
+              receiveBuffer = [];
+              receivedBytes = 0;
+              incomingMeta = msg;
+              
+              document.getElementById('recvPlaceholder').classList.add('hidden');
+              document.getElementById('receiverProgress').classList.remove('hidden');
+              
+              // Add pending item to UI
+              const list = document.getElementById('recvList');
+              const li = document.createElement('li');
+              li.className = 'recv-item';
+              li.id = 'recv-' + incomingMeta.name.replace(/[^a-zA-Z0-9]/g, ''); // safe ID
+              li.innerHTML = `
+                  <i class="ph ph-file file-icon"></i>
+                  <span class="file-name">${incomingMeta.name}</span>
+                  <span class="file-size">${formatBytes(incomingMeta.size)}</span>
+                  <span class="file-status sending">Receiving...</span>
+              `;
+              list.appendChild(li);
+
+          } else if (msg.type === 'eof') {
+              // Assemble file and trigger download
+              const blob = new Blob(receiveBuffer, { type: incomingMeta.mime || 'application/octet-stream' });
+              const downloadUrl = URL.createObjectURL(blob);
+              
+              // Update UI to show Download link
+              const safeId = incomingMeta.name.replace(/[^a-zA-Z0-9]/g, '');
+              const li = document.getElementById('recv-' + safeId);
+              if (li) {
+                  li.innerHTML = `
+                      <i class="ph ph-check-circle file-icon" style="color:#10b981"></i>
+                      <span class="file-name">${incomingMeta.name}</span>
+                      <a href="${downloadUrl}" download="${incomingMeta.name}" class="btn-primary" style="padding:.2rem .5rem; font-size:.75rem; text-decoration:none">Download</a>
+                  `;
+              }
+              
+              document.getElementById('recvProgressLabel').textContent = "Waiting for next file...";
+              receiveBuffer = []; // Clear RAM
+              incomingMeta = null;
+          }
+
+      } else if (event.data instanceof ArrayBuffer) {
+          // It's a binary chunk
+          receiveBuffer.push(event.data);
+          receivedBytes += event.data.byteLength;
+          
+          // Update Receiver Progress Bar
+          if (incomingMeta && incomingMeta.size > 0) {
+              const percent = Math.floor((receivedBytes / incomingMeta.size) * 100);
+              document.getElementById('recvProgressFill').style.width = percent + '%';
+              document.getElementById('recvProgressLabel').textContent = `Receiving ${incomingMeta.name} — ${percent}%`;
+          }
+      }
+  };
 }
 
 // Copy Handlers
