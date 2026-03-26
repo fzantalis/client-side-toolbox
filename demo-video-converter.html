@@ -327,7 +327,9 @@ const convertBtn = document.getElementById('convertBtn');
 // ── Load FFmpeg ──────────────────────────────────────────────────────────────
 (async () => {
   try {
-    const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
+    const coreURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
+    const ffmpegURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/esm';
+    
     ffmpeg.on('log', ({ message }) => {
       const log = document.getElementById('logBox');
       if (log) { log.textContent += message + '\n'; log.scrollTop = log.scrollHeight; }
@@ -338,10 +340,14 @@ const convertBtn = document.getElementById('convertBtn');
         document.getElementById('progressLabel').textContent = `Processing… ${timeMatch[0].replace('time=','⏱ ')}`;
       }
     });
+
+    // FIX: Added workerURL via toBlobURL to bypass Cross-Origin Worker policy
     await ffmpeg.load({
-      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      coreURL: await toBlobURL(`${coreURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${coreURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      workerURL: await toBlobURL(`${ffmpegURL}/worker.js`, 'text/javascript'),
     });
+    
     ffmpegReady = true;
     statusEl.className = 'load-state ready';
     statusEl.innerHTML = '<span class="pulse"></span> FFmpeg ready';
@@ -414,12 +420,12 @@ document.getElementById('clearFileBtn').addEventListener('click', () => {
 convertBtn.addEventListener('click', async () => {
   if (!inputFile || !ffmpegReady) return;
 
-  const format   = document.getElementById('outputFormat').value;
-  const codec    = document.getElementById('videoCodec').value;
-  const crf      = document.getElementById('crfVal').value;
-  const scale    = document.getElementById('scaleVal').value;
-  const fps      = document.getElementById('fpsVal').value;
-  const audio    = document.getElementById('audioBitrate').value;
+  const format    = document.getElementById('outputFormat').value;
+  const codec     = document.getElementById('videoCodec').value;
+  const crf       = document.getElementById('crfVal').value;
+  const scale     = document.getElementById('scaleVal').value;
+  const fps       = document.getElementById('fpsVal').value;
+  const audio     = document.getElementById('audioBitrate').value;
   const trimStart = document.getElementById('trimStart').value.trim();
   const trimEnd   = document.getElementById('trimEnd').value.trim();
 
