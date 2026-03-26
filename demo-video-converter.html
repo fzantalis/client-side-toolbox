@@ -333,19 +333,25 @@ const convertBtn = document.getElementById('convertBtn');
     ffmpeg.on('log', ({ message }) => {
       const log = document.getElementById('logBox');
       if (log) { log.textContent += message + '\n'; log.scrollTop = log.scrollHeight; }
-      // Parse progress from ffmpeg output
       const timeMatch = message.match(/time=(\d+):(\d+):([\d.]+)/);
       if (timeMatch) {
-        const secs = parseInt(timeMatch[1])*3600 + parseInt(timeMatch[2])*60 + parseFloat(timeMatch[3]);
         document.getElementById('progressLabel').textContent = `Processing… ${timeMatch[0].replace('time=','⏱ ')}`;
       }
     });
 
-    // FIX: Added workerURL via toBlobURL to bypass Cross-Origin Worker policy
+    // FIX: The Cross-Origin Worker bypass trick
+    // Instead of fetching the worker code (which breaks relative imports), 
+    // we create a local worker blob that IMPORTS the remote worker code as an ES Module.
+    const workerBlob = new Blob(
+      [`import "${ffmpegURL}/worker.js";`], 
+      { type: 'text/javascript' }
+    );
+    const classWorkerURL = URL.createObjectURL(workerBlob);
+
     await ffmpeg.load({
       coreURL: await toBlobURL(`${coreURL}/ffmpeg-core.js`, 'text/javascript'),
       wasmURL: await toBlobURL(`${coreURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      workerURL: await toBlobURL(`${ffmpegURL}/worker.js`, 'text/javascript'),
+      classWorkerURL: classWorkerURL, // Note: It is classWorkerURL, not workerURL!
     });
     
     ffmpegReady = true;
@@ -451,7 +457,6 @@ convertBtn.addEventListener('click', async () => {
     if (trimEnd) args.push('-to', trimEnd);
 
     if (format === 'gif') {
-      // Two-pass GIF via palette
       const paletteArgs = [...args, '-vf', `${scale ? `scale=${scale},` : ''}fps=${fps||10},palettegen`, 'palette.png'];
       await ffmpeg.exec(paletteArgs);
       const gifArgs = [...args, '-i', 'palette.png', '-lavfi', `${scale ? `scale=${scale},` : ''}fps=${fps||10}[x];[x][1:v]paletteuse`, outputName];
