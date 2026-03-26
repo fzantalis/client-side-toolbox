@@ -209,9 +209,10 @@
 <script src="ffmpeg/util.js"></script>
 
 <script>
-// Instead of importing, we grab the libraries from the global window object
+// Grab the libraries from the global window object
 const { FFmpeg } = window.FFmpegWASM;
-const { fetchFile } = window.FFmpegUtil;
+// FIX 1: We pull in toBlobURL to force the correct MIME types
+const { fetchFile, toBlobURL } = window.FFmpegUtil; 
 
 const ffmpeg = new FFmpeg();
 let inputFile = null;
@@ -234,10 +235,10 @@ const convertBtn = document.getElementById('convertBtn');
       }
     });
 
-    // Point to your local server folder
+    // FIX 2: Use toBlobURL on your local files to bypass server MIME type issues
     await ffmpeg.load({
-      coreURL: 'ffmpeg/ffmpeg-core.js',
-      wasmURL: 'ffmpeg/ffmpeg-core.wasm'
+      coreURL: await toBlobURL('ffmpeg/ffmpeg-core.js', 'text/javascript'),
+      wasmURL: await toBlobURL('ffmpeg/ffmpeg-core.wasm', 'application/wasm')
     });
     
     ffmpegReady = true;
@@ -245,8 +246,10 @@ const convertBtn = document.getElementById('convertBtn');
     statusEl.innerHTML = '<span class="pulse"></span> FFmpeg ready';
     if (inputFile) convertBtn.disabled = false;
   } catch(e) {
+    // FIX 3: Better error logging so it doesn't just say "undefined"
+    console.error("FFMPEG INITIALIZATION ERROR:", e);
     statusEl.className = 'load-state error';
-    statusEl.innerHTML = `<span class="pulse"></span> Failed to load FFmpeg: ${e.message}`;
+    statusEl.innerHTML = `<span class="pulse"></span> Failed to load FFmpeg: ${e?.message || e}`;
   }
 })();
 
