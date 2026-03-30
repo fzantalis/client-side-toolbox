@@ -10,12 +10,6 @@
 </head>
 <body>
 
-<!--<div class="hero-nav">
-  <a href="https://buymeacoffee.com/yourusername" target="_blank" class="btn-coffee">
-    <i class="ph-fill ph-coffee"></i> Buy me a coffee
-  </a>
-</div>-->
-
 <div class="container" style="padding-top: 0;">
   <header class="hero" style="padding-top: 1rem;">
     <div class="hero-text">
@@ -38,21 +32,21 @@
     </div>
     <div class="search-container">
       <i class="ph ph-magnifying-glass"></i>
-      <input type="text" id="searchInput" placeholder="Search tools (e.g., 'JWT', 'Markdown')...">
+      <input type="text" id="searchInput" placeholder="Search tools (e.g., 'JWT', 'Markdown', 'PDF')...">
     </div>
   </header>
 
   <nav class="nav-pills">
     <a href="#text-data" class="active">Text &amp; Data</a>
     <a href="#design-media">Design &amp; Media</a>
-    <a href="#business-math">Business &amp; Math</a>
+    <a href="#business-finance">Business &amp; Finance</a>
+    <a href="#math-utilities">Math &amp; Utilities</a>
     <a href="#security-encoding">Security &amp; Encoding</a>
     <a href="#developer">Developer</a>
   </nav>
 
   <main>
 
-    <!-- TEXT & DATA -->
     <section id="text-data" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-text-aa"></i>
@@ -94,10 +88,14 @@
           <h4>Mock Data Generator</h4>
           <p>Generate thousands of realistic JSON/CSV records instantly in your browser.</p>
         </a>
+        <a href="demo-pdf.html" class="card">
+          <div class="card-icon"><i class="ph ph-file-pdf"></i></div>
+          <h4>PDF Utility</h4>
+          <p>Inspect, add blank pages, or securely extract pages right in your browser.</p>
+        </a>
       </div>
     </section>
 
-    <!-- DESIGN & MEDIA -->
     <section id="design-media" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-palette"></i>
@@ -136,17 +134,16 @@
         </a>
          <a href="demo-anonymizer.html" class="card">
           <div class="card-icon"><i class="ph ph-eye-slash"></i></div>
-          <h4>Auto Face Blur - Photo Anonymizer</h4>
+          <h4>Auto Face Blur</h4>
           <p>Automatically detect and blur faces in images using on-device AI.</p>
         </a>
       </div>
     </section>
 
-    <!-- BUSINESS & PRODUCTIVITY -->
-    <section id="business-math" class="tool-section">
+    <section id="business-finance" class="tool-section">
       <div class="section-header">
-        <i class="ph-fill ph-calculator"></i>
-        <h2>Business &amp; Productivity</h2>
+        <i class="ph-fill ph-briefcase"></i>
+        <h2>Business &amp; Finance</h2>
       </div>
       <div class="card-grid">
         <a href="demo-hourly-wage.html" class="card">
@@ -158,6 +155,40 @@
           <div class="card-icon"><i class="ph ph-receipt"></i></div>
           <h4>Invoice Generator</h4>
           <p>Generate and download professional PDF invoices directly in the browser.</p>
+        </a>
+        <a href="demo-currency.html" class="card">
+          <div class="card-icon"><i class="ph ph-currency-circle-dollar"></i></div>
+          <h4>Currency Converter</h4>
+          <p>Offline conversion using baseline fixed rates. Quick and private.</p>
+        </a>
+        <a href="demo-tip.html" class="card">
+          <div class="card-icon"><i class="ph ph-coins"></i></div>
+          <h4>Tip Calculator</h4>
+          <p>Calculate gratuity and perfectly split bills among friends easily.</p>
+        </a>
+      </div>
+    </section>
+
+    <section id="math-utilities" class="tool-section">
+      <div class="section-header">
+        <i class="ph-fill ph-calculator"></i>
+        <h2>Math &amp; Utilities</h2>
+      </div>
+      <div class="card-grid">
+        <a href="demo-calculator.html" class="card">
+          <div class="card-icon"><i class="ph ph-calculator"></i></div>
+          <h4>Standard Calculator</h4>
+          <p>A fast, offline-ready standard calculator for quick math operations.</p>
+        </a>
+        <a href="demo-unit-converter.html" class="card">
+          <div class="card-icon"><i class="ph ph-ruler"></i></div>
+          <h4>Unit Converter</h4>
+          <p>Instantly convert length, weight, and temperature offline.</p>
+        </a>
+        <a href="demo-stopwatch.html" class="card">
+          <div class="card-icon"><i class="ph ph-stopwatch"></i></div>
+          <h4>Stopwatch &amp; Timer</h4>
+          <p>Millisecond precision stopwatch with an integrated lap tracking feature.</p>
         </a>
         <a href="demo-timezone.html" class="card">
           <div class="card-icon"><i class="ph ph-globe"></i></div>
@@ -172,7 +203,6 @@
       </div>
     </section>
 
-    <!-- SECURITY & ENCODING -->
     <section id="security-encoding" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-shield-check"></i>
@@ -217,7 +247,6 @@
       </div>
     </section>
 
-    <!-- DEVELOPER -->
     <section id="developer" class="tool-section">
       <div class="section-header">
         <i class="ph-fill ph-terminal-window"></i>
