@@ -8,10 +8,15 @@
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <title>PDF Utility</title>
   <style>
-    .form-control { width: 100%; padding: 0.75rem; border: 1px dashed var(--border); border-radius: 8px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 1rem; cursor: pointer; }
-    .info-row { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .form-control:focus { border-color: var(--primary); }
+    .form-control[type="file"] { border-style: dashed; cursor: pointer; }
+    .info-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;}
     .info-row span { color: var(--text-muted); }
     .info-row strong { color: var(--text-main); font-weight: 600; }
+    .tool-group { background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem; }
+    .tool-group h4 { font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text-main); }
+    #pdfPreview { width: 100%; height: 100%; min-height: 500px; border: none; border-radius: 0 0 8px 8px; background: #525659; }
   </style>
 </head>
 <body>
@@ -21,10 +26,11 @@
       <div class="card-icon"><i class="ph ph-file-pdf"></i></div>
       <div class="tool-header-text">
         <h1>PDF Utility</h1>
-        <p>Inspect, add blank pages, or securely manipulate PDFs locally.</p>
+        <p>Preview, manipulate, and extract pages from PDFs entirely in your browser.</p>
       </div>
     </header>
     <main class="workspace">
+      
       <div class="panel">
         <div class="panel-header"><h3>File Actions</h3></div>
         <div class="panel-body">
@@ -33,40 +39,58 @@
             <input type="file" id="pdfUpload" accept="application/pdf" class="form-control">
           </div>
           
-          <div id="actionButtons" style="display: none; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
-            <p style="font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Modifications</p>
-            <button class="btn-secondary" onclick="addBlankPage()"><i class="ph ph-plus"></i> Append Blank Page</button>
-            <button class="btn-primary" onclick="downloadPDF()"><i class="ph ph-download-simple"></i> Download Edited PDF</button>
+          <div id="actionTools" style="display: none; flex-direction: column; margin-top: 1rem;">
+            
+            <div class="tool-group">
+              <h4>Insert Blank Page</h4>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span style="font-size: 0.9rem; color: var(--text-muted);">After Page:</span>
+                <input type="number" id="insertAt" class="form-control" placeholder="e.g. 1" min="0" style="width: 80px; padding: 0.5rem;">
+                <button class="btn-secondary" onclick="insertBlankPage()" style="padding: 0.5rem 1rem;"><i class="ph ph-plus"></i> Add</button>
+              </div>
+            </div>
+
+            <div class="tool-group">
+              <h4>Extract Specific Pages</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Enter page numbers/ranges (e.g. 1, 3, 5-8)</p>
+              <input type="text" id="extractRange" class="form-control" placeholder="1, 3, 5-8" style="margin-bottom: 0.5rem;">
+              <button class="btn-secondary" onclick="extractPages()" style="width: 100%; justify-content: center;"><i class="ph ph-export"></i> Extract to New PDF</button>
+            </div>
+
+            <button class="btn-primary" onclick="downloadModifiedPDF()" style="margin-top: 0.5rem; justify-content: center; padding: 0.75rem;"><i class="ph ph-download-simple"></i> Download Current Workspace</button>
           </div>
         </div>
       </div>
+
       <div class="panel">
-        <div class="panel-header"><h3>Document Inspector</h3></div>
-        <div class="panel-body" style="justify-content: flex-start;">
-          <div id="pdfEmptyState" class="result-display" style="color: var(--text-muted); font-size: 1.1rem; font-weight: 400;">
-            Upload a PDF to view its metadata.
-          </div>
-          <div id="pdfInfo" style="display: none; width: 100%;">
-            <div class="info-row">
-              <span>Status</span>
-              <strong style="color: #10b981;">Loaded Successfully</strong>
-            </div>
-            <div class="info-row">
-              <span>Total Pages</span>
-              <strong id="pageCount">0</strong>
-            </div>
-            <div class="info-row" style="border-bottom: none;">
-              <span>Creator / Producer</span>
-              <strong id="producer" style="word-break: break-all; text-align: right; max-width: 60%;">Unknown</strong>
-            </div>
+        <div class="panel-header" style="justify-content: space-between; display: flex;">
+          <h3>Document Preview</h3>
+          <span id="pageCountBadge" style="font-size: 0.85rem; background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 99px; display: none;">0 Pages</span>
+        </div>
+        
+        <div id="pdfInfo" style="display: none; padding: 1rem 1.5rem; background: var(--bg); border-bottom: 1px solid var(--border);">
+          <div class="info-row" style="border: none; padding: 0;">
+            <span>Producer:</span>
+            <strong id="producer" style="word-break: break-all; text-align: right; max-width: 70%; font-size: 0.85rem;">Unknown</strong>
           </div>
         </div>
+
+        <div class="panel-body" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+          <div id="pdfEmptyState" class="result-display" style="color: var(--text-muted); font-size: 1.1rem; font-weight: 400; height: 100%; min-height: 400px;">
+            Upload a PDF to view and edit.
+          </div>
+          <iframe id="pdfPreview" style="display: none;"></iframe>
+        </div>
       </div>
+
     </main>
   </div>
+  
   <script>
     let currentPdfDoc = null;
+    let previewBlobUrl = null;
 
+    // Load and Parse Document
     document.getElementById('pdfUpload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -75,46 +99,128 @@
       
       try {
         currentPdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+        await updatePreviewAndMeta();
         
-        // Update UI
-        document.getElementById('pageCount').innerText = currentPdfDoc.getPageCount();
-        document.getElementById('producer').innerText = currentPdfDoc.getProducer() || 'Not specified';
-        
-        // Toggle Views
         document.getElementById('pdfEmptyState').style.display = 'none';
+        document.getElementById('actionTools').style.display = 'flex';
         document.getElementById('pdfInfo').style.display = 'block';
-        document.getElementById('actionButtons').style.display = 'flex';
+        document.getElementById('pageCountBadge').style.display = 'block';
+        document.getElementById('pdfPreview').style.display = 'block';
       } catch (err) {
-        alert("Failed to read PDF. It might be encrypted or corrupted.");
+        alert("Failed to read PDF. It might be heavily encrypted or corrupted.");
+        console.error(err);
       }
     });
 
-    async function addBlankPage() {
-      if (!currentPdfDoc) return;
-      currentPdfDoc.addPage();
-      document.getElementById('pageCount').innerText = currentPdfDoc.getPageCount();
-      
-      // Temporary success state on button
-      const btn = event.currentTarget;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="ph ph-check"></i> Page Added';
-      btn.classList.add('success-state');
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.classList.remove('success-state');
-      }, 2000);
-    }
-
-    async function downloadPDF() {
+    // Central function to update UI and Iframe
+    async function updatePreviewAndMeta() {
       if (!currentPdfDoc) return;
       
+      const totalPages = currentPdfDoc.getPageCount();
+      document.getElementById('pageCountBadge').innerText = `${totalPages} Pages`;
+      document.getElementById('producer').innerText = currentPdfDoc.getProducer() || 'Not specified';
+      
+      // Serialize current state to a Blob URL for the iframe preview
       const pdfBytes = await currentPdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
       
+      if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl); // Cleanup old URL
+      previewBlobUrl = URL.createObjectURL(blob);
+      
+      // Add #toolbar=0 to hide browser PDF controls if desired, though usually helpful to keep
+      document.getElementById('pdfPreview').src = previewBlobUrl; 
+    }
+
+    // Insert Blank Page
+    async function insertBlankPage() {
+      if (!currentPdfDoc) return;
+      
+      const totalPages = currentPdfDoc.getPageCount();
+      let insertStr = document.getElementById('insertAt').value;
+      let insertIndex = insertStr ? parseInt(insertStr, 10) : totalPages; // Default to end
+      
+      // Validate index
+      if (insertIndex < 0) insertIndex = 0;
+      if (insertIndex > totalPages) insertIndex = totalPages;
+
+      currentPdfDoc.insertPage(insertIndex);
+      await updatePreviewAndMeta();
+      
+      document.getElementById('insertAt').value = ''; // clear input
+    }
+
+    // Parse string like "1, 3, 5-7" into an array of zero-indexed page numbers [0, 2, 4, 5, 6]
+    function parsePageRange(rangeStr, maxPages) {
+      const pages = new Set();
+      const parts = rangeStr.split(',');
+      
+      for (let part of parts) {
+        part = part.trim();
+        if (part.includes('-')) {
+          const [start, end] = part.split('-').map(n => parseInt(n, 10));
+          if (start && end && start <= end) {
+            for (let i = start; i <= end; i++) {
+              if (i > 0 && i <= maxPages) pages.add(i - 1); // 0-indexed
+            }
+          }
+        } else {
+          const num = parseInt(part, 10);
+          if (num > 0 && num <= maxPages) pages.add(num - 1);
+        }
+      }
+      return Array.from(pages).sort((a,b) => a-b);
+    }
+
+    // Extract Pages to New Document
+    async function extractPages() {
+      if (!currentPdfDoc) return;
+      
+      const rangeStr = document.getElementById('extractRange').value;
+      if (!rangeStr) {
+        alert("Please enter a page range to extract.");
+        return;
+      }
+
+      const totalPages = currentPdfDoc.getPageCount();
+      const pageIndices = parsePageRange(rangeStr, totalPages);
+      
+      if (pageIndices.length === 0) {
+        alert("Invalid page range. Please check your input.");
+        return;
+      }
+
+      try {
+        // Create a brand new document
+        const newPdfDoc = await PDFLib.PDFDocument.create();
+        
+        // Copy the specified pages from the original doc
+        const copiedPages = await newPdfDoc.copyPages(currentPdfDoc, pageIndices);
+        copiedPages.forEach((page) => newPdfDoc.addPage(page));
+        
+        // Trigger download of the new document
+        const pdfBytes = await newPdfDoc.save();
+        triggerDownload(pdfBytes, 'extracted_pages.pdf');
+        
+      } catch (err) {
+        alert("An error occurred while extracting pages.");
+        console.error(err);
+      }
+    }
+
+    // Global save function
+    async function downloadModifiedPDF() {
+      if (!currentPdfDoc) return;
+      const pdfBytes = await currentPdfDoc.save();
+      triggerDownload(pdfBytes, 'modified_document.pdf');
+    }
+
+    // Helper to force browser download
+    function triggerDownload(uint8Array, filename) {
+      const blob = new Blob([uint8Array], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'edited_document.pdf';
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
