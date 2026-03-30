@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <title>PDF Utilities</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-file-pdf"></i></div>
+      <div class="tool-header-text">
+        <h1>PDF Utility</h1>
+        <p>Inspect, add blank pages, or securely extract pages right in your browser.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header"><h3>Load PDF File</h3></div>
+        <div class="panel-body">
+          <input type="file" id="pdfUpload" accept="application/pdf" style="margin-bottom: 1rem;">
+          <div id="pdfInfo" style="display: none; padding: 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;">
+            <p><strong>Pages:</strong> <span id="pageCount">0</span></p>
+            <p><strong>Producer:</strong> <span id="producer">Unknown</span></p>
+            <div style="margin-top: 1rem; display: flex; gap: 10px;">
+              <button class="btn-primary" onclick="addBlankPage()"><i class="ph ph-plus"></i> Add Blank Page</button>
+              <button class="btn-primary" style="background: var(--bg); color: var(--text);" onclick="downloadPDF()"><i class="ph ph-download-simple"></i> Download Edited PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    let currentPdfDoc = null;
+    let pdfBytesOriginal = null;
+
+    document.getElementById('pdfUpload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const arrayBuffer = await file.arrayBuffer();
+      pdfBytesOriginal = new Uint8Array(arrayBuffer);
+      
+      try {
+        currentPdfDoc = await PDFLib.PDFDocument.load(pdfBytesOriginal);
+        
+        document.getElementById('pageCount').innerText = currentPdfDoc.getPageCount();
+        document.getElementById('producer').innerText = currentPdfDoc.getProducer() || 'Not specified';
+        document.getElementById('pdfInfo').style.display = 'block';
+      } catch (err) {
+        alert("Failed to read PDF. It might be encrypted or corrupted.");
+      }
+    });
+
+    async function addBlankPage() {
+      if (!currentPdfDoc) return;
+      currentPdfDoc.addPage();
+      document.getElementById('pageCount').innerText = currentPdfDoc.getPageCount();
+      alert("Blank page added to the end of the document.");
+    }
+
+    async function downloadPDF() {
+      if (!currentPdfDoc) return;
+      
+      const pdfBytes = await currentPdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'edited_document.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
