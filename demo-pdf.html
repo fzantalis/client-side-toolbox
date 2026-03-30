@@ -6,7 +6,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <title>PDF Utilities</title>
+  <title>PDF Utility</title>
+  <style>
+    .form-control { width: 100%; padding: 0.75rem; border: 1px dashed var(--border); border-radius: 8px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 1rem; cursor: pointer; }
+    .info-row { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .info-row span { color: var(--text-muted); }
+    .info-row strong { color: var(--text-main); font-weight: 600; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -15,20 +21,43 @@
       <div class="card-icon"><i class="ph ph-file-pdf"></i></div>
       <div class="tool-header-text">
         <h1>PDF Utility</h1>
-        <p>Inspect, add blank pages, or securely extract pages right in your browser.</p>
+        <p>Inspect, add blank pages, or securely manipulate PDFs locally.</p>
       </div>
     </header>
     <main class="workspace">
       <div class="panel">
-        <div class="panel-header"><h3>Load PDF File</h3></div>
+        <div class="panel-header"><h3>File Actions</h3></div>
         <div class="panel-body">
-          <input type="file" id="pdfUpload" accept="application/pdf" style="margin-bottom: 1rem;">
-          <div id="pdfInfo" style="display: none; padding: 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;">
-            <p><strong>Pages:</strong> <span id="pageCount">0</span></p>
-            <p><strong>Producer:</strong> <span id="producer">Unknown</span></p>
-            <div style="margin-top: 1rem; display: flex; gap: 10px;">
-              <button class="btn-primary" onclick="addBlankPage()"><i class="ph ph-plus"></i> Add Blank Page</button>
-              <button class="btn-primary" style="background: var(--bg); color: var(--text);" onclick="downloadPDF()"><i class="ph ph-download-simple"></i> Download Edited PDF</button>
+          <div class="form-group">
+            <label>Upload PDF Document</label>
+            <input type="file" id="pdfUpload" accept="application/pdf" class="form-control">
+          </div>
+          
+          <div id="actionButtons" style="display: none; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
+            <p style="font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Modifications</p>
+            <button class="btn-secondary" onclick="addBlankPage()"><i class="ph ph-plus"></i> Append Blank Page</button>
+            <button class="btn-primary" onclick="downloadPDF()"><i class="ph ph-download-simple"></i> Download Edited PDF</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Document Inspector</h3></div>
+        <div class="panel-body" style="justify-content: flex-start;">
+          <div id="pdfEmptyState" class="result-display" style="color: var(--text-muted); font-size: 1.1rem; font-weight: 400;">
+            Upload a PDF to view its metadata.
+          </div>
+          <div id="pdfInfo" style="display: none; width: 100%;">
+            <div class="info-row">
+              <span>Status</span>
+              <strong style="color: #10b981;">Loaded Successfully</strong>
+            </div>
+            <div class="info-row">
+              <span>Total Pages</span>
+              <strong id="pageCount">0</strong>
+            </div>
+            <div class="info-row" style="border-bottom: none;">
+              <span>Creator / Producer</span>
+              <strong id="producer" style="word-break: break-all; text-align: right; max-width: 60%;">Unknown</strong>
             </div>
           </div>
         </div>
@@ -37,21 +66,24 @@
   </div>
   <script>
     let currentPdfDoc = null;
-    let pdfBytesOriginal = null;
 
     document.getElementById('pdfUpload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       const arrayBuffer = await file.arrayBuffer();
-      pdfBytesOriginal = new Uint8Array(arrayBuffer);
       
       try {
-        currentPdfDoc = await PDFLib.PDFDocument.load(pdfBytesOriginal);
+        currentPdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
         
+        // Update UI
         document.getElementById('pageCount').innerText = currentPdfDoc.getPageCount();
         document.getElementById('producer').innerText = currentPdfDoc.getProducer() || 'Not specified';
+        
+        // Toggle Views
+        document.getElementById('pdfEmptyState').style.display = 'none';
         document.getElementById('pdfInfo').style.display = 'block';
+        document.getElementById('actionButtons').style.display = 'flex';
       } catch (err) {
         alert("Failed to read PDF. It might be encrypted or corrupted.");
       }
@@ -61,7 +93,16 @@
       if (!currentPdfDoc) return;
       currentPdfDoc.addPage();
       document.getElementById('pageCount').innerText = currentPdfDoc.getPageCount();
-      alert("Blank page added to the end of the document.");
+      
+      // Temporary success state on button
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="ph ph-check"></i> Page Added';
+      btn.classList.add('success-state');
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('success-state');
+      }, 2000);
     }
 
     async function downloadPDF() {
@@ -80,5 +121,7 @@
       URL.revokeObjectURL(url);
     }
   </script>
+  <script src="script.js"></script>
+  <script src="theme-toggle.js"></script>
 </body>
 </html>
