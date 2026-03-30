@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <title>Stopwatch</title>
   <style>
-    .display { font-size: 3.5rem; font-family: monospace; font-weight: 700; text-align: center; margin: 2rem 0; color: var(--text); }
-    .controls { display: flex; justify-content: center; gap: 1rem; }
-    .lap-list { list-style: none; padding: 0; margin-top: 2rem; max-height: 200px; overflow-y: auto; border-top: 1px solid var(--border); }
-    .lap-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-family: monospace; }
+    .lap-item { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border); font-family: 'Fira Code', monospace; font-size: 1.1rem; }
+    .lap-item strong { color: var(--text-main); }
+    .lap-item span { color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -19,31 +18,45 @@
     <header class="tool-header">
       <div class="card-icon"><i class="ph ph-stopwatch"></i></div>
       <div class="tool-header-text">
-        <h1>Stopwatch</h1>
+        <h1>Stopwatch & Timer</h1>
         <p>Millisecond precision stopwatch with lap tracking.</p>
       </div>
     </header>
     <main class="workspace">
-      <div class="panel" style="max-width: 500px; margin: 0 auto;">
-        <div class="panel-body">
-          <div class="display" id="timeDisplay">00:00:00.00</div>
-          <div class="controls">
-            <button class="btn-primary" id="startBtn" onclick="toggleTimer()">Start</button>
-            <button class="btn-primary" style="background: var(--bg); color: var(--text);" onclick="recordLap()">Lap</button>
-            <button class="btn-primary" style="background: #ef4444; color: white;" onclick="resetTimer()">Reset</button>
+      <div class="panel">
+        <div class="panel-header"><h3>Timer</h3></div>
+        <div class="panel-body" style="justify-content: center; align-items: center; text-align: center;">
+          <div class="result-display" id="timeDisplay" style="font-family: 'Fira Code', monospace; font-size: 3.5rem; letter-spacing: -2px; color: var(--text-main); height: auto; margin-bottom: 2rem;">
+            00:00:00.00
           </div>
-          <ul class="lap-list" id="laps"></ul>
+          <div style="display: flex; gap: 1rem;">
+            <button class="btn-primary" id="startBtn" onclick="toggleTimer()" style="padding: 0.75rem 2rem; font-size: 1.1rem;"><i class="ph ph-play"></i> Start</button>
+            <button class="btn-secondary" onclick="recordLap()" style="padding: 0.75rem 1.5rem;"><i class="ph ph-flag"></i> Lap</button>
+            <button class="btn-secondary error-text" onclick="resetTimer()" style="padding: 0.75rem 1.5rem;"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Lap Times</h3>
+          <span id="lapCountHeader" style="font-size: 0.9rem; color: var(--text-muted);">0 Laps</span>
+        </div>
+        <div class="panel-body" style="padding: 1rem 1.5rem; justify-content: flex-start;">
+          <div id="laps" style="display: flex; flex-direction: column; width: 100%;">
+             <p style="color: var(--text-muted); text-align: center; margin-top: 2rem;" id="emptyLaps">No laps recorded yet.</p>
+          </div>
         </div>
       </div>
     </main>
   </div>
   <script>
     let startTime = 0, elapsedTime = 0, timerInterval;
-    let isRunning = false;
-    let lapCount = 1;
+    let isRunning = false, lapCount = 1;
     const display = document.getElementById('timeDisplay');
     const startBtn = document.getElementById('startBtn');
     const lapsList = document.getElementById('laps');
+    const emptyLaps = document.getElementById('emptyLaps');
+    const lapHeader = document.getElementById('lapCountHeader');
 
     function formatTime(time) {
       const date = new Date(time);
@@ -55,8 +68,7 @@
     }
 
     function updateDisplay() {
-      const currentTime = Date.now();
-      elapsedTime = currentTime - startTime;
+      elapsedTime = Date.now() - startTime;
       display.textContent = formatTime(elapsedTime);
     }
 
@@ -64,12 +76,12 @@
       if (!isRunning) {
         startTime = Date.now() - elapsedTime;
         timerInterval = setInterval(updateDisplay, 10);
-        startBtn.textContent = 'Pause';
-        startBtn.style.background = '#eab308'; // yellow
+        startBtn.innerHTML = '<i class="ph ph-pause"></i> Pause';
+        startBtn.style.background = '#eab308'; // Warning yellow
         isRunning = true;
       } else {
         clearInterval(timerInterval);
-        startBtn.textContent = 'Resume';
+        startBtn.innerHTML = '<i class="ph ph-play"></i> Resume';
         startBtn.style.background = 'var(--primary)';
         isRunning = false;
       }
@@ -77,22 +89,28 @@
 
     function resetTimer() {
       clearInterval(timerInterval);
-      isRunning = false;
-      elapsedTime = 0;
+      isRunning = false; elapsedTime = 0; lapCount = 1;
       display.textContent = '00:00:00.00';
-      startBtn.textContent = 'Start';
+      startBtn.innerHTML = '<i class="ph ph-play"></i> Start';
       startBtn.style.background = 'var(--primary)';
-      lapsList.innerHTML = '';
-      lapCount = 1;
+      lapsList.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 2rem;" id="emptyLaps">No laps recorded yet.</p>';
+      lapHeader.innerText = '0 Laps';
     }
 
     function recordLap() {
       if (!isRunning) return;
-      const li = document.createElement('li');
-      li.className = 'lap-item';
-      li.innerHTML = `<span>Lap ${lapCount++}</span><span>${formatTime(elapsedTime)}</span>`;
-      lapsList.prepend(li);
+      if (document.getElementById('emptyLaps')) document.getElementById('emptyLaps').remove();
+      
+      const div = document.createElement('div');
+      div.className = 'lap-item';
+      div.innerHTML = `<span>Lap ${lapCount}</span><strong>${formatTime(elapsedTime)}</strong>`;
+      lapsList.prepend(div);
+      
+      lapHeader.innerText = `${lapCount} Laps`;
+      lapCount++;
     }
   </script>
+  <script src="script.js"></script>
+  <script src="theme-toggle.js"></script>
 </body>
 </html>
