@@ -6,6 +6,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <title>Tip Calculator</title>
+  <style>
+    .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; }
+    .form-control:focus { border-color: var(--primary); }
+    .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .breakdown-row span { color: var(--text-muted); font-size: 1.1rem; }
+    .breakdown-row strong { font-size: 1.5rem; color: var(--text-main); }
+    .breakdown-row.highlight strong { color: #10b981; font-size: 2.5rem; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -14,40 +22,44 @@
       <div class="card-icon"><i class="ph ph-coins"></i></div>
       <div class="tool-header-text">
         <h1>Tip Calculator</h1>
-        <p>Calculate gratuity and split bills among friends easily.</p>
+        <p>Calculate gratuity and perfectly split bills among friends easily.</p>
       </div>
     </header>
-    <main class="workspace" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <main class="workspace">
       <div class="panel">
-        <div class="panel-header"><h3>Details</h3></div>
+        <div class="panel-header"><h3>Bill Details</h3></div>
         <div class="panel-body">
           <div class="form-group">
             <label>Bill Amount ($)</label>
-            <input type="number" id="bill" value="50.00" oninput="calculateTip()" style="width: 100%; padding: 10px;">
+            <input type="number" id="bill" class="form-control" value="50.00" oninput="calculateTip()">
           </div>
-          <div class="form-group">
-            <label>Tip Percentage: <span id="tipLabel">15%</span></label>
-            <input type="range" id="tipPct" min="0" max="50" value="15" oninput="calculateTip()" style="width: 100%; margin-top: 10px;">
+          <div class="form-group" style="margin-top: 1rem;">
+            <label style="display: flex; justify-content: space-between;">
+              <span>Tip Percentage</span>
+              <strong id="tipLabel" style="color: var(--primary);">15%</strong>
+            </label>
+            <input type="range" id="tipPct" min="0" max="50" value="15" oninput="calculateTip()" style="width: 100%; margin-top: 0.5rem; cursor: pointer;">
           </div>
-          <div class="form-group">
+          <div class="form-group" style="margin-top: 1rem;">
             <label>Split Between (People)</label>
-            <input type="number" id="split" value="1" min="1" oninput="calculateTip()" style="width: 100%; padding: 10px;">
+            <input type="number" id="split" class="form-control" value="1" min="1" oninput="calculateTip()">
           </div>
         </div>
       </div>
-      <div class="panel" style="background: var(--bg); border: none;">
-        <div class="panel-body" style="display: flex; flex-direction: column; justify-content: center; text-align: center; height: 100%;">
-          <div style="margin-bottom: 2rem;">
-            <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 0.5rem;">Tip Amount</p>
-            <h2 id="tipAmount" style="font-size: 2.5rem; color: var(--primary);">$7.50</h2>
+      <div class="panel">
+        <div class="panel-header"><h3>Breakdown</h3></div>
+        <div class="panel-body" style="justify-content: flex-start; padding: 2rem;">
+          <div class="breakdown-row">
+            <span>Tip Amount</span>
+            <strong id="tipAmount">$7.50</strong>
           </div>
-          <div style="margin-bottom: 2rem;">
-            <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 0.5rem;">Total Bill</p>
-            <h2 id="totalBill" style="font-size: 2rem;">$57.50</h2>
+          <div class="breakdown-row">
+            <span>Total Bill</span>
+            <strong id="totalBill">$57.50</strong>
           </div>
-          <div id="splitSection" style="display: none; padding-top: 1.5rem; border-top: 1px solid var(--border);">
-            <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 0.5rem;">Total Per Person</p>
-            <h2 id="totalPerPerson" style="font-size: 2rem; color: #10b981;">$57.50</h2>
+          <div class="breakdown-row highlight" id="splitSection" style="display: none; border-bottom: none; margin-top: 1rem;">
+            <span>Per Person</span>
+            <strong id="totalPerPerson">$57.50</strong>
           </div>
         </div>
       </div>
@@ -70,12 +82,14 @@
       
       const splitSec = document.getElementById('splitSection');
       if (split > 1) {
-        splitSec.style.display = 'block';
+        splitSec.style.display = 'flex';
         document.getElementById('totalPerPerson').innerText = '$' + perPerson.toFixed(2);
       } else {
         splitSec.style.display = 'none';
       }
     }
   </script>
+  <script src="script.js"></script>
+  <script src="theme-toggle.js"></script>
 </body>
 </html>
