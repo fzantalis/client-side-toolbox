@@ -7,13 +7,14 @@
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <title>Calculator</title>
   <style>
-    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .calc-display { grid-column: span 4; background: var(--bg); padding: 1.5rem; text-align: right; font-size: 2rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; margin-bottom: 10px; font-family: monospace; }
-    .calc-btn { padding: 1rem; font-size: 1.2rem; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 8px; cursor: pointer; transition: 0.2s; }
-    .calc-btn:hover { background: var(--bg); }
-    .calc-btn.op { background: var(--primary); color: white; border-color: var(--primary); }
-    .calc-btn.op:hover { opacity: 0.9; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; flex-grow: 1; }
+    .calc-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; font-size: 1.25rem; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .calc-btn:hover { background: var(--border); }
+    .calc-btn.op { background: rgba(59, 130, 246, 0.1); color: var(--primary); border-color: rgba(59, 130, 246, 0.2); }
+    .calc-btn.op:hover { background: var(--primary); color: white; }
     .calc-btn.span-2 { grid-column: span 2; }
+    .history-item { padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-family: 'Fira Code', monospace; display: flex; justify-content: space-between; color: var(--text-muted); }
+    .history-item strong { color: var(--text-main); }
   </style>
 </head>
 <body>
@@ -22,17 +23,18 @@
     <header class="tool-header">
       <div class="card-icon"><i class="ph ph-calculator"></i></div>
       <div class="tool-header-text">
-        <h1>Calculator</h1>
-        <p>A fast, offline-ready standard calculator.</p>
+        <h1>Standard Calculator</h1>
+        <p>A fast, offline-ready calculator with a running history tape.</p>
       </div>
     </header>
     <main class="workspace">
-      <div class="panel" style="max-width: 400px; margin: 0 auto;">
-        <div class="panel-body">
-          <div class="calc-display" id="display">0</div>
+      <div class="panel">
+        <div class="panel-header"><h3>Calculator</h3></div>
+        <div class="panel-body" style="padding: 1rem;">
+          <div class="result-display" id="display" style="justify-content: flex-end; font-family: 'Fira Code', monospace; margin-bottom: 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-size: 2.5rem; height: auto;">0</div>
           <div class="calc-grid">
-            <button class="calc-btn span-2" onclick="clearDisplay()">AC</button>
-            <button class="calc-btn" onclick="appendOp('/')">/</button>
+            <button class="calc-btn span-2 error-text" onclick="clearDisplay()">AC</button>
+            <button class="calc-btn op" onclick="appendOp('/')">/</button>
             <button class="calc-btn op" onclick="appendOp('*')">×</button>
             
             <button class="calc-btn" onclick="appendNum('7')">7</button>
@@ -48,21 +50,33 @@
             <button class="calc-btn" onclick="appendNum('1')">1</button>
             <button class="calc-btn" onclick="appendNum('2')">2</button>
             <button class="calc-btn" onclick="appendNum('3')">3</button>
-            <button class="calc-btn op" style="grid-row: span 2;" onclick="calculate()">=</button>
+            <button class="calc-btn btn-primary" style="grid-row: span 2; border: none; color: white;" onclick="calculate()">=</button>
             
             <button class="calc-btn span-2" onclick="appendNum('0')">0</button>
             <button class="calc-btn" onclick="appendNum('.')">.</button>
           </div>
         </div>
       </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h3>History Tape</h3>
+          <button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="clearHistory()"><i class="ph ph-trash"></i> Clear</button>
+        </div>
+        <div class="panel-body" id="historyTape" style="justify-content: flex-start;">
+          <p style="color: var(--text-muted); text-align: center; margin-top: 2rem;" id="emptyHistory">No history yet.</p>
+        </div>
+      </div>
     </main>
   </div>
   <script>
     let display = document.getElementById('display');
+    let historyTape = document.getElementById('historyTape');
+    let emptyHistory = document.getElementById('emptyHistory');
     let currentInput = '0';
+    let expression = '';
 
     function updateDisplay() { display.innerText = currentInput; }
-    function clearDisplay() { currentInput = '0'; updateDisplay(); }
+    function clearDisplay() { currentInput = '0'; expression = ''; updateDisplay(); }
     
     function appendNum(num) {
       if (currentInput === '0' && num !== '.') currentInput = num;
@@ -82,15 +96,28 @@
     
     function calculate() {
       try {
-        // Safe evaluation of math string
+        let prev = currentInput;
         let result = new Function('return ' + currentInput)();
-        // Handle JS floating point quirks (e.g. 0.1 + 0.2)
         currentInput = parseFloat(result.toFixed(10)).toString();
+        
+        // Add to history tape
+        if (emptyHistory) emptyHistory.style.display = 'none';
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `<span>${prev}</span> <strong>= ${currentInput}</strong>`;
+        historyTape.prepend(item);
       } catch (e) {
         currentInput = 'Error';
       }
       updateDisplay();
     }
+
+    function clearHistory() {
+      historyTape.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 2rem;" id="emptyHistory">No history yet.</p>';
+      emptyHistory = document.getElementById('emptyHistory');
+    }
   </script>
+  <script src="script.js"></script>
+  <script src="theme-toggle.js"></script>
 </body>
 </html>
