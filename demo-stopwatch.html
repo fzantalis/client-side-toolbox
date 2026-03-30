@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Stopwatch</title>
+  <style>
+    .display { font-size: 3.5rem; font-family: monospace; font-weight: 700; text-align: center; margin: 2rem 0; color: var(--text); }
+    .controls { display: flex; justify-content: center; gap: 1rem; }
+    .lap-list { list-style: none; padding: 0; margin-top: 2rem; max-height: 200px; overflow-y: auto; border-top: 1px solid var(--border); }
+    .lap-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-stopwatch"></i></div>
+      <div class="tool-header-text">
+        <h1>Stopwatch</h1>
+        <p>Millisecond precision stopwatch with lap tracking.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel" style="max-width: 500px; margin: 0 auto;">
+        <div class="panel-body">
+          <div class="display" id="timeDisplay">00:00:00.00</div>
+          <div class="controls">
+            <button class="btn-primary" id="startBtn" onclick="toggleTimer()">Start</button>
+            <button class="btn-primary" style="background: var(--bg); color: var(--text);" onclick="recordLap()">Lap</button>
+            <button class="btn-primary" style="background: #ef4444; color: white;" onclick="resetTimer()">Reset</button>
+          </div>
+          <ul class="lap-list" id="laps"></ul>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    let startTime = 0, elapsedTime = 0, timerInterval;
+    let isRunning = false;
+    let lapCount = 1;
+    const display = document.getElementById('timeDisplay');
+    const startBtn = document.getElementById('startBtn');
+    const lapsList = document.getElementById('laps');
+
+    function formatTime(time) {
+      const date = new Date(time);
+      const h = String(Math.floor(time / 3600000)).padStart(2, '0');
+      const m = String(date.getUTCMinutes()).padStart(2, '0');
+      const s = String(date.getUTCSeconds()).padStart(2, '0');
+      const ms = String(Math.floor(date.getUTCMilliseconds() / 10)).padStart(2, '0');
+      return `${h}:${m}:${s}.${ms}`;
+    }
+
+    function updateDisplay() {
+      const currentTime = Date.now();
+      elapsedTime = currentTime - startTime;
+      display.textContent = formatTime(elapsedTime);
+    }
+
+    function toggleTimer() {
+      if (!isRunning) {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(updateDisplay, 10);
+        startBtn.textContent = 'Pause';
+        startBtn.style.background = '#eab308'; // yellow
+        isRunning = true;
+      } else {
+        clearInterval(timerInterval);
+        startBtn.textContent = 'Resume';
+        startBtn.style.background = 'var(--primary)';
+        isRunning = false;
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      elapsedTime = 0;
+      display.textContent = '00:00:00.00';
+      startBtn.textContent = 'Start';
+      startBtn.style.background = 'var(--primary)';
+      lapsList.innerHTML = '';
+      lapCount = 1;
+    }
+
+    function recordLap() {
+      if (!isRunning) return;
+      const li = document.createElement('li');
+      li.className = 'lap-item';
+      li.innerHTML = `<span>Lap ${lapCount++}</span><span>${formatTime(elapsedTime)}</span>`;
+      lapsList.prepend(li);
+    }
+  </script>
+</body>
+</html>
