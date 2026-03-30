@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Calculator</title>
+  <style>
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .calc-display { grid-column: span 4; background: var(--bg); padding: 1.5rem; text-align: right; font-size: 2rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; margin-bottom: 10px; font-family: monospace; }
+    .calc-btn { padding: 1rem; font-size: 1.2rem; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .calc-btn:hover { background: var(--bg); }
+    .calc-btn.op { background: var(--primary); color: white; border-color: var(--primary); }
+    .calc-btn.op:hover { opacity: 0.9; }
+    .calc-btn.span-2 { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-calculator"></i></div>
+      <div class="tool-header-text">
+        <h1>Calculator</h1>
+        <p>A fast, offline-ready standard calculator.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel" style="max-width: 400px; margin: 0 auto;">
+        <div class="panel-body">
+          <div class="calc-display" id="display">0</div>
+          <div class="calc-grid">
+            <button class="calc-btn span-2" onclick="clearDisplay()">AC</button>
+            <button class="calc-btn" onclick="appendOp('/')">/</button>
+            <button class="calc-btn op" onclick="appendOp('*')">×</button>
+            
+            <button class="calc-btn" onclick="appendNum('7')">7</button>
+            <button class="calc-btn" onclick="appendNum('8')">8</button>
+            <button class="calc-btn" onclick="appendNum('9')">9</button>
+            <button class="calc-btn op" onclick="appendOp('-')">−</button>
+            
+            <button class="calc-btn" onclick="appendNum('4')">4</button>
+            <button class="calc-btn" onclick="appendNum('5')">5</button>
+            <button class="calc-btn" onclick="appendNum('6')">6</button>
+            <button class="calc-btn op" onclick="appendOp('+')">+</button>
+            
+            <button class="calc-btn" onclick="appendNum('1')">1</button>
+            <button class="calc-btn" onclick="appendNum('2')">2</button>
+            <button class="calc-btn" onclick="appendNum('3')">3</button>
+            <button class="calc-btn op" style="grid-row: span 2;" onclick="calculate()">=</button>
+            
+            <button class="calc-btn span-2" onclick="appendNum('0')">0</button>
+            <button class="calc-btn" onclick="appendNum('.')">.</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    let display = document.getElementById('display');
+    let currentInput = '0';
+
+    function updateDisplay() { display.innerText = currentInput; }
+    function clearDisplay() { currentInput = '0'; updateDisplay(); }
+    
+    function appendNum(num) {
+      if (currentInput === '0' && num !== '.') currentInput = num;
+      else currentInput += num;
+      updateDisplay();
+    }
+    
+    function appendOp(op) {
+      const lastChar = currentInput.slice(-1);
+      if (['+', '-', '*', '/'].includes(lastChar)) {
+        currentInput = currentInput.slice(0, -1) + op;
+      } else {
+        currentInput += op;
+      }
+      updateDisplay();
+    }
+    
+    function calculate() {
+      try {
+        // Safe evaluation of math string
+        let result = new Function('return ' + currentInput)();
+        // Handle JS floating point quirks (e.g. 0.1 + 0.2)
+        currentInput = parseFloat(result.toFixed(10)).toString();
+      } catch (e) {
+        currentInput = 'Error';
+      }
+      updateDisplay();
+    }
+  </script>
+</body>
+</html>
