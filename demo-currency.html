@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Currency Converter</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-currency-circle-dollar"></i></div>
+      <div class="tool-header-text">
+        <h1>Currency Converter</h1>
+        <p>Offline conversion using baseline fixed rates. For actual trading, check live rates.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      <div class="panel" style="max-width: 600px; margin: 0 auto;">
+        <div class="panel-body">
+          <div style="display: flex; gap: 1rem; align-items: flex-end;">
+            <div class="form-group" style="flex: 1;">
+              <label>Amount</label>
+              <input type="number" id="amount" value="100" oninput="convertCurrency()" style="width: 100%; padding: 10px;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>From</label>
+              <select id="currencyFrom" class="tz-select" onchange="convertCurrency()">
+                 <option value="USD" selected>USD - US Dollar</option>
+                 <option value="EUR">EUR - Euro</option>
+                 <option value="GBP">GBP - British Pound</option>
+                 <option value="JPY">JPY - Japanese Yen</option>
+                 <option value="INR">INR - Indian Rupee</option>
+                 <option value="CNY">CNY - Chinese Yuan</option>
+                 <option value="AUD">AUD - Australian Dollar</option>
+                 <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>To</label>
+              <select id="currencyTo" class="tz-select" onchange="convertCurrency()">
+                 <option value="USD">USD - US Dollar</option>
+                 <option value="EUR" selected>EUR - Euro</option>
+                 <option value="GBP">GBP - British Pound</option>
+                 <option value="JPY">JPY - Japanese Yen</option>
+                 <option value="INR">INR - Indian Rupee</option>
+                 <option value="CNY">CNY - Chinese Yuan</option>
+                 <option value="AUD">AUD - Australian Dollar</option>
+                 <option value="CAD">CAD - Canadian Dollar</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg); border-radius: 8px; text-align: center;">
+            <h2 id="resultDisplay" style="font-size: 2rem; color: var(--primary);">92.00 EUR</h2>
+            <p style="color: var(--text-muted); margin-top: 0.5rem;" id="rateText">1 USD = 0.92 EUR</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    // Baseline rates relative to 1 USD (Hardcoded for offline compatibility)
+    const rates = {
+      USD: 1, EUR: 0.92, GBP: 0.79, JPY: 150.5, INR: 83.2, CNY: 7.23, AUD: 1.52, CAD: 1.35
+    };
+
+    function convertCurrency() {
+      const amount = parseFloat(document.getElementById('amount').value) || 0;
+      const from = document.getElementById('currencyFrom').value;
+      const to = document.getElementById('currencyTo').value;
+      
+      // Convert to base USD, then to target
+      const inUSD = amount / rates[from];
+      const result = inUSD * rates[to];
+      
+      const singleRate = (1 / rates[from]) * rates[to];
+
+      document.getElementById('resultDisplay').innerText = `${result.toFixed(2)} ${to}`;
+      document.getElementById('rateText').innerText = `1 ${from} = ${singleRate.toFixed(4)} ${to}`;
+    }
+    
+    document.addEventListener('DOMContentLoaded', convertCurrency);
+  </script>
+</body>
+</html>
