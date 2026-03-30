@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Tip Calculator</title>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-coins"></i></div>
+      <div class="tool-header-text">
+        <h1>Tip Calculator</h1>
+        <p>Calculate gratuity and split bills among friends easily.</p>
+      </div>
+    </header>
+    <main class="workspace" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+      <div class="panel">
+        <div class="panel-header"><h3>Details</h3></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Bill Amount ($)</label>
+            <input type="number" id="bill" value="50.00" oninput="calculateTip()" style="width: 100%; padding: 10px;">
+          </div>
+          <div class="form-group">
+            <label>Tip Percentage: <span id="tipLabel">15%</span></label>
+            <input type="range" id="tipPct" min="0" max="50" value="15" oninput="calculateTip()" style="width: 100%; margin-top: 10px;">
+          </div>
+          <div class="form-group">
+            <label>Split Between (People)</label>
+            <input type="number" id="split" value="1" min="1" oninput="calculateTip()" style="width: 100%; padding: 10px;">
+          </div>
+        </div>
+      </div>
+      <div class="panel" style="background: var(--bg); border: none;">
+        <div class="panel-body" style="display: flex; flex-direction: column; justify-content: center; text-align: center; height: 100%;">
+          <div style="margin-bottom: 2rem;">
+            <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 0.5rem;">Tip Amount</p>
+            <h2 id="tipAmount" style="font-size: 2.5rem; color: var(--primary);">$7.50</h2>
+          </div>
+          <div style="margin-bottom: 2rem;">
+            <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 0.5rem;">Total Bill</p>
+            <h2 id="totalBill" style="font-size: 2rem;">$57.50</h2>
+          </div>
+          <div id="splitSection" style="display: none; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+            <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 0.5rem;">Total Per Person</p>
+            <h2 id="totalPerPerson" style="font-size: 2rem; color: #10b981;">$57.50</h2>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    function calculateTip() {
+      const bill = parseFloat(document.getElementById('bill').value) || 0;
+      const tipPct = parseFloat(document.getElementById('tipPct').value);
+      const split = parseInt(document.getElementById('split').value) || 1;
+      
+      document.getElementById('tipLabel').innerText = tipPct + '%';
+
+      const tipAmt = bill * (tipPct / 100);
+      const total = bill + tipAmt;
+      const perPerson = total / split;
+
+      document.getElementById('tipAmount').innerText = '$' + tipAmt.toFixed(2);
+      document.getElementById('totalBill').innerText = '$' + total.toFixed(2);
+      
+      const splitSec = document.getElementById('splitSection');
+      if (split > 1) {
+        splitSec.style.display = 'block';
+        document.getElementById('totalPerPerson').innerText = '$' + perPerson.toFixed(2);
+      } else {
+        splitSec.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
