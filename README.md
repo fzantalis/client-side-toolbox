@@ -1,9 +1,9 @@
 # 🧰 Client-Side Toolbox
 A suite of developer and business utilities that run **entirely in your browser** — no server, no uploads, no data leaving your machine.
 
-[![HTML](https://img.shields.io/badge/HTML-82%25-orange)](https://github.com/fzantalis/client-side-toolbox)
-[![CSS](https://img.shields.io/badge/CSS-11%25-blue)](https://github.com/fzantalis/client-side-toolbox)
-[![JavaScript](https://img.shields.io/badge/JavaScript-6%25-yellow)](https://github.com/fzantalis/client-side-toolbox)
+[![HTML](https://img.shields.io/badge/HTML-96.1%25-orange)](https://github.com/fzantalis/client-side-toolbox)
+[![CSS](https://img.shields.io/badge/CSS-2.6%25-blue)](https://github.com/fzantalis/client-side-toolbox)
+[![JavaScript](https://img.shields.io/badge/JavaScript-1.3%25-yellow)](https://github.com/fzantalis/client-side-toolbox)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ---
@@ -75,7 +75,6 @@ All tools share a common design principle: **your data never leaves your browser
 | **ERD Builder** | `demo-erd.html` | Design entity-relationship diagrams visually and export them as SQL or an image. |
 | **Subnet Calculator** | `demo-subnet-calc.html` | Instantly calculate CIDR network addresses, masks, and host ranges. |
 | **Open Graph Generator** | `demo-og-generator.html` | Preview social media share cards and generate HTML meta tags instantly. |
-
 ---
 
 ## 🚀 Getting Started
@@ -83,9 +82,41 @@ All tools share a common design principle: **your data never leaves your browser
 No installation required. Just open any HTML file directly in your browser:
 
 ```bash
-git clone [https://github.com/fzantalis/client-side-toolbox.git](https://github.com/fzantalis/client-side-toolbox.git)
+git clone https://github.com/fzantalis/client-side-toolbox.git
 cd client-side-toolbox
 open index.html   # macOS
 # or
 start index.html  # Windows
 # or just drag index.html into your browser
+```
+
+The `index.html` serves as a dashboard linking to all individual tools.
+
+---
+
+## 🔒 Privacy
+
+All processing happens **locally in your browser**. No data is sent to any server. This makes the toolbox safe to use with sensitive information such as JWTs, hashed values, or private documents.
+
+See [privacy.html](privacy.html) for the full privacy statement.
+
+---
+
+## 🗂️ Project Structure
+
+```
+client-side-toolbox/
+├── index.html              # Main dashboard / tool launcher
+├── style.css               # Shared styles
+├── script.js               # Shared utilities (e.g. JSON beautifier)
+├── theme-toggle.js         # Light/dark mode toggle
+├── demo-*.html             # Individual tool pages (24 tools)
+├── privacy.html            # Privacy policy
+└── terms.html              # Terms of use
+```
+
+---
+
+## 📄 License
+
+This project is open source. See [terms.html](terms.html) for details.
