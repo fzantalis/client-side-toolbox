@@ -3,57 +3,116 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JSON Beautifier & Formatter</title>
+   <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>JSON Beautifier & Formatter | Free Online JSON Validator</title>
+  <meta name="title" content="JSON Beautifier & Formatter | Free Online JSON Validator">
+  <meta name="description" content="Format, validate, and beautify your raw JSON data instantly. A secure, free, client-side JSON formatter that runs entirely in your browser with zero server uploads.">
+  <meta name="keywords" content="JSON beautifier, JSON formatter, JSON validator, format JSON online, pretty print JSON, client-side JSON tool, secure JSON editor, browser-based">
+  <meta name="author" content="fzantalis">
 
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-json.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-json.html">
+  <meta property="og:title" content="JSON Beautifier & Formatter | Free Online JSON Validator">
+  <meta property="og:description" content="Format, validate, and beautify your raw JSON data instantly. A secure, free, client-side JSON formatter that runs entirely in your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-json.html">
+  <meta property="twitter:title" content="JSON Beautifier & Formatter | Free Online JSON Validator">
+  <meta property="twitter:description" content="Format, validate, and beautify your raw JSON data instantly. A secure, free, client-side JSON formatter that runs entirely in your browser.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-  <!-- Highlight.js -->
+  <!-- ✅ ADD ONLY (no CSS override of your theme) -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    /* ✅ Minimal safe additions */
+    #treeOutput ul {
+      list-style: none;
+      padding-left: 1rem;
+    }
+
+    #treeOutput li {
+      margin: 2px 0;
+    }
+
+    #treeOutput span {
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
+  <div class="container">
+    
+    <a href="index.html" class="breadcrumb">
+      <i class="ph ph-arrow-left"></i> Back to Toolbox
+    </a>
 
-  <header class="tool-header">
-    <div class="card-icon"><i class="ph ph-brackets-curly"></i></div>
-    <div class="tool-header-text">
-      <h1>JSON Beautifier</h1>
-      <p>Format, validate, and structure your JSON data instantly.</p>
-    </div>
-  </header>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-brackets-curly"></i></div>
+      <div class="tool-header-text">
+        <h1>JSON Beautifier</h1>
+        <p>Format, validate, and structure your JSON data instantly.</p>
+      </div>
+    </header>
 
-  <main class="workspace">
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Input</h3>
+          <div class="panel-actions">
+            <button id="clearBtn" class="btn-secondary"><i class="ph ph-trash"></i> Clear</button>
+            <button id="formatBtn" class="btn-primary"><i class="ph ph-magic-wand"></i> Beautify</button>
 
-    <!-- INPUT -->
-    <div class="panel">
-      <div class="panel-header">
-        <h3>Input</h3>
-        <div class="panel-actions">
-          <button id="clearBtn" class="btn-secondary"><i class="ph ph-trash"></i> Clear</button>
-          <button id="formatBtn" class="btn-primary"><i class="ph ph-magic-wand"></i> Beautify</button>
-          <button id="minifyBtn" class="btn-secondary"><i class="ph ph-arrows-in-simple"></i> Minify</button>
-          <button id="treeBtn" class="btn-secondary"><i class="ph ph-tree-structure"></i> Tree</button>
+            <!-- ✅ NEW BUTTONS -->
+            <button id="minifyBtn" class="btn-secondary"><i class="ph ph-arrows-in-simple"></i> Minify</button>
+            <button id="treeBtn" class="btn-secondary"><i class="ph ph-tree-structure"></i> Tree</button>
+          </div>
         </div>
-      </div>
-      <textarea id="input" placeholder="Paste your raw JSON here..."></textarea>
-    </div>
-
-    <!-- OUTPUT -->
-    <div class="panel">
-      <div class="panel-header">
-        <h3>Output</h3>
-        <button id="copyBtn" class="btn-secondary"><i class="ph ph-copy"></i> Copy</button>
+        <textarea id="input" placeholder="Paste your raw JSON here..."></textarea>
       </div>
 
-      <pre id="output" class="hljs">Result will appear here...</pre>
-      <div id="treeOutput" style="display:none; font-family: monospace;"></div>
-    </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Output</h3>
+          <button id="copyBtn" class="btn-secondary"><i class="ph ph-copy"></i> Copy</button>
+        </div>
 
-  </main>
-</div>
+        <!-- ✅ KEEP ORIGINAL -->
+        <pre id="output">Result will appear here...</pre>
+
+        <!-- ✅ ADD TREE VIEW (hidden by default) -->
+        <div id="treeOutput" style="display:none;"></div>
+      </div>
+
+    </main>
+
+    <!-- ✅ YOUR FOOTER UNTOUCHED -->
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -68,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearBtn = document.getElementById('clearBtn');
   const copyBtn = document.getElementById('copyBtn');
 
-  // -------- Beautify --------
+  // Beautify
   const jsonBeautify = (input) => {
     try {
       const parsed = JSON.parse(input);
@@ -78,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // -------- Minify --------
+  // Minify
   const jsonMinify = (input) => {
     try {
       const parsed = JSON.parse(input);
@@ -88,27 +147,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // -------- Syntax Highlight --------
+  // Highlight (SAFE - doesn't override your CSS)
   const highlightJSON = (jsonString) => {
-    outputEl.style.display = 'block';
     treeOutput.style.display = 'none';
+    outputEl.style.display = 'block';
     outputEl.innerHTML = hljs.highlight(jsonString, { language: 'json' }).value;
   };
 
-  // -------- Tree View --------
-  const createTree = (data) => {
+  // Tree builder
+  const createTree = (obj) => {
     const ul = document.createElement('ul');
 
-    for (let key in data) {
+    Object.entries(obj).forEach(([key, value]) => {
       const li = document.createElement('li');
 
-      if (typeof data[key] === 'object' && data[key] !== null) {
+      if (typeof value === 'object' && value !== null) {
         const span = document.createElement('span');
         span.textContent = key;
-        span.style.cursor = 'pointer';
-        span.style.fontWeight = 'bold';
 
-        const child = createTree(data[key]);
+        const child = createTree(value);
         child.style.display = 'none';
 
         span.onclick = () => {
@@ -118,16 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(span);
         li.appendChild(child);
       } else {
-        li.textContent = `${key}: ${data[key]}`;
+        li.textContent = `${key}: ${value}`;
       }
 
       ul.appendChild(li);
-    }
+    });
 
     return ul;
   };
 
-  // -------- Beautify Button --------
+  // Beautify
   formatBtn.addEventListener('click', () => {
     const result = jsonBeautify(inputEl.value);
 
@@ -141,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     highlightJSON(result.data);
   });
 
-  // -------- Minify Button --------
+  // Minify
   minifyBtn.addEventListener('click', () => {
     const result = jsonMinify(inputEl.value);
 
@@ -155,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     highlightJSON(result.data);
   });
 
-  // -------- Tree Button --------
+  // Tree
   treeBtn.addEventListener('click', () => {
     try {
       const parsed = JSON.parse(inputEl.value);
@@ -173,27 +230,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // -------- Clear --------
+  // Clear
   clearBtn.addEventListener('click', () => {
     inputEl.value = '';
     outputEl.textContent = 'Result will appear here...';
     treeOutput.innerHTML = '';
   });
 
-  // -------- Copy --------
+  // Copy
   copyBtn.addEventListener('click', () => {
-    let text = '';
-
-    if (treeOutput.style.display === 'block') {
-      text = treeOutput.innerText;
-    } else {
-      text = outputEl.innerText;
-    }
+    const text = (treeOutput.style.display === 'block')
+      ? treeOutput.innerText
+      : outputEl.innerText;
 
     navigator.clipboard.writeText(text);
   });
 
 });
 </script>
+
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
