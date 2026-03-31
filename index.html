@@ -4,10 +4,43 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Client-Side Toolbox | Free Private Browser-Based Developer Utilities</title>
+  <meta name="title" content="Client-Side Toolbox | Free Private Browser-Based Developer Utilities">
+  <meta name="description" content="A suite of 100% private, blazing-fast, and offline-ready developer and business tools. Convert, format, encode, and calculate entirely in your browser.">
+  <meta name="keywords" content="developer tools, client-side utilities, JSON beautifier, CSV converter, browser-based tools, offline developer tools, open source utilities">
+  <meta name="author" content="fzantalis">
+  
+  <link rel="canonical" href="https://yourwebsite.com/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourwebsite.com/">
+  <meta property="og:title" content="Client-Side Toolbox | Free Private Developer Utilities">
+  <meta property="og:description" content="A suite of 100% private, blazing-fast, and offline-ready developer and business tools. Runs entirely in your browser.">
+  <meta property="og:image" content="https://yourwebsite.com/og-image.jpg"> <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://yourwebsite.com/">
+  <meta property="twitter:title" content="Client-Side Toolbox | Free Private Developer Utilities">
+  <meta property="twitter:description" content="A suite of 100% private, blazing-fast, and offline-ready developer and business tools. Runs entirely in your browser.">
+  <meta property="twitter:image" content="https://yourwebsite.com/og-image.jpg">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Client-Side Toolbox",
+    "url": "https://yourwebsite.com/",
+    "description": "A suite of powerful developer and business utilities that run entirely in your browser.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://yourwebsite.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <title>Client-Side Toolbox</title>
 </head>
 <body>
 
@@ -19,25 +52,25 @@
     </div>
     <div class="features-banner">
       <div class="feature-item">
-        <i class="ph-fill ph-shield-check"></i>
+        <i class="ph-fill ph-shield-check" aria-hidden="true"></i>
         <div><strong>100% Private</strong><span>Zero server uploads</span></div>
       </div>
       <div class="feature-item">
-        <i class="ph-fill ph-lightning"></i>
+        <i class="ph-fill ph-lightning" aria-hidden="true"></i>
         <div><strong>Blazing Fast</strong><span>Instant local processing</span></div>
       </div>
       <div class="feature-item">
-        <i class="ph-fill ph-wifi-slash"></i>
+        <i class="ph-fill ph-wifi-slash" aria-hidden="true"></i>
         <div><strong>Offline Ready</strong><span>Works without internet</span></div>
       </div>
     </div>
     <div class="search-container">
-      <i class="ph ph-magnifying-glass"></i>
-      <input type="text" id="searchInput" placeholder="Search tools (e.g., 'JWT', 'Markdown', 'PDF')...">
+      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+      <input type="text" id="searchInput" aria-label="Search tools" placeholder="Search tools (e.g., 'JWT', 'Markdown', 'PDF')...">
     </div>
   </header>
 
-  <nav class="nav-pills">
+  <nav class="nav-pills" aria-label="Tool Categories">
     <a href="#text-data" class="active">Text &amp; Data</a>
     <a href="#design-media">Design &amp; Media</a>
     <a href="#business-finance">Business &amp; Finance</a>
@@ -50,47 +83,47 @@
 
     <section id="text-data" class="tool-section">
       <div class="section-header">
-        <i class="ph-fill ph-text-aa"></i>
+        <i class="ph-fill ph-text-aa" aria-hidden="true"></i>
         <h2>Text &amp; Data</h2>
       </div>
       <div class="card-grid">
-        <a href="demo-json.html" class="card">
-          <div class="card-icon"><i class="ph ph-brackets-curly"></i></div>
+        <a href="demo-json.html" class="card" title="JSON Beautifier">
+          <div class="card-icon"><i class="ph ph-brackets-curly" aria-hidden="true"></i></div>
           <h4>JSON Beautifier</h4>
           <p>Format, validate, and minify JSON data instantly in your browser.</p>
         </a>
-        <a href="demo-csv-to-json.html" class="card">
-          <div class="card-icon"><i class="ph ph-table"></i></div>
+        <a href="demo-csv-to-json.html" class="card" title="CSV Converter">
+          <div class="card-icon"><i class="ph ph-table" aria-hidden="true"></i></div>
           <h4>CSV Converter</h4>
           <p>Transform raw CSV data into clean JSON or SQL insert statements.</p>
         </a>
-        <a href="demo-csv-explorer.html" class="card">
-          <div class="card-icon"><i class="ph ph-magnifying-glass-plus"></i></div>
+        <a href="demo-csv-explorer.html" class="card" title="CSV Explorer">
+          <div class="card-icon"><i class="ph ph-magnifying-glass-plus" aria-hidden="true"></i></div>
           <h4>CSV Explorer</h4>
           <p>Load, sort, filter, and explore large CSV files directly in the browser.</p>
         </a>
-        <a href="demo-smart-case.html" class="card">
-          <div class="card-icon"><i class="ph ph-text-a-underline"></i></div>
+        <a href="demo-smart-case.html" class="card" title="Smart Case Converter">
+          <div class="card-icon"><i class="ph ph-text-a-underline" aria-hidden="true"></i></div>
           <h4>Smart Case Converter</h4>
           <p>Switch between camelCase, snake_case, PascalCase, and more.</p>
         </a>
-        <a href="demo-markdown.html" class="card">
-          <div class="card-icon"><i class="ph ph-markdown-logo"></i></div>
+        <a href="demo-markdown.html" class="card" title="Markdown Editor">
+          <div class="card-icon"><i class="ph ph-markdown-logo" aria-hidden="true"></i></div>
           <h4>Markdown Editor</h4>
           <p>Real-time Markdown rendering and HTML export.</p>
         </a>
-        <a href="demo-diff.html" class="card">
-          <div class="card-icon"><i class="ph ph-files"></i></div>
+        <a href="demo-diff.html" class="card" title="Text Diff Checker">
+          <div class="card-icon"><i class="ph ph-files" aria-hidden="true"></i></div>
           <h4>Text Diff Checker</h4>
           <p>Compare two blocks of text or code to find exact line changes.</p>
         </a>
-        <a href="demo-mock-data.html" class="card">
-          <div class="card-icon"><i class="ph ph-database"></i></div>
+        <a href="demo-mock-data.html" class="card" title="Mock Data Generator">
+          <div class="card-icon"><i class="ph ph-database" aria-hidden="true"></i></div>
           <h4>Mock Data Generator</h4>
           <p>Generate thousands of realistic JSON/CSV records instantly in your browser.</p>
         </a>
-        <a href="demo-pdf.html" class="card">
-          <div class="card-icon"><i class="ph ph-file-pdf"></i></div>
+        <a href="demo-pdf.html" class="card" title="PDF Utility">
+          <div class="card-icon"><i class="ph ph-file-pdf" aria-hidden="true"></i></div>
           <h4>PDF Utility</h4>
           <p>Inspect, add blank pages, or securely extract pages right in your browser.</p>
         </a>
@@ -99,42 +132,42 @@
 
     <section id="design-media" class="tool-section">
       <div class="section-header">
-        <i class="ph-fill ph-palette"></i>
+        <i class="ph-fill ph-palette" aria-hidden="true"></i>
         <h2>Design &amp; Media</h2>
       </div>
       <div class="card-grid">
-        <a href="demo-webp.html" class="card">
-          <div class="card-icon"><i class="ph ph-image"></i></div>
+        <a href="demo-webp.html" class="card" title="WebP Converter">
+          <div class="card-icon"><i class="ph ph-image" aria-hidden="true"></i></div>
           <h4>WebP Converter</h4>
           <p>Compress bulk images to next-gen WebP format without losing quality.</p>
         </a>
-        <a href="demo-video-converter.html" class="card">
-          <div class="card-icon"><i class="ph ph-film-strip"></i></div>
+        <a href="demo-video-converter.html" class="card" title="Video Converter">
+          <div class="card-icon"><i class="ph ph-film-strip" aria-hidden="true"></i></div>
           <h4>Video Converter</h4>
           <p>Convert and compress video files entirely in the browser — no uploads needed.</p>
         </a>
-        <a href="demo-color-extractor.html" class="card">
-          <div class="card-icon"><i class="ph ph-eyedropper"></i></div>
+        <a href="demo-color-extractor.html" class="card" title="Color Extractor">
+          <div class="card-icon"><i class="ph ph-eyedropper" aria-hidden="true"></i></div>
           <h4>Color Extractor</h4>
           <p>Upload an image to extract its dominant color palette and hex codes.</p>
         </a>
-        <a href="demo-exif.html" class="card">
-          <div class="card-icon"><i class="ph ph-camera"></i></div>
+        <a href="demo-exif.html" class="card" title="EXIF Viewer">
+          <div class="card-icon"><i class="ph ph-camera" aria-hidden="true"></i></div>
           <h4>EXIF Viewer</h4>
           <p>Inspect hidden photo metadata — camera, GPS location, exposure, and more.</p>
         </a>
-        <a href="demo-qr.html" class="card">
-          <div class="card-icon"><i class="ph ph-qr-code"></i></div>
+        <a href="demo-qr.html" class="card" title="QR Code Generator">
+          <div class="card-icon"><i class="ph ph-qr-code" aria-hidden="true"></i></div>
           <h4>QR Code Generator</h4>
           <p>Instantly generate tracking-free QR codes for links and text.</p>
         </a>
-        <a href="demo-svg.html" class="card">
-          <div class="card-icon"><i class="ph ph-bezier-curve"></i></div>
+        <a href="demo-svg.html" class="card" title="SVG Optimizer">
+          <div class="card-icon"><i class="ph ph-bezier-curve" aria-hidden="true"></i></div>
           <h4>SVG Optimizer</h4>
           <p>Clean and minify messy SVG code exports to save space.</p>
         </a>
-         <a href="demo-anonymizer.html" class="card">
-          <div class="card-icon"><i class="ph ph-eye-slash"></i></div>
+         <a href="demo-anonymizer.html" class="card" title="Auto Face Blur">
+          <div class="card-icon"><i class="ph ph-eye-slash" aria-hidden="true"></i></div>
           <h4>Auto Face Blur</h4>
           <p>Automatically detect and blur faces in images using on-device AI.</p>
         </a>
@@ -143,27 +176,27 @@
 
     <section id="business-finance" class="tool-section">
       <div class="section-header">
-        <i class="ph-fill ph-briefcase"></i>
+        <i class="ph-fill ph-briefcase" aria-hidden="true"></i>
         <h2>Business &amp; Finance</h2>
       </div>
       <div class="card-grid">
-        <a href="demo-hourly-wage.html" class="card">
-          <div class="card-icon"><i class="ph ph-currency-dollar"></i></div>
+        <a href="demo-hourly-wage.html" class="card" title="Hourly Wage Calculator">
+          <div class="card-icon"><i class="ph ph-currency-dollar" aria-hidden="true"></i></div>
           <h4>Hourly Wage Calculator</h4>
           <p>Calculate your effective hourly rate after software costs and taxes.</p>
         </a>
-        <a href="demo-invoice.html" class="card">
-          <div class="card-icon"><i class="ph ph-receipt"></i></div>
+        <a href="demo-invoice.html" class="card" title="Invoice Generator">
+          <div class="card-icon"><i class="ph ph-receipt" aria-hidden="true"></i></div>
           <h4>Invoice Generator</h4>
           <p>Generate and download professional PDF invoices directly in the browser.</p>
         </a>
-        <a href="demo-currency.html" class="card">
-          <div class="card-icon"><i class="ph ph-currency-circle-dollar"></i></div>
+        <a href="demo-currency.html" class="card" title="Currency Converter">
+          <div class="card-icon"><i class="ph ph-currency-circle-dollar" aria-hidden="true"></i></div>
           <h4>Currency Converter</h4>
           <p>Offline conversion using baseline fixed rates. Quick and private.</p>
         </a>
-        <a href="demo-tip.html" class="card">
-          <div class="card-icon"><i class="ph ph-coins"></i></div>
+        <a href="demo-tip.html" class="card" title="Tip Calculator">
+          <div class="card-icon"><i class="ph ph-coins" aria-hidden="true"></i></div>
           <h4>Tip Calculator</h4>
           <p>Calculate gratuity and perfectly split bills among friends easily.</p>
         </a>
@@ -172,32 +205,32 @@
 
     <section id="math-utilities" class="tool-section">
       <div class="section-header">
-        <i class="ph-fill ph-calculator"></i>
+        <i class="ph-fill ph-calculator" aria-hidden="true"></i>
         <h2>Math &amp; Utilities</h2>
       </div>
       <div class="card-grid">
-        <a href="demo-calculator.html" class="card">
-          <div class="card-icon"><i class="ph ph-calculator"></i></div>
+        <a href="demo-calculator.html" class="card" title="Standard Calculator">
+          <div class="card-icon"><i class="ph ph-calculator" aria-hidden="true"></i></div>
           <h4>Standard Calculator</h4>
           <p>A fast, offline-ready standard calculator for quick math operations.</p>
         </a>
-        <a href="demo-unit-converter.html" class="card">
-          <div class="card-icon"><i class="ph ph-ruler"></i></div>
+        <a href="demo-unit-converter.html" class="card" title="Unit Converter">
+          <div class="card-icon"><i class="ph ph-ruler" aria-hidden="true"></i></div>
           <h4>Unit Converter</h4>
           <p>Instantly convert length, weight, and temperature offline.</p>
         </a>
-        <a href="demo-stopwatch.html" class="card">
-          <div class="card-icon"><i class="ph ph-timer"></i></div>
+        <a href="demo-stopwatch.html" class="card" title="Stopwatch &amp; Timer">
+          <div class="card-icon"><i class="ph ph-timer" aria-hidden="true"></i></div>
           <h4>Stopwatch &amp; Timer</h4>
           <p>Millisecond precision stopwatch with an integrated lap tracking feature.</p>
         </a>
-        <a href="demo-timezone.html" class="card">
-          <div class="card-icon"><i class="ph ph-globe"></i></div>
+        <a href="demo-timezone.html" class="card" title="Timezone Overlap">
+          <div class="card-icon"><i class="ph ph-globe" aria-hidden="true"></i></div>
           <h4>Timezone Overlap</h4>
           <p>Find overlapping meeting times across multiple global timezones.</p>
         </a>
-        <a href="demo-p2p.html" class="card">
-          <div class="card-icon"><i class="ph ph-share-network"></i></div>
+        <a href="demo-p2p.html" class="card" title="P2P File Transfer">
+          <div class="card-icon"><i class="ph ph-share-network" aria-hidden="true"></i></div>
           <h4>P2P File Transfer</h4>
           <p>Send files directly to another browser over an encrypted peer-to-peer connection.</p>
         </a>
@@ -206,42 +239,42 @@
 
     <section id="security-encoding" class="tool-section">
       <div class="section-header">
-        <i class="ph-fill ph-shield-check"></i>
+        <i class="ph-fill ph-shield-check" aria-hidden="true"></i>
         <h2>Security &amp; Encoding</h2>
       </div>
       <div class="card-grid">
-        <a href="demo-url-encoder.html" class="card">
-          <div class="card-icon"><i class="ph ph-link"></i></div>
+        <a href="demo-url-encoder.html" class="card" title="URL Encoder/Decoder">
+          <div class="card-icon"><i class="ph ph-link" aria-hidden="true"></i></div>
           <h4>URL Encoder/Decoder</h4>
           <p>Safely encode URLs for data transfer or decode them to read parameters.</p>
         </a>
-        <a href="demo-password.html" class="card">
-          <div class="card-icon"><i class="ph ph-password"></i></div>
+        <a href="demo-password.html" class="card" title="Password Generator">
+          <div class="card-icon"><i class="ph ph-password" aria-hidden="true"></i></div>
           <h4>Password Generator</h4>
           <p>Generate highly secure, localized passwords instantly.</p>
         </a>
-        <a href="demo-base64-image.html" class="card">
-          <div class="card-icon"><i class="ph ph-file-code"></i></div>
+        <a href="demo-base64-image.html" class="card" title="Base64 Image Encoder">
+          <div class="card-icon"><i class="ph ph-file-code" aria-hidden="true"></i></div>
           <h4>Base64 Image Encoder</h4>
           <p>Encode images into Base64 data strings for inline HTML/CSS embedding.</p>
         </a>
-        <a href="demo-jwt-builder.html" class="card">
-          <div class="card-icon"><i class="ph ph-key"></i></div>
+        <a href="demo-jwt-builder.html" class="card" title="JWT Builder &amp; Decoder">
+          <div class="card-icon"><i class="ph ph-key" aria-hidden="true"></i></div>
           <h4>JWT Builder &amp; Decoder</h4>
           <p>Craft, sign, and decode JSON Web Tokens securely without leaving the browser.</p>
         </a>
-        <a href="demo-cert-viewer.html" class="card">
-          <div class="card-icon"><i class="ph ph-certificate"></i></div>
+        <a href="demo-cert-viewer.html" class="card" title="Certificate Viewer">
+          <div class="card-icon"><i class="ph ph-certificate" aria-hidden="true"></i></div>
           <h4>Certificate Viewer</h4>
           <p>Inspect standard X.509 certificates (.pem, .crt) securely in your browser.</p>
         </a>
-        <a href="demo-hash.html" class="card">
-          <div class="card-icon"><i class="ph ph-fingerprint"></i></div>
+        <a href="demo-hash.html" class="card" title="File Hash Checker">
+          <div class="card-icon"><i class="ph ph-fingerprint" aria-hidden="true"></i></div>
           <h4>File Hash Checker</h4>
           <p>Verify file integrity locally by calculating SHA-256 checksums.</p>
         </a>
-        <a href="demo-prompt-sanitizer.html" class="card">
-          <div class="card-icon"><i class="ph ph-shield-check"></i></div>
+        <a href="demo-prompt-sanitizer.html" class="card" title="Zero-Trust AI Sanitizer">
+          <div class="card-icon"><i class="ph ph-shield-check" aria-hidden="true"></i></div>
           <h4>Zero-Trust AI Sanitizer</h4>
           <p>Redact API keys, PII, and tokens from code before pasting into LLMs.</p>
         </a>
@@ -250,32 +283,32 @@
 
     <section id="developer" class="tool-section">
       <div class="section-header">
-        <i class="ph-fill ph-terminal-window"></i>
+        <i class="ph-fill ph-terminal-window" aria-hidden="true"></i>
         <h2>Developer</h2>
       </div>
       <div class="card-grid">
-        <a href="demo-regex.html" class="card">
-          <div class="card-icon"><i class="ph ph-magnifying-glass"></i></div>
+        <a href="demo-regex.html" class="card" title="Regex Tester">
+          <div class="card-icon"><i class="ph ph-magnifying-glass" aria-hidden="true"></i></div>
           <h4>Regex Tester</h4>
           <p>Live match highlighting, capture group inspector, and a full cheat sheet.</p>
         </a>
-        <a href="demo-cron.html" class="card">
-          <div class="card-icon"><i class="ph ph-clock-countdown"></i></div>
+        <a href="demo-cron.html" class="card" title="Cron Expression Builder">
+          <div class="card-icon"><i class="ph ph-clock-countdown" aria-hidden="true"></i></div>
           <h4>Cron Expression Builder</h4>
           <p>Build and validate cron schedules with a plain-English description and next-run preview.</p>
         </a>
-        <a href="demo-erd.html" class="card">
-          <div class="card-icon"><i class="ph ph-graph"></i></div>
+        <a href="demo-erd.html" class="card" title="ERD Builder">
+          <div class="card-icon"><i class="ph ph-graph" aria-hidden="true"></i></div>
           <h4>ERD Builder</h4>
           <p>Design entity-relationship diagrams visually and export them as SQL or an image.</p>
         </a>
-        <a href="demo-subnet-calc.html" class="card">
-          <div class="card-icon"><i class="ph ph-share-network"></i></div>
+        <a href="demo-subnet-calc.html" class="card" title="Subnet Calculator">
+          <div class="card-icon"><i class="ph ph-share-network" aria-hidden="true"></i></div>
           <h4>Subnet Calculator</h4>
           <p>Instantly calculate CIDR network addresses, masks, and host ranges.</p>
         </a>
-        <a href="demo-og-generator.html" class="card">
-          <div class="card-icon"><i class="ph ph-cards"></i></div>
+        <a href="demo-og-generator.html" class="card" title="Open Graph Generator">
+          <div class="card-icon"><i class="ph ph-cards" aria-hidden="true"></i></div>
           <h4>Open Graph Generator</h4>
           <p>Preview social media share cards and generate HTML meta tags instantly.</p>
         </a>
@@ -286,6 +319,14 @@
 
   <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    
+    <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+
     <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
       <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
       <span>&bull;</span>
