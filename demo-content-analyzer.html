@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Readability & Content Analyzer | Free Private Writing Tool</title>
+  <meta name="title" content="Readability & Content Analyzer | Free Private Writing Tool">
+  <meta name="description" content="Analyze word count, reading time, and Flesch-Kincaid readability scores entirely in your browser. Perfect for private drafts and secure content strategy.">
+  <meta name="keywords" content="word counter, readability checker, flesch-kincaid score, reading time calculator, speaking time generator, private writing tool, seo content analyzer">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-content-analyzer.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-content-analyzer.html">
+  <meta property="og:title" content="Readability & Content Analyzer | Free Private Writing Tool">
+  <meta property="og:description" content="Check word count and readability grade levels privately. No data ever leaves your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 1rem; border-radius: 10px; text-align: center; }
+    .stat-card strong { display: block; font-size: 1.5rem; color: var(--primary); margin-bottom: 0.25rem; }
+    .stat-card span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; }
+    
+    #editor { width: 100%; min-height: 400px; padding: 1.5rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.6; resize: vertical; outline: none; transition: border-color 0.2s; }
+    #editor:focus { border-color: var(--primary); }
+
+    .gauge-container { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border); margin-top: 1rem; }
+    .grade-badge { padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.9rem; }
+    .grade-easy { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .grade-med { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .grade-hard { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-article"></i></div>
+      <div class="tool-header-text">
+        <h1>Content Strategy Analyzer</h1>
+        <p>Private analysis of word counts, reading difficulty, and timing for your drafts.</p>
+      </div>
+    </header>
+
+    <main class="workspace" style="flex-direction: column; gap: 1.5rem;">
+      <div class="stat-grid">
+        <div class="stat-card"><strong id="cnt-words">0</strong><span>Words</span></div>
+        <div class="stat-card"><strong id="cnt-chars">0</strong><span>Characters</span></div>
+        <div class="stat-card"><strong id="cnt-read">0m</strong><span>Reading Time</span></div>
+        <div class="stat-card"><strong id="cnt-speak">0m</strong><span>Speaking Time</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Editor</h3>
+          <div id="readability-indicator" class="grade-badge grade-easy" style="display:none;">Score: --</div>
+        </div>
+        <div class="panel-body">
+          <textarea id="editor" placeholder="Start typing or paste your content here..."></textarea>
+          
+          <div class="gauge-container">
+            <i class="ph ph-info" style="color: var(--primary);"></i>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+              <strong>Flesch Reading Ease:</strong> <span id="readability-desc">Type some text to calculate difficulty.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+        <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+          <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+          View Source on GitHub
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const editor = document.getElementById('editor');
+    
+    function countSyllables(word) {
+      word = word.toLowerCase();
+      if(word.length <= 3) return 1;
+      word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+      word = word.replace(/^y/, '');
+      const syllables = word.match(/[aeiouy]{1,2}/g);
+      return syllables ? syllables.length : 1;
+    }
+
+    function updateStats() {
+      const text = editor.value.trim();
+      if (!text) {
+        resetStats();
+        return;
+      }
+
+      const words = text.split(/\s+/).filter(w => w.length > 0);
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      const charCount = text.length;
+      const wordCount = words.length;
+      const sentenceCount = sentences.length || 1;
+
+      // Basic Stats
+      document.getElementById('cnt-words').textContent = wordCount.toLocaleString();
+      document.getElementById('cnt-chars').textContent = charCount.toLocaleString();
+
+      // Time Estimates
+      // Reading: ~225 wpm | Speaking: ~130 wpm
+      const readMin = Math.ceil(wordCount / 225);
+      const speakMin = Math.ceil(wordCount / 130);
+      document.getElementById('cnt-read').textContent = readMin + 'm';
+      document.getElementById('cnt-speak').textContent = speakMin + 'm';
+
+      // Readability (Flesch Reading Ease)
+      let totalSyllables = 0;
+      words.forEach(w => totalSyllables += countSyllables(w));
+
+      // Formula: 206.835 - 1.015(total words / total sentences) - 84.6(total syllables / total words)
+      const score = 206.835 - 1.015 * (wordCount / sentenceCount) - 84.6 * (totalSyllables / wordCount);
+      displayReadability(score);
+    }
+
+    function displayReadability(score) {
+      const badge = document.getElementById('readability-indicator');
+      const desc = document.getElementById('readability-desc');
+      badge.style.display = 'block';
+      badge.textContent = `Score: ${Math.round(score)}`;
+      badge.className = 'grade-badge';
+
+      if (score >= 80) {
+        badge.classList.add('grade-easy');
+        desc.textContent = "Very easy to read. Typical for a 5th grade student.";
+      } else if (score >= 60) {
+        badge.classList.add('grade-easy');
+        desc.textContent = "Standard English. Easily understood by 8th & 9th graders.";
+      } else if (score >= 30) {
+        badge.classList.add('grade-med');
+        desc.textContent = "Fairly difficult. Best for college-level readers.";
+      } else {
+        badge.classList.add('grade-hard');
+        desc.textContent = "Very difficult. Likely professional or scientific prose.";
+      }
+    }
+
+    function resetStats() {
+      document.getElementById('cnt-words').textContent = '0';
+      document.getElementById('cnt-chars').textContent = '0';
+      document.getElementById('cnt-read').textContent = '0m';
+      document.getElementById('cnt-speak').textContent = '0m';
+      document.getElementById('readability-indicator').style.display = 'none';
+      document.getElementById('readability-desc').textContent = "Type some text to calculate difficulty.";
+    }
+
+    editor.addEventListener('input', updateStats);
+  </script>
+  <script src="theme-toggle.js"></script>
+</body>
+</html>
