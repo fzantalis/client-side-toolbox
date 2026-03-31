@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Event Timeline Builder | Free Visual Schedule Creator</title>
+  <meta name="title" content="Event Timeline Builder | Free Visual Schedule Creator">
+  <meta name="description" content="Build clean, professional visual timelines instantly from key dates and labels. 100% private, runs entirely in your browser. Export as SVG or HTML.">
+  <meta name="keywords" content="timeline builder, visual schedule creator, history timeline generator, project roadmap tool, free timeline maker, client-side, SVG export, roadmap designer">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-timeline-builder.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-timeline-builder.html">
+  <meta property="og:title" content="Event Timeline Builder | Free Visual Schedule Creator">
+  <meta property="og:description" content="Build clean, professional visual timelines instantly from key dates and labels. Export as SVG or HTML entirely in your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* Specific Tool Styles */
+    .form-control { width: 100%; padding: 0.65rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 0.9rem; outline: none; }
+    .form-control:focus { border-color: var(--primary); }
+    
+    .event-input-row { display: grid; grid-template-columns: 140px 1fr auto; gap: 0.5rem; align-items: start; background: var(--bg-secondary); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem; }
+    
+    .event-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; padding-right: 0.5rem;}
+    .event-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem; }
+    .event-item code { font-family: 'Fira Code', monospace; color: var(--primary); font-weight: 500; margin-right: 0.75rem; }
+    .event-item .actions { opacity: 0; transition: opacity 0.2s; }
+    .event-item:hover .actions { opacity: 1; }
+
+    #timelineViewer { width: 100%; height: 100%; min-height: 500px; display: flex; align-items: start; justify-content: center; background: white; border-radius: 8px; border: 1px solid var(--border); overflow: auto; padding: 2rem; }
+    [data-theme="dark"] #timelineViewer { background: #1a1d21; }
+
+    svg { font-family: 'Inter', sans-serif; }
+    .tl-main-line { stroke: var(--border); stroke-width: 3; stroke-linecap: round; }
+    .tl-node { fill: white; stroke: var(--primary); stroke-width: 3; transition: r 0.2s; }
+    .tl-node:hover { r: 8; cursor: pointer; }
+    [data-theme="dark"] .tl-node { fill: #1a1d21; }
+    .tl-label-text { fill: var(--text-main); font-size: 12px; font-weight: 500; }
+    .tl-date-text { fill: var(--primary); font-size: 11px; font-weight: 600; font-family: 'Fira Code', monospace; }
+    .tl-connector { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-calendar-blank"></i></div>
+      <div class="tool-header-text">
+        <h1>Event Timeline Builder</h1>
+        <p>Input key dates and labels to render a clean visual timeline entirely in your browser.</p>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header"><h3>Add Events</h3></div>
+        <div class="panel-body">
+          <div class="event-input-row">
+            <div>
+              <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem; display: block;">Date</label>
+              <input type="date" id="evtDate" class="form-control">
+            </div>
+            <div>
+              <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem; display: block;">Label</label>
+              <input type="text" id="evtLabel" class="form-control" placeholder="e.g., Project Kickoff">
+            </div>
+            <button class="btn-primary" onclick="addEvent()" style="margin-top: 1.25rem; padding: 0.65rem;"><i class="ph ph-plus"></i></button>
+          </div>
+
+          <div class="form-group" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <label>Current Events</label>
+            <button class="btn-secondary error-text" onclick="clearAllEvents()" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;"><i class="ph ph-trash"></i> Clear All</button>
+          </div>
+          
+          <div id="eventList" class="event-list">
+            <p style="color: var(--text-muted); text-align: center; font-size: 0.9rem; margin-top: 1rem;">No events added yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Visualization</h3>
+          <div class="panel-actions">
+            <button class="btn-secondary" onclick="exportSVG()"><i class="ph ph-download-simple"></i> SVG</button>
+            <button class="btn-secondary" onclick="exportHTML()"><i class="ph ph-code"></i> HTML</button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding: 0; display: flex; flex-direction: column;">
+          <div id="timelineViewer">
+            </div>
+        </div>
+      </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+        <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+          <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+          View Source on GitHub
+        </a>
+      </div>
+      <div style="display:flex;justify-content:center;gap:1rem;margin-top:0.5rem;">
+        <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    let events = [];
+    const viewer = document.getElementById('timelineViewer');
+
+    // Load sample data on startup
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      
+      events = [
+        { id: 1, date: today.toISOString().split('T')[0], label: 'Project Concept' },
+        { id: 2, date: nextMonth.toISOString().split('T')[0], label: 'Alpha Release' },
+        { id: 3, date: new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 2, 15).toISOString().split('T')[0], label: 'Public Beta' }
+      ];
+      render();
+    });
+
+    function addEvent() {
+      const dateEl = document.getElementById('evtDate');
+      const labelEl = document.getElementById('evtLabel');
+      
+      if (!dateEl.value || !labelEl.value.trim()) {
+        alert("Please provide both a date and a label.");
+        return;
+      }
+
+      events.push({
+        id: Date.now(),
+        date: dateEl.value,
+        label: labelEl.value.trim()
+      });
+
+      labelEl.value = ''; // clear label input
+      render();
+    }
+
+    function removeEvent(id) {
+      events = events.filter(e => e.id !== id);
+      render();
+    }
+
+    function clearAllEvents() {
+      events = [];
+      render();
+    }
+
+    function render() {
+      renderList();
+      renderTimeline();
+    }
+
+    // ── Render Input List ───────────────────────────────────────────────────────
+    function renderList() {
+      const listEl = document.getElementById('eventList');
+      listEl.innerHTML = '';
+
+      if (events.length === 0) {
+        listEl.innerHTML = '<p style="color: var(--text-muted); text-align: center; font-size: 0.9rem; margin-top: 1rem;">No events added yet.</p>';
+        return;
+      }
+
+      // Sort chronologically for the list view
+      const sorted = [...events].sort((a,b) => a.date.localeCompare(b.date));
+
+      sorted.forEach(evt => {
+        const item = document.createElement('div');
+        item.className = 'event-item';
+        item.innerHTML = `
+          <div><code>${evt.date}</code> ${escHtml(evt.label)}</div>
+          <div class="actions">
+            <button class="btn-secondary error-text" style="padding: 0.2rem 0.4rem;" onclick="removeEvent(${evt.id})"><i class="ph ph-x"></i></button>
+          </div>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    // ── Render SVG Timeline ────────────────────────────────────────────────────
+    function renderTimeline() {
+      viewer.innerHTML = ''; // Clear viewer
+
+      if (events.length < 2) {
+        viewer.innerHTML = '<p style="color: var(--text-muted); padding: 2rem; text-align: center;">Add at least two events to generate a visual timeline.</p>';
+        return;
+      }
+
+      // 1. Sort Events
+      const sorted = [...events].sort((a,b) => a.date.localeCompare(b.date));
+      const minDate = new Date(sorted[0].date);
+      const maxDate = new Date(sorted[sorted.length - 1].date);
+      const totalDays = (maxDate - minDate) / (1000 * 60 * 60 * 24) || 1; // avoid divide by zero
+
+      // 2. SVG Setup
+      const width = 600;
+      const margin = { top: 50, right: 150, bottom: 50, left: 150 };
+      const rowHeight = 60; // minimum space between overlapping labels
+      const height = Math.max(500, (sorted.length * rowHeight) + margin.top + margin.bottom);
+      
+      const drawWidth = width - margin.left - margin.right;
+      const drawHeight = height - margin.top - margin.bottom;
+      const centerX = width / 2;
+
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`;
+      
+      // CSS Injection for export styling
+      svg += `
+        <style>
+          text { font-family: sans-serif; }
+          .tl-line { stroke: #e2e8f0; stroke-width: 3; stroke-linecap: round; }
+          .tl-node { fill: white; stroke: #6366f1; stroke-width: 3; }
+          .tl-label { fill: #1a1d21; font-size: 12px; font-weight: 500; }
+          .tl-date { fill: #6366f1; font-size: 11px; font-weight: 600; font-family: monospace; }
+          .tl-conn { stroke: #e2e8f0; stroke-width: 1; stroke-dasharray: 3 3; }
+          @media (prefers-color-scheme: dark) {
+            .tl-line { stroke: #31363c; }
+            .tl-node { fill: #1a1d21; }
+            .tl-label { fill: #ecf0f3; }
+            .tl-conn { stroke: #31363c; }
+          }
+        </style>
+      `;
+
+      // 3. Draw Main vertical line
+      svg += `<line x1="${centerX}" y1="${margin.top}" x2="${centerX}" y2="${height - margin.bottom}" class="tl-line tl-main-line" />`;
+
+      // 4. Draw Events
+      sorted.forEach((evt, i) => {
+        const currDate = new Date(evt.date);
+        const daysFromStart = (currDate - minDate) / (1000 * 60 * 60 * 24);
+        const y = margin.top + (daysFromStart / totalDays) * drawHeight;
+        
+        // Alternate sides to avoid overlap (even = left, odd = right)
+        const isLeft = i % 2 === 0;
+        const textX = isLeft ? centerX - 20 : centerX + 20;
+        const anchor = isLeft ? 'end' : 'start';
+        const connX2 = isLeft ? centerX - 15 : centerX + 15;
+
+        // Connector line
+        svg += `<line x1="${centerX}" y1="${y}" x2="${connX2}" y2="${y}" class="tl-conn tl-connector" />`;
+
+        // Node circle
+        svg += `<circle cx="${centerX}" cy="${y}" r="6" class="tl-node" />`;
+
+        // Date text
+        svg += `<text x="${textX}" y="${y - 6}" text-anchor="${anchor}" class="tl-date tl-date-text">${evt.date}</text>`;
+        
+        // Label text (simple truncation for very long labels)
+        const label = evt.label.length > 35 ? evt.label.substring(0, 32) + '...' : evt.label;
+        svg += `<text x="${textX}" y="${y + 10}" text-anchor="${anchor}" class="tl-label tl-label-text">${escHtml(label)}</text>`;
+      });
+
+      svg += '</svg>';
+      viewer.innerHTML = svg;
+    }
+
+    // ── Exports ─────────────────────────────────────────────────────────────────
+    function getSVGContent() {
+      const svgEl = viewer.querySelector('svg');
+      if (!svgEl) return null;
+      // Add XML declaration
+      return '<?xml version="1.0" standalone="no"?>\n' + svgEl.outerHTML;
+    }
+
+    function exportSVG() {
+      const content = getSVGContent();
+      if (!content) return;
+      triggerDownload(content, 'timeline.svg', 'image/svg+xml');
+    }
+
+    function exportHTML() {
+      const svgContent = getSVGContent();
+      if (!svgContent) return;
+
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exported Timeline</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; padding: 2rem; background: #f8fafc; }
+    .wrapper { background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    @media (prefers-color-scheme: dark) {
+      body { background: #111315; }
+      .wrapper { background: #1a1d21; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    ${svgContent}
+  </div>
+</body>
+</html>`;
+
+      triggerDownload(htmlContent, 'timeline.html', 'text/html');
+    }
+
+    function triggerDownload(content, filename, contentType) {
+      const blob = new Blob([content], { type: contentType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
