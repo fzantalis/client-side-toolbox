@@ -52,13 +52,7 @@
     </header>
 
     <main class="workspace" style="flex-direction: column; gap: 1.5rem;">
-      <div class="stat-grid">
-        <div class="stat-card"><strong id="cnt-words">0</strong><span>Words</span></div>
-        <div class="stat-card"><strong id="cnt-chars">0</strong><span>Characters</span></div>
-        <div class="stat-card"><strong id="cnt-read">0m</strong><span>Reading Time</span></div>
-        <div class="stat-card"><strong id="cnt-speak">0m</strong><span>Speaking Time</span></div>
-      </div>
-
+      
       <div class="panel">
         <div class="panel-header">
           <h3>Editor</h3>
@@ -75,6 +69,12 @@
           </div>
         </div>
       </div>
+      <div class="stat-grid">
+        <div class="stat-card"><strong id="cnt-words">0</strong><span>Words</span></div>
+        <div class="stat-card"><strong id="cnt-chars">0</strong><span>Characters</span></div>
+        <div class="stat-card"><strong id="cnt-read">0m</strong><span>Reading Time</span></div>
+        <div class="stat-card"><strong id="cnt-speak">0m</strong><span>Speaking Time</span></div>
+      </div>
     </main>
 
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
@@ -85,6 +85,11 @@
           View Source on GitHub
         </a>
       </div>
+       <div style="display:flex;justify-content:center;gap:1rem;margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
+    </div>
     </footer>
   </div>
 
