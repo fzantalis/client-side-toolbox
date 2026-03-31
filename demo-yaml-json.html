@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>YAML to JSON & JSON to YAML Converter | Free Secure Data Tool</title>
+  <meta name="title" content="YAML to JSON & JSON to YAML Converter | Free Secure Data Tool">
+  <meta name="description" content="Instantly convert YAML to JSON or JSON to YAML. A fast, secure, and 100% private client-side developer tool for transforming and formatting configuration files.">
+  <meta name="keywords" content="YAML to JSON converter, JSON to YAML converter, YAML parser, format YAML online, JSON to YAML tool, secure configuration converter, browser-based YAML tool, zero upload">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-yaml-json.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-yaml-json.html">
+  <meta property="og:title" content="YAML to JSON & JSON to YAML Converter | Free Secure Data Tool">
+  <meta property="og:description" content="Instantly convert YAML to JSON or JSON to YAML. A secure tool that runs entirely in your browser with zero server uploads.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-yaml-json.html">
+  <meta property="twitter:title" content="YAML to JSON & JSON to YAML Converter | Free Secure Data Tool">
+  <meta property="twitter:description" content="Instantly convert YAML to JSON or JSON to YAML. A secure tool that runs entirely in your browser.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
+  <style>
+    textarea { font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+    #out { font-family: 'Fira Code', monospace; font-size: 0.9rem; tab-size: 2; }
+    .error-text { color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.5rem; border-radius: 4px; display: none; margin-bottom: 1rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-code"></i></div>
+      <div class="tool-header-text">
+        <h1>YAML ↔ JSON Converter</h1>
+        <p>Transform structured data between YAML and JSON formats instantly and privately.</p>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Input Data</h3>
+          <div class="panel-actions">
+            <button onclick="convertToJSON()" class="btn-primary"><i class="ph ph-brackets-curly"></i> To JSON</button>
+            <button onclick="convertToYAML()" class="btn-primary"><i class="ph ph-list"></i> To YAML</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="error-msg" class="error-text"></div>
+          <textarea id="input" placeholder="Enter YAML or JSON here...&#10;&#10;example:&#10;name: ClientSideToolbox&#10;version: 1.0.0"></textarea>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Result</h3>
+          <div class="panel-actions">
+            <button onclick="copyResult()" class="btn-secondary"><i class="ph ph-copy"></i> Copy</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <pre id="out">Converted result will appear here...</pre>
+        </div>
+      </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+        <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+          <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+          View Source on GitHub
+        </a>
+      </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const inputEl = document.getElementById('input');
+    const outputEl = document.getElementById('out');
+    const errorEl = document.getElementById('error-msg');
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+      outputEl.textContent = "Error in conversion.";
+    }
+
+    function clearError() {
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+    }
+
+    function convertToJSON() {
+      clearError();
+      const val = inputEl.value.trim();
+      if (!val) return;
+
+      try {
+        const obj = jsyaml.load(val);
+        outputEl.textContent = JSON.stringify(obj, null, 2);
+      } catch (e) {
+        showError("Invalid YAML: " + e.message);
+      }
+    }
+
+    function convertToYAML() {
+      clearError();
+      const val = inputEl.value.trim();
+      if (!val) return;
+
+      try {
+        const obj = JSON.parse(val);
+        outputEl.textContent = jsyaml.dump(obj, { indent: 2 });
+      } catch (e) {
+        // If it wasn't JSON, maybe they clicked 'To YAML' on something already YAML
+        try {
+            const obj = jsyaml.load(val);
+            outputEl.textContent = jsyaml.dump(obj, { indent: 2 });
+        } catch(e2) {
+            showError("Invalid Input: Provide valid JSON to convert to YAML.");
+        }
+      }
+    }
+
+    function copyResult() {
+      const text = outputEl.textContent;
+      if (text && text !== "Converted result will appear here..." && text !== "Error in conversion.") {
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.querySelector('.btn-secondary');
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+          setTimeout(() => btn.innerHTML = originalText, 2000);
+        });
+      }
+    }
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
