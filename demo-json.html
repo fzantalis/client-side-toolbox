@@ -34,20 +34,48 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
   <style>
-    /* ✅ Minimal safe additions */
-    #treeOutput ul {
-      list-style: none;
-      padding-left: 1rem;
-    }
+  #treeOutput {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
 
-    #treeOutput li {
-      margin: 2px 0;
-    }
+  #treeOutput ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 1.2rem;
+    border-left: 1px dashed var(--border);
+  }
 
-    #treeOutput span {
-      cursor: pointer;
-    }
-  </style>
+  #treeOutput li {
+    margin: 2px 0;
+    position: relative;
+  }
+
+  .tree-toggle {
+    cursor: pointer;
+    margin-right: 6px;
+    user-select: none;
+    color: var(--text-muted);
+  }
+
+  .tree-key {
+    color: #7dd3fc; /* light blue */
+  }
+
+  .tree-value {
+    color: #86efac; /* light green */
+  }
+
+  .tree-leaf {
+    color: var(--text);
+  }
+
+  .tree-node:hover {
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+  }
+</style>
 </head>
 
 <body>
@@ -155,34 +183,62 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Tree builder
-  const createTree = (obj) => {
-    const ul = document.createElement('ul');
+  const createTree = (data) => {
 
-    Object.entries(obj).forEach(([key, value]) => {
-      const li = document.createElement('li');
+  const createNode = (key, value) => {
+    const li = document.createElement('li');
+    const container = document.createElement('div');
+    container.className = 'tree-node';
 
-      if (typeof value === 'object' && value !== null) {
-        const span = document.createElement('span');
-        span.textContent = key;
+    // Check if object/array
+    if (typeof value === 'object' && value !== null) {
 
-        const child = createTree(value);
-        child.style.display = 'none';
+      const toggle = document.createElement('span');
+      toggle.textContent = '▶';
+      toggle.className = 'tree-toggle';
 
-        span.onclick = () => {
-          child.style.display = child.style.display === 'none' ? 'block' : 'none';
-        };
+      const keySpan = document.createElement('span');
+      keySpan.textContent = key;
+      keySpan.className = 'tree-key';
 
-        li.appendChild(span);
-        li.appendChild(child);
-      } else {
-        li.textContent = `${key}: ${value}`;
-      }
+      const child = document.createElement('ul');
+      child.style.display = 'none';
 
-      ul.appendChild(li);
-    });
+      Object.entries(value).forEach(([k, v]) => {
+        child.appendChild(createNode(k, v));
+      });
 
-    return ul;
+      toggle.onclick = () => {
+        const isOpen = child.style.display === 'block';
+        child.style.display = isOpen ? 'none' : 'block';
+        toggle.textContent = isOpen ? '▶' : '▼';
+      };
+
+      container.appendChild(toggle);
+      container.appendChild(keySpan);
+      li.appendChild(container);
+      li.appendChild(child);
+
+    } else {
+      // Leaf node
+      container.innerHTML = `
+        <span class="tree-key">${key}</span>: 
+        <span class="tree-value">${value}</span>
+      `;
+      li.appendChild(container);
+    }
+
+    return li;
   };
+
+  const root = document.createElement('ul');
+
+  Object.entries(data).forEach(([key, value]) => {
+    root.appendChild(createNode(key, value));
+  });
+
+  return root;
+};
 
   // Beautify
   formatBtn.addEventListener('click', () => {
