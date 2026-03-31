@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
-  
-  <title>Readability & Content Analyzer | Free Private Writing Tool</title>
-  <meta name="title" content="Readability & Content Analyzer | Free Private Writing Tool">
-  <meta name="description" content="Analyze word count, reading time, and Flesch-Kincaid readability scores entirely in your browser. Perfect for private drafts and secure content strategy.">
-  <meta name="keywords" content="word counter, readability checker, flesch-kincaid score, reading time calculator, speaking time generator, private writing tool, seo content analyzer">
+
+  <title>Readability &amp; Content Analyzer | Free Private Writing Tool</title>
+  <meta name="title" content="Readability &amp; Content Analyzer | Free Private Writing Tool">
+  <meta name="description" content="Analyze word count, reading time, readability scores, and word frequency entirely in your browser. Adjust reading pace, spot top keywords, and check difficulty — 100% private.">
+  <meta name="keywords" content="word counter, readability checker, flesch-kincaid score, reading time calculator, speaking time, word frequency, private writing tool, content analyzer, seo content tool">
   <meta name="author" content="fzantalis">
 
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -16,161 +16,489 @@
 
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://zantalis.net/demo-content-analyzer.html">
-  <meta property="og:title" content="Readability & Content Analyzer | Free Private Writing Tool">
-  <meta property="og:description" content="Check word count and readability grade levels privately. No data ever leaves your browser.">
+  <meta property="og:title" content="Readability &amp; Content Analyzer | Free Private Writing Tool">
+  <meta property="og:description" content="Check word count, reading time, and readability grades privately. Adjust pace, see top keywords. No data ever leaves your browser.">
   <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-content-analyzer.html">
+  <meta property="twitter:title" content="Readability &amp; Content Analyzer | Free Private Writing Tool">
+  <meta property="twitter:description" content="Check word count, reading time, and readability grades privately. No data ever leaves your browser.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
 
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <style>
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 1rem; border-radius: 10px; text-align: center; }
-    .stat-card strong { display: block; font-size: 1.5rem; color: var(--primary); margin-bottom: 0.25rem; }
-    .stat-card span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; }
-    
-    #editor { width: 100%; min-height: 400px; padding: 1.5rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.6; resize: vertical; outline: none; transition: border-color 0.2s; }
-    #editor:focus { border-color: var(--primary); }
+    /* --- Stat Cards --- */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card strong {
+      display: block;
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+      font-weight: 700;
+    }
+    .stat-card span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
 
-    .gauge-container { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border); margin-top: 1rem; }
-    .grade-badge { padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.9rem; }
-    .grade-easy { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-    .grade-med { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-    .grade-hard { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    /* --- Editor --- */
+    #editor {
+      width: 100%;
+      min-height: 280px;
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #editor:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+
+    /* --- Readability Badge --- */
+    .grade-badge {
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .grade-easy { background: rgba(16,185,129,0.1); color: #10b981; }
+    .grade-med  { background: rgba(245,158,11,0.1);  color: #f59e0b; }
+    .grade-hard { background: rgba(239,68,68,0.1);   color: #ef4444; }
+
+    .gauge-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .gauge-container i { color: var(--primary); margin-top: 2px; flex-shrink: 0; }
+    .gauge-container p { font-size: 0.875rem; color: var(--text-muted); margin: 0; }
+
+    /* --- Pace Selector --- */
+    .pace-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .pace-selector label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .pace-btn {
+      padding: 0.35rem 0.85rem;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pace-btn:hover { border-color: var(--primary); color: var(--primary); transform: none; }
+    .pace-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* --- Word Frequency --- */
+    .freq-section {
+      margin-top: 0;
+    }
+    .freq-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .freq-header h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .freq-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .freq-toggle input[type="checkbox"] { cursor: pointer; }
+
+    .freq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .freq-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .freq-word {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 100px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .freq-bar-wrap {
+      flex: 1;
+      background: var(--bg);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .freq-bar {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--primary);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .freq-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    .freq-empty {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    /* --- Section divider within panel body --- */
+    .panel-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0.25rem 0;
+    }
+
+    /* --- Responsive layout for the two-panel workspace --- */
+    .analyzer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 900px) {
+      .analyzer-grid {
+        grid-template-columns: 1.4fr 1fr;
+        align-items: start;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
-    <header class="tool-header">
-      <div class="card-icon"><i class="ph ph-article"></i></div>
-      <div class="tool-header-text">
-        <h1>Content Strategy Analyzer</h1>
-        <p>Private analysis of word counts, reading difficulty, and timing for your drafts.</p>
-      </div>
-    </header>
 
-    <main class="workspace" style="flex-direction: column; gap: 1.5rem;">
-      
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-article"></i></div>
+    <div>
+      <h1>Content Analyzer</h1>
+      <p>Readability scores, reading time, and word frequency — fully private, runs in your browser.</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid">
+      <div class="stat-card"><strong id="cnt-words">0</strong><span>Words</span></div>
+      <div class="stat-card"><strong id="cnt-chars">0</strong><span>Characters</span></div>
+      <div class="stat-card"><strong id="cnt-sentences">0</strong><span>Sentences</span></div>
+      <div class="stat-card"><strong id="cnt-paragraphs">0</strong><span>Paragraphs</span></div>
+      <div class="stat-card"><strong id="cnt-read">—</strong><span>Read Time</span></div>
+      <div class="stat-card"><strong id="cnt-speak">—</strong><span>Speak Time</span></div>
+    </div>
+
+    <!-- Two-panel grid: Editor left, Analysis right -->
+    <div class="analyzer-grid">
+
+      <!-- LEFT: Editor -->
       <div class="panel">
         <div class="panel-header">
           <h3>Editor</h3>
-          <div id="readability-indicator" class="grade-badge grade-easy" style="display:none;">Score: --</div>
+          <div id="readability-indicator" class="grade-badge grade-easy" style="display:none;"></div>
         </div>
         <div class="panel-body">
           <textarea id="editor" placeholder="Start typing or paste your content here..."></textarea>
-          
+
           <div class="gauge-container">
-            <i class="ph ph-info" style="color: var(--primary);"></i>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
-              <strong>Flesch Reading Ease:</strong> <span id="readability-desc">Type some text to calculate difficulty.</span>
+            <i class="ph ph-info"></i>
+            <p>
+              <strong>Flesch Reading Ease — </strong>
+              <span id="readability-desc">Type some text to calculate difficulty.</span>
             </p>
           </div>
         </div>
       </div>
-      <div class="stat-grid">
-        <div class="stat-card"><strong id="cnt-words">0</strong><span>Words</span></div>
-        <div class="stat-card"><strong id="cnt-chars">0</strong><span>Characters</span></div>
-        <div class="stat-card"><strong id="cnt-read">0m</strong><span>Reading Time</span></div>
-        <div class="stat-card"><strong id="cnt-speak">0m</strong><span>Speaking Time</span></div>
-      </div>
-    </main>
 
-    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
-      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
-      <div style="margin-top: 1rem; margin-bottom: 1rem;">
-        <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
-          <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
-          View Source on GitHub
-        </a>
+      <!-- RIGHT: Analysis -->
+      <div class="panel">
+
+        <!-- Pace -->
+        <div class="panel-header">
+          <h3>Reading Pace</h3>
+        </div>
+        <div class="panel-body" style="padding-bottom: 1.25rem;">
+          <div class="pace-selector">
+            <label>Reading</label>
+            <button class="pace-btn" data-type="read" data-wpm="150">Slow <span style="opacity:.6;font-weight:400">150 wpm</span></button>
+            <button class="pace-btn active" data-type="read" data-wpm="225">Normal <span style="opacity:.6;font-weight:400">225 wpm</span></button>
+            <button class="pace-btn" data-type="read" data-wpm="350">Fast <span style="opacity:.6;font-weight:400">350 wpm</span></button>
+          </div>
+          <div class="pace-selector" style="margin-top:0.5rem;">
+            <label>Speaking</label>
+            <button class="pace-btn" data-type="speak" data-wpm="100">Slow <span style="opacity:.6;font-weight:400">100 wpm</span></button>
+            <button class="pace-btn active" data-type="speak" data-wpm="130">Normal <span style="opacity:.6;font-weight:400">130 wpm</span></button>
+            <button class="pace-btn" data-type="speak" data-wpm="160">Fast <span style="opacity:.6;font-weight:400">160 wpm</span></button>
+          </div>
+        </div>
+
+        <hr class="panel-divider">
+
+        <!-- Word Frequency -->
+        <div class="panel-header">
+          <h3>Top Words</h3>
+          <label class="freq-toggle">
+            <input type="checkbox" id="toggle-stopwords" checked>
+            Skip common words
+          </label>
+        </div>
+        <div class="panel-body freq-section">
+          <div class="freq-list" id="freq-list">
+            <p class="freq-empty">Type something to see word frequency.</p>
+          </div>
+        </div>
+
       </div>
-       <div style="display:flex;justify-content:center;gap:1rem;margin-top:0.5rem;">
-      <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
-      <span>&bull;</span>
-      <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
     </div>
-    </footer>
-  </div>
 
-  <script>
-    const editor = document.getElementById('editor');
-    
-    function countSyllables(word) {
-      word = word.toLowerCase();
-      if(word.length <= 3) return 1;
-      word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-      word = word.replace(/^y/, '');
-      const syllables = word.match(/[aeiouy]{1,2}/g);
-      return syllables ? syllables.length : 1;
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────
+  let readWpm   = 225;
+  let speakWpm  = 130;
+
+  const STOPWORDS = new Set([
+    'a','an','the','and','or','but','in','on','at','to','for','of','with',
+    'by','from','is','are','was','were','be','been','being','have','has',
+    'had','do','does','did','will','would','could','should','may','might',
+    'it','its','i','you','he','she','we','they','this','that','these',
+    'those','not','no','so','as','if','up','out','about','into','than',
+    'then','my','your','his','her','our','their','what','which','who',
+    'all','can','just','me','him','us','them','there','here','when','where',
+    'how','also','after','before','over','under','more','some','any','each'
+  ]);
+
+  // ── Helpers ────────────────────────────────────────────
+  function countSyllables(word) {
+    word = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (!word) return 0;
+    if (word.length <= 3) return 1;
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    word = word.replace(/^y/, '');
+    const m = word.match(/[aeiouy]{1,2}/g);
+    return m ? m.length : 1;
+  }
+
+  function formatTime(totalMinutes) {
+    if (totalMinutes < 1) return '< 1 min';
+    if (totalMinutes < 60) return totalMinutes + ' min';
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+
+  // ── Main update ────────────────────────────────────────
+  function updateStats() {
+    const text = document.getElementById('editor').value;
+
+    if (!text.trim()) {
+      resetStats();
+      return;
     }
 
-    function updateStats() {
-      const text = editor.value.trim();
-      if (!text) {
-        resetStats();
-        return;
-      }
+    // Tokenize
+    const words      = text.trim().split(/\s+/).filter(w => w.length > 0);
+    const sentences  = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
-      const words = text.split(/\s+/).filter(w => w.length > 0);
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-      const charCount = text.length;
-      const wordCount = words.length;
-      const sentenceCount = sentences.length || 1;
+    const wordCount      = words.length;
+    const sentenceCount  = Math.max(sentences.length, 1);
+    const paraCount      = Math.max(paragraphs.length, 1);
+    const charCount      = text.length;
 
-      // Basic Stats
-      document.getElementById('cnt-words').textContent = wordCount.toLocaleString();
-      document.getElementById('cnt-chars').textContent = charCount.toLocaleString();
+    // Basic stats
+    document.getElementById('cnt-words').textContent      = wordCount.toLocaleString();
+    document.getElementById('cnt-chars').textContent      = charCount.toLocaleString();
+    document.getElementById('cnt-sentences').textContent  = sentenceCount.toLocaleString();
+    document.getElementById('cnt-paragraphs').textContent = paraCount.toLocaleString();
 
-      // Time Estimates
-      // Reading: ~225 wpm | Speaking: ~130 wpm
-      const readMin = Math.ceil(wordCount / 225);
-      const speakMin = Math.ceil(wordCount / 130);
-      document.getElementById('cnt-read').textContent = readMin + 'm';
-      document.getElementById('cnt-speak').textContent = speakMin + 'm';
+    // Times
+    document.getElementById('cnt-read').textContent  = formatTime(Math.ceil(wordCount / readWpm));
+    document.getElementById('cnt-speak').textContent = formatTime(Math.ceil(wordCount / speakWpm));
 
-      // Readability (Flesch Reading Ease)
-      let totalSyllables = 0;
-      words.forEach(w => totalSyllables += countSyllables(w));
+    // Flesch Reading Ease
+    let totalSyllables = 0;
+    words.forEach(w => { totalSyllables += countSyllables(w); });
+    const flesch = 206.835
+      - 1.015  * (wordCount / sentenceCount)
+      - 84.6   * (totalSyllables / Math.max(wordCount, 1));
+    displayReadability(Math.round(flesch));
 
-      // Formula: 206.835 - 1.015(total words / total sentences) - 84.6(total syllables / total words)
-      const score = 206.835 - 1.015 * (wordCount / sentenceCount) - 84.6 * (totalSyllables / wordCount);
-      displayReadability(score);
+    // Word frequency
+    updateFrequency(words);
+  }
+
+  function displayReadability(score) {
+    const badge = document.getElementById('readability-indicator');
+    const desc  = document.getElementById('readability-desc');
+    badge.style.display = 'inline-block';
+    badge.textContent   = 'Score: ' + score;
+    badge.className     = 'grade-badge';
+
+    if (score >= 80) {
+      badge.classList.add('grade-easy');
+      desc.innerHTML = '<strong>Very easy.</strong> Suitable for a 5th grader.';
+    } else if (score >= 60) {
+      badge.classList.add('grade-easy');
+      desc.innerHTML = '<strong>Standard English.</strong> Clear to 8th–9th grade readers.';
+    } else if (score >= 30) {
+      badge.classList.add('grade-med');
+      desc.innerHTML = '<strong>Fairly difficult.</strong> Best suited for college-level readers.';
+    } else {
+      badge.classList.add('grade-hard');
+      desc.innerHTML = '<strong>Very difficult.</strong> Typical of academic or scientific writing.';
+    }
+  }
+
+  function updateFrequency(words) {
+    const skipStopwords = document.getElementById('toggle-stopwords').checked;
+    const freq = {};
+
+    words.forEach(raw => {
+      const w = raw.toLowerCase().replace(/[^a-z']/g, '');
+      if (!w || w.length < 2) return;
+      if (skipStopwords && STOPWORDS.has(w)) return;
+      freq[w] = (freq[w] || 0) + 1;
+    });
+
+    const sorted = Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15);
+
+    const list = document.getElementById('freq-list');
+
+    if (sorted.length === 0) {
+      list.innerHTML = '<p class="freq-empty">No words to display.</p>';
+      return;
     }
 
-    function displayReadability(score) {
-      const badge = document.getElementById('readability-indicator');
-      const desc = document.getElementById('readability-desc');
-      badge.style.display = 'block';
-      badge.textContent = `Score: ${Math.round(score)}`;
-      badge.className = 'grade-badge';
+    const max = sorted[0][1];
+    list.innerHTML = sorted.map(([word, count]) => `
+      <div class="freq-item">
+        <span class="freq-word" title="${word}">${word}</span>
+        <div class="freq-bar-wrap">
+          <div class="freq-bar" style="width:${Math.round((count / max) * 100)}%"></div>
+        </div>
+        <span class="freq-count">${count}</span>
+      </div>
+    `).join('');
+  }
 
-      if (score >= 80) {
-        badge.classList.add('grade-easy');
-        desc.textContent = "Very easy to read. Typical for a 5th grade student.";
-      } else if (score >= 60) {
-        badge.classList.add('grade-easy');
-        desc.textContent = "Standard English. Easily understood by 8th & 9th graders.";
-      } else if (score >= 30) {
-        badge.classList.add('grade-med');
-        desc.textContent = "Fairly difficult. Best for college-level readers.";
-      } else {
-        badge.classList.add('grade-hard');
-        desc.textContent = "Very difficult. Likely professional or scientific prose.";
-      }
-    }
+  function resetStats() {
+    ['cnt-words','cnt-chars','cnt-sentences','cnt-paragraphs'].forEach(id => {
+      document.getElementById(id).textContent = '0';
+    });
+    document.getElementById('cnt-read').textContent  = '—';
+    document.getElementById('cnt-speak').textContent = '—';
+    document.getElementById('readability-indicator').style.display = 'none';
+    document.getElementById('readability-desc').textContent = 'Type some text to calculate difficulty.';
+    document.getElementById('freq-list').innerHTML = '<p class="freq-empty">Type something to see word frequency.</p>';
+  }
 
-    function resetStats() {
-      document.getElementById('cnt-words').textContent = '0';
-      document.getElementById('cnt-chars').textContent = '0';
-      document.getElementById('cnt-read').textContent = '0m';
-      document.getElementById('cnt-speak').textContent = '0m';
-      document.getElementById('readability-indicator').style.display = 'none';
-      document.getElementById('readability-desc').textContent = "Type some text to calculate difficulty.";
-    }
+  // ── Pace buttons ───────────────────────────────────────
+  document.querySelectorAll('.pace-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.type;
+      document.querySelectorAll(`.pace-btn[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (type === 'read')  readWpm  = +btn.dataset.wpm;
+      if (type === 'speak') speakWpm = +btn.dataset.wpm;
+      updateStats();
+    });
+  });
 
-    editor.addEventListener('input', updateStats);
-  </script>
-  <script src="theme-toggle.js"></script>
+  // ── Stopword toggle ────────────────────────────────────
+  document.getElementById('toggle-stopwords').addEventListener('change', updateStats);
+
+  // ── Editor input ───────────────────────────────────────
+  document.getElementById('editor').addEventListener('input', updateStats);
+</script>
+
+<script src="theme-toggle.js"></script>
 </body>
 </html>
