@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+
+  <title>Mortgage Repayment Calculator | Free Private Finance Tool</title>
+  <meta name="title" content="Mortgage Repayment Calculator | Free Private Finance Tool">
+  <meta name="description" content="Calculate your monthly mortgage payment, total interest paid, and view a full month-by-month repayment schedule. Set loan amount, interest rate, and term. 100% private, runs entirely in your browser.">
+  <meta name="keywords" content="mortgage calculator, mortgage repayment calculator, monthly payment calculator, amortization schedule, home loan calculator, interest calculator, free finance tool, private mortgage tool, offline calculator">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-mortgage.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-mortgage.html">
+  <meta property="og:title" content="Mortgage Repayment Calculator | Free Private Finance Tool">
+  <meta property="og:description" content="Monthly payment, total interest, and full amortization schedule for any loan. No data leaves your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-mortgage.html">
+  <meta property="twitter:title" content="Mortgage Repayment Calculator | Free Private Finance Tool">
+  <meta property="twitter:description" content="Monthly payment, total interest, and full repayment schedule. Runs entirely in your browser.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ── Input form ─────────────────────────────────────── */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-prefix, .input-suffix {
+      position: absolute;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .input-prefix { left: 0.85rem; }
+    .input-suffix { right: 0.85rem; }
+    .input-wrap input,
+    .input-wrap select {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -moz-appearance: textfield;
+    }
+    .input-wrap input::-webkit-outer-spin-button,
+    .input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .input-wrap input:focus,
+    .input-wrap select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+    .has-prefix input  { padding-left: 2rem; }
+    .has-suffix input  { padding-right: 2.5rem; }
+
+    .input-wrap select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      cursor: pointer;
+    }
+
+    /* ── Extra payments toggle hint ─────────────────────── */
+    .extra-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* ── Summary stat cards ─────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    .stat-card .sc-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .stat-card .sc-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .stat-card .sc-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+    .stat-card.highlight {
+      border-color: var(--primary);
+      background: rgba(59,130,246,0.04);
+    }
+    .stat-card.highlight .sc-value { font-size: 1.75rem; }
+    .stat-card.danger .sc-value    { color: #ef4444; }
+    .stat-card.success .sc-value   { color: #10b981; }
+
+    /* ── Two-column layout for chart + donut ────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    @media (min-width: 860px) {
+      .charts-row { grid-template-columns: 1.8fr 1fr; }
+    }
+
+    .chart-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-panel h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.25rem;
+    }
+    .chart-wrap { position: relative; height: 260px; }
+    .donut-wrap {
+      position: relative;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Donut centre label */
+    .donut-center {
+      position: absolute;
+      text-align: center;
+      pointer-events: none;
+    }
+    .donut-center .dc-pct {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+    }
+    .donut-center .dc-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 0.2rem;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Milestone pills ────────────────────────────────── */
+    .milestones {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .milestone-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+    }
+    .milestone-pill i { color: var(--primary); }
+
+    /* ── Amortization table ─────────────────────────────── */
+    .table-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+    .table-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .table-panel-header h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+    }
+    .view-toggle {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .vt-btn {
+      padding: 0.35rem 0.85rem;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .vt-btn:hover { border-color: var(--primary); color: var(--primary); transform: none; }
+    .vt-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .table-scroll { overflow-x: auto; max-height: 480px; overflow-y: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 0.75rem 1rem;
+      text-align: right;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    thead th:first-child { text-align: center; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+
+    /* Highlight 25/50/75% milestones in table */
+    tbody tr.milestone-row { background: rgba(59,130,246,0.04); }
+    tbody tr.milestone-row td:first-child { color: var(--primary); font-weight: 700; }
+
+    tbody td {
+      padding: 0.7rem 1rem;
+      text-align: right;
+      color: var(--text-main);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    tbody td:first-child {
+      text-align: center;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .td-interest  { color: #ef4444; }
+    .td-principal { color: var(--primary); }
+    .td-balance   { font-weight: 700; }
+    .td-equity    { color: #10b981; }
+
+    /* Progress bar inside balance cell */
+    .balance-bar-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.6rem;
+    }
+    .balance-bar-bg {
+      width: 60px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .balance-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    /* ── Empty state ────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+    .empty-state i {
+      font-size: 2.5rem;
+      color: var(--border);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-house"></i></div>
+    <div>
+      <h1>Mortgage Repayment Calculator</h1>
+      <p>Monthly payment, total interest, and a full month-by-month repayment schedule. Runs privately in your browser.</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── Inputs ────────────────────────────────────────── -->
+    <div class="panel" style="margin-bottom:2rem;">
+      <div class="panel-header"><h3>Loan Details</h3></div>
+      <div class="panel-body">
+        <div class="inputs-grid">
+
+          <div class="form-group">
+            <label>Loan Amount</label>
+            <div class="input-wrap has-prefix">
+              <span class="input-prefix" id="sym-prefix">$</span>
+              <input type="number" id="loan" value="300000" min="0" step="1000">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Annual Interest Rate</label>
+            <div class="input-wrap has-suffix">
+              <input type="number" id="rate" value="6.5" min="0" max="30" step="0.05">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Loan Term</label>
+            <div class="input-wrap">
+              <select id="term">
+                <option value="5">5 years</option>
+                <option value="10">10 years</option>
+                <option value="15">15 years</option>
+                <option value="20">20 years</option>
+                <option value="25" selected>25 years</option>
+                <option value="30">30 years</option>
+                <option value="35">35 years</option>
+                <option value="40">40 years</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Extra Monthly Payment</label>
+            <div class="input-wrap has-prefix">
+              <span class="input-prefix" id="sym-prefix2">$</span>
+              <input type="number" id="extra" value="0" min="0" step="50" placeholder="0">
+            </div>
+            <span class="extra-hint">Pays off earlier &amp; saves on interest</span>
+          </div>
+
+          <div class="form-group">
+            <label>Currency Symbol</label>
+            <div class="input-wrap">
+              <input type="text" id="currency" value="$" maxlength="3" style="text-align:center; font-weight:700; letter-spacing:0.05em;">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Summary cards ─────────────────────────────────── -->
+    <div class="stat-grid" id="summary-cards">
+      <div class="empty-state" style="grid-column:1/-1; padding:1.5rem;">
+        <i class="ph ph-calculator"></i>
+        <p>Fill in the loan details above to see results.</p>
+      </div>
+    </div>
+
+    <!-- ── Milestone pills ───────────────────────────────── -->
+    <div class="milestones" id="milestones" style="display:none;"></div>
+
+    <!-- ── Charts row ────────────────────────────────────── -->
+    <div class="charts-row" id="charts-row" style="display:none;">
+
+      <!-- Balance over time line chart -->
+      <div class="chart-panel">
+        <h3>Balance Over Time</h3>
+        <div class="chart-wrap">
+          <canvas id="balanceChart"></canvas>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>Remaining Balance</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div>Equity Built</div>
+          <div class="legend-item" id="extra-legend" style="display:none;"><div class="legend-dot" style="background:#f59e0b; border:1.5px dashed #f59e0b; background:transparent;"></div>Balance with Extra Payment</div>
+        </div>
+      </div>
+
+      <!-- Principal vs Interest donut -->
+      <div class="chart-panel">
+        <h3>Payment Breakdown</h3>
+        <div class="donut-wrap">
+          <canvas id="donutChart"></canvas>
+          <div class="donut-center" id="donut-center">
+            <div class="dc-pct" id="dc-interest-pct">—</div>
+            <div class="dc-label">interest</div>
+          </div>
+        </div>
+        <div class="chart-legend" style="justify-content:center;">
+          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>Principal</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div>Interest</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Amortization table ─────────────────────────────── -->
+    <div class="table-panel" id="table-panel" style="display:none;">
+      <div class="table-panel-header">
+        <h3>Repayment Schedule</h3>
+        <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+          <div class="view-toggle">
+            <button class="vt-btn active" id="btn-monthly" onclick="setView('monthly')">Monthly</button>
+            <button class="vt-btn" id="btn-yearly"  onclick="setView('yearly')">Yearly</button>
+          </div>
+          <button class="btn-secondary" onclick="exportCSV()" style="font-size:0.82rem;">
+            <i class="ph ph-download-simple"></i> Export CSV
+          </button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table id="amort-table">
+          <thead id="amort-head"></thead>
+          <tbody id="amort-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ── Globals ────────────────────────────────────────────────────────
+let balanceChartInstance = null;
+let donutChartInstance   = null;
+let monthlyRows          = [];   // full month-by-month data
+let yearlyRows           = [];   // aggregated by year
+let currentView          = 'monthly';
+let currentLoan          = 0;
+
+// ── Currency helper ────────────────────────────────────────────────
+function getCur() { return document.getElementById('currency').value.trim() || '$'; }
+
+function fmt(n, compact) {
+  const s = getCur();
+  if (compact) {
+    if (Math.abs(n) >= 1e6) return s + (n/1e6).toFixed(2) + 'M';
+    if (Math.abs(n) >= 1e3) return s + (n/1e3).toFixed(1) + 'K';
+    return s + Math.round(n).toLocaleString();
+  }
+  return s + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ── Core amortization ──────────────────────────────────────────────
+function amortize(principal, annualRate, termMonths, extraMonthly) {
+  const r = annualRate / 100 / 12;
+  // Standard monthly payment formula
+  const basePayment = r === 0
+    ? principal / termMonths
+    : principal * (r * Math.pow(1 + r, termMonths)) / (Math.pow(1 + r, termMonths) - 1);
+
+  const rows = [];
+  let balance = principal;
+  let month = 0;
+
+  while (balance > 0.005 && month < termMonths) {
+    month++;
+    const interestCharge = balance * r;
+    let principalCharge  = basePayment - interestCharge;
+    let extra            = extraMonthly;
+
+    // Don't overpay
+    if (principalCharge + extra >= balance) {
+      extra = Math.max(0, balance - principalCharge);
+    }
+    if (principalCharge > balance) principalCharge = balance;
+
+    const totalPaid = basePayment + extra;
+    balance         = Math.max(0, balance - principalCharge - extra);
+
+    rows.push({
+      month,
+      payment:   basePayment + extra,
+      principal: principalCharge + extra,
+      interest:  interestCharge,
+      balance,
+      equity:    principal - balance,
+    });
+
+    if (balance <= 0.005) break;
+  }
+
+  return { rows, basePayment };
+}
+
+// Aggregate monthly rows into yearly summaries
+function toYearly(rows, principal) {
+  const years = {};
+  rows.forEach(r => {
+    const y = Math.ceil(r.month / 12);
+    if (!years[y]) years[y] = { year: y, payment: 0, principal: 0, interest: 0, balance: 0, equity: 0 };
+    years[y].payment   += r.payment;
+    years[y].principal += r.principal;
+    years[y].interest  += r.interest;
+    years[y].balance    = r.balance;
+    years[y].equity     = r.equity;
+  });
+  return Object.values(years);
+}
+
+// ── Main calculate ─────────────────────────────────────────────────
+function calculate() {
+  const loan  = parseFloat(document.getElementById('loan').value)  || 0;
+  const rate  = parseFloat(document.getElementById('rate').value)  || 0;
+  const term  = parseInt(document.getElementById('term').value)    || 25;
+  const extra = parseFloat(document.getElementById('extra').value) || 0;
+
+  // sync currency prefix
+  const sym = getCur();
+  document.getElementById('sym-prefix').textContent  = sym;
+  document.getElementById('sym-prefix2').textContent = sym;
+
+  if (loan <= 0) return;
+
+  currentLoan = loan;
+
+  const termMonths = term * 12;
+  const { rows, basePayment } = amortize(loan, rate, termMonths, extra);
+
+  // With extra payment we might finish early — also calculate without for comparison
+  let earlyMonths = null;
+  let interestSaved = 0;
+  if (extra > 0) {
+    const { rows: noExtraRows } = amortize(loan, rate, termMonths, 0);
+    earlyMonths   = termMonths - rows.length;
+    const totalNoExtra   = noExtraRows.reduce((s, r) => s + r.interest, 0);
+    const totalWithExtra = rows.reduce((s, r) => s + r.interest, 0);
+    interestSaved = totalNoExtra - totalWithExtra;
+  }
+
+  monthlyRows = rows;
+  yearlyRows  = toYearly(rows, loan);
+
+  const totalPaid     = rows.reduce((s, r) => s + r.payment, 0);
+  const totalInterest = rows.reduce((s, r) => s + r.interest, 0);
+  const totalPrincipal = rows.reduce((s, r) => s + r.principal, 0);
+  const actualMonths  = rows.length;
+  const actualYears   = Math.floor(actualMonths / 12);
+  const remMonths     = actualMonths % 12;
+
+  renderSummary(loan, basePayment, totalPaid, totalInterest, actualMonths, extra, earlyMonths, interestSaved);
+  renderMilestones(rows, loan, extra, earlyMonths);
+  renderBalanceChart(rows, loan, extra, termMonths, rate);
+  renderDonutChart(loan, totalInterest);
+  renderTable(currentView);
+
+  document.getElementById('charts-row').style.display  = '';
+  document.getElementById('table-panel').style.display = '';
+  document.getElementById('milestones').style.display  = '';
+}
+
+// ── Summary cards ──────────────────────────────────────────────────
+function renderSummary(loan, monthly, totalPaid, totalInterest, actualMonths, extra, earlyMonths, interestSaved) {
+  const yrs = Math.floor(actualMonths / 12);
+  const mos = actualMonths % 12;
+  const termStr = yrs > 0 ? `${yrs}y ${mos > 0 ? mos + 'm' : ''}`.trim() : `${mos}m`;
+
+  let extraCard = '';
+  if (extra > 0 && earlyMonths > 0) {
+    const ey = Math.floor(earlyMonths / 12);
+    const em = earlyMonths % 12;
+    const eStr = ey > 0 ? `${ey}y ${em > 0 ? em + 'm' : ''}`.trim() : `${em}m`;
+    extraCard = `
+      <div class="stat-card success">
+        <div class="sc-label">Interest Saved</div>
+        <div class="sc-value">${fmt(interestSaved, true)}</div>
+        <div class="sc-sub">Paid off ${eStr} earlier</div>
+      </div>`;
+  }
+
+  document.getElementById('summary-cards').innerHTML = `
+    <div class="stat-card highlight">
+      <div class="sc-label">Monthly Payment</div>
+      <div class="sc-value">${fmt(monthly + extra)}</div>
+      <div class="sc-sub">${extra > 0 ? fmt(monthly) + ' base + ' + fmt(extra) + ' extra' : 'Fixed payment'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Total Repaid</div>
+      <div class="sc-value">${fmt(totalPaid, true)}</div>
+      <div class="sc-sub">Over ${termStr}</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="sc-label">Total Interest</div>
+      <div class="sc-value">${fmt(totalInterest, true)}</div>
+      <div class="sc-sub">${((totalInterest / loan) * 100).toFixed(1)}% of loan amount</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Loan Paid Off</div>
+      <div class="sc-value" style="font-size:1.2rem;">${termStr}</div>
+      <div class="sc-sub">${actualMonths} monthly payments</div>
+    </div>
+    ${extraCard}
+  `;
+}
+
+// ── Milestone pills ────────────────────────────────────────────────
+function renderMilestones(rows, loan, extra, earlyMonths) {
+  const pcts = [25, 50, 75];
+  const pills = pcts.map(pct => {
+    const target = loan * (1 - pct / 100);
+    const hit    = rows.find(r => r.balance <= target);
+    if (!hit) return '';
+    const y = Math.floor(hit.month / 12);
+    const m = hit.month % 12;
+    const label = y > 0 ? `${y}y ${m > 0 ? m + 'm' : ''}`.trim() : `${m}m`;
+    return `<div class="milestone-pill"><i class="ph ph-flag"></i>${pct}% paid off in <strong>${label}</strong></div>`;
+  }).join('');
+
+  // Halfway-interest pill: month where cumulative interest > principal paid
+  const half = rows.find(r => r.equity >= loan / 2);
+  const halfPill = half ? `<div class="milestone-pill"><i class="ph ph-scales"></i>50% equity at month <strong>${half.month}</strong></div>` : '';
+
+  document.getElementById('milestones').innerHTML = pills + halfPill;
+}
+
+// ── Balance chart ──────────────────────────────────────────────────
+function renderBalanceChart(rows, loan, extra, termMonths, rate) {
+  const isDark    = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const lblColor  = isDark ? '#94a3b8' : '#64748b';
+
+  // Sample every Nth month so chart isn't too dense
+  const step   = rows.length > 120 ? 6 : rows.length > 60 ? 3 : 1;
+  const sample = rows.filter((_, i) => i % step === 0 || i === rows.length - 1);
+
+  const labels   = sample.map(r => r.month <= 12 ? `Mo ${r.month}` : `Yr ${(r.month/12).toFixed(1).replace('.0','')}`);
+  const balances = sample.map(r => parseFloat(r.balance.toFixed(2)));
+  const equity   = sample.map(r => parseFloat(r.equity.toFixed(2)));
+
+  const datasets = [
+    {
+      label: 'Remaining Balance',
+      data: balances,
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,0.07)',
+      fill: true,
+      tension: 0.35,
+      borderWidth: 2.5,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointBackgroundColor: '#3b82f6',
+    },
+    {
+      label: 'Equity Built',
+      data: equity,
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16,185,129,0.06)',
+      fill: true,
+      tension: 0.35,
+      borderWidth: 1.5,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+    },
+  ];
+
+  // If extra payment is set, show the "without extra" line as comparison
+  if (extra > 0) {
+    const { rows: noExtra } = amortize(loan, rate, termMonths, 0);
+    // Pad noExtra to same length if needed, sampling same steps
+    const noExtraSampled = [];
+    sample.forEach(s => {
+      const r = noExtra[s.month - 1];
+      noExtraSampled.push(r ? parseFloat(r.balance.toFixed(2)) : 0);
+    });
+    datasets.push({
+      label: 'Balance (no extra payment)',
+      data: noExtraSampled,
+      borderColor: '#f59e0b',
+      backgroundColor: 'transparent',
+      fill: false,
+      tension: 0.35,
+      borderWidth: 1.5,
+      borderDash: [5, 4],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+    });
+    document.getElementById('extra-legend').style.display = 'flex';
+  } else {
+    document.getElementById('extra-legend').style.display = 'none';
+  }
+
+  const ctx = document.getElementById('balanceChart').getContext('2d');
+  if (balanceChartInstance) balanceChartInstance.destroy();
+
+  balanceChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: isDark ? '#1e293b' : '#fff',
+          borderColor:     isDark ? '#334155' : '#e2e8f0',
+          borderWidth: 1,
+          titleColor: isDark ? '#f8fafc' : '#0f172a',
+          bodyColor:  isDark ? '#94a3b8'  : '#64748b',
+          padding: 12,
+          callbacks: { label: c => '  ' + c.dataset.label + ':  ' + fmt(c.parsed.y) }
+        }
+      },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: lblColor, font: { size: 11 }, maxTicksLimit: 10 } },
+        y: { grid: { color: gridColor }, ticks: { color: lblColor, font: { size: 11 }, callback: v => fmt(v, true) } }
+      }
+    }
+  });
+}
+
+// ── Donut chart ────────────────────────────────────────────────────
+function renderDonutChart(loan, totalInterest) {
+  const total   = loan + totalInterest;
+  const intPct  = ((totalInterest / total) * 100).toFixed(1);
+  document.getElementById('dc-interest-pct').textContent = intPct + '%';
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const ctx    = document.getElementById('donutChart').getContext('2d');
+  if (donutChartInstance) donutChartInstance.destroy();
+
+  donutChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Principal', 'Interest'],
+      datasets: [{
+        data: [parseFloat(loan.toFixed(2)), parseFloat(totalInterest.toFixed(2))],
+        backgroundColor: ['#3b82f6', '#ef4444'],
+        borderColor: isDark ? '#1e293b' : '#fff',
+        borderWidth: 3,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: isDark ? '#1e293b' : '#fff',
+          borderColor:     isDark ? '#334155' : '#e2e8f0',
+          borderWidth: 1,
+          titleColor: isDark ? '#f8fafc' : '#0f172a',
+          bodyColor:  isDark ? '#94a3b8'  : '#64748b',
+          padding: 12,
+          callbacks: {
+            label: c => '  ' + c.label + ':  ' + fmt(c.parsed) + ' (' + ((c.parsed / total) * 100).toFixed(1) + '%)'
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Table rendering ────────────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-monthly').classList.toggle('active', v === 'monthly');
+  document.getElementById('btn-yearly').classList.toggle('active',  v === 'yearly');
+  renderTable(v);
+}
+
+function renderTable(view) {
+  const rows  = view === 'monthly' ? monthlyRows : yearlyRows;
+  const isYr  = view === 'yearly';
+  const loan  = currentLoan;
+
+  document.getElementById('amort-head').innerHTML = `
+    <tr>
+      <th>${isYr ? 'Year' : 'Month'}</th>
+      <th>Payment</th>
+      <th>Principal</th>
+      <th>Interest</th>
+      <th>Balance</th>
+      <th>Equity</th>
+    </tr>`;
+
+  // Milestone months for highlighting
+  const milestoneSet = new Set();
+  [25, 50, 75].forEach(pct => {
+    const target = loan * (1 - pct / 100);
+    if (isYr) {
+      const hit = yearlyRows.find(r => r.balance <= target);
+      if (hit) milestoneSet.add(hit.year);
+    } else {
+      const hit = monthlyRows.find(r => r.balance <= target);
+      if (hit) milestoneSet.add(hit.month);
+    }
+  });
+
+  const key = isYr ? 'year' : 'month';
+
+  document.getElementById('amort-body').innerHTML = rows.map(r => {
+    const pct = Math.max(0, ((loan - r.balance) / loan) * 100);
+    const isMilestone = milestoneSet.has(r[key]);
+    return `
+      <tr class="${isMilestone ? 'milestone-row' : ''}">
+        <td>${r[key]}</td>
+        <td>${fmt(r.payment)}</td>
+        <td class="td-principal">${fmt(r.principal)}</td>
+        <td class="td-interest">${fmt(r.interest)}</td>
+        <td class="td-balance">
+          <div class="balance-bar-wrap">
+            <span>${fmt(r.balance)}</span>
+            <div class="balance-bar-bg">
+              <div class="balance-bar-fill" style="width:${(100 - pct).toFixed(1)}%"></div>
+            </div>
+          </div>
+        </td>
+        <td class="td-equity">${fmt(r.equity)}</td>
+      </tr>`;
+  }).join('');
+}
+
+// ── CSV export ─────────────────────────────────────────────────────
+function exportCSV() {
+  const rows  = currentView === 'monthly' ? monthlyRows : yearlyRows;
+  const isYr  = currentView === 'yearly';
+  const header = [isYr ? 'Year' : 'Month', 'Payment', 'Principal', 'Interest', 'Balance', 'Equity'];
+  const key    = isYr ? 'year' : 'month';
+  const data   = rows.map(r => [r[key], r.payment.toFixed(2), r.principal.toFixed(2), r.interest.toFixed(2), r.balance.toFixed(2), r.equity.toFixed(2)]);
+  const csv    = [header, ...data].map(r => r.join(',')).join('\n');
+  const blob   = new Blob([csv], { type: 'text/csv' });
+  const a      = document.createElement('a');
+  a.href       = URL.createObjectURL(blob);
+  a.download   = `mortgage-schedule-${currentView}.csv`;
+  a.click();
+}
+
+// ── Wire up all inputs ─────────────────────────────────────────────
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', calculate);
+});
+
+// ── Initial render ─────────────────────────────────────────────────
+calculate();
+</script>
+
+<script src="theme-toggle.js"></script>
+</body>
+</html>
