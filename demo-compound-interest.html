@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+
+  <title>Compound Interest Calculator | Free Private Finance Tool</title>
+  <meta name="title" content="Compound Interest Calculator | Free Private Finance Tool">
+  <meta name="description" content="Calculate compound interest with a full year-by-year amortization table and interactive growth chart. Set principal, rate, compounding period and additional contributions. 100% private, runs in your browser.">
+  <meta name="keywords" content="compound interest calculator, investment growth calculator, amortization table, interest calculator, savings calculator, free finance tool, offline calculator, private calculator">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-compound-interest.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-compound-interest.html">
+  <meta property="og:title" content="Compound Interest Calculator | Free Private Finance Tool">
+  <meta property="og:description" content="Full amortization table and growth chart for any principal, rate, and compounding period. No data leaves your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-compound-interest.html">
+  <meta property="twitter:title" content="Compound Interest Calculator | Free Private Finance Tool">
+  <meta property="twitter:description" content="Full amortization table and growth chart. Runs entirely in your browser.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ── Summary stat cards ─────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    .stat-card .sc-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .stat-card .sc-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .stat-card .sc-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+    .stat-card.highlight {
+      border-color: var(--primary);
+      background: rgba(59,130,246,0.04);
+    }
+    .stat-card.highlight .sc-value { font-size: 1.7rem; }
+
+    /* ── Input form ─────────────────────────────────────── */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-prefix, .input-suffix {
+      position: absolute;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .input-prefix { left: 0.85rem; }
+    .input-suffix { right: 0.85rem; }
+    .input-wrap input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -moz-appearance: textfield;
+    }
+    .input-wrap input::-webkit-outer-spin-button,
+    .input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .input-wrap input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+    .has-prefix input  { padding-left: 2rem; }
+    .has-suffix input  { padding-right: 2.4rem; }
+
+    select {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+    }
+    select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+
+    /* ── Chart panel ────────────────────────────────────── */
+    .chart-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+    .chart-panel h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.25rem;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 280px;
+    }
+
+    /* ── Chart legend ───────────────────────────────────── */
+    .chart-legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Table ──────────────────────────────────────────── */
+    .table-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+    .table-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .table-panel-header h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+    }
+    .table-scroll { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    thead th {
+      padding: 0.75rem 1rem;
+      text-align: right;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    thead th:first-child { text-align: center; }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+    tbody td {
+      padding: 0.75rem 1rem;
+      text-align: right;
+      color: var(--text-main);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    tbody td:first-child {
+      text-align: center;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .td-interest { color: var(--primary); }
+    .td-total    { font-weight: 700; }
+    .td-gain     { color: #10b981; }
+
+    /* ── Empty state ────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+    .empty-state i { font-size: 2.5rem; color: var(--border); margin-bottom: 0.75rem; display: block; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-chart-line-up"></i></div>
+    <div>
+      <h1>Compound Interest Calculator</h1>
+      <p>Full growth chart and year-by-year amortization table. All calculations run privately in your browser.</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── Inputs ────────────────────────────────────────── -->
+    <div class="panel" style="margin-bottom:2rem;">
+      <div class="panel-header"><h3>Parameters</h3></div>
+      <div class="panel-body">
+        <div class="inputs-grid">
+
+          <div class="form-group">
+            <label>Principal</label>
+            <div class="input-wrap has-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" id="principal" value="10000" min="0" step="100">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Annual Interest Rate</label>
+            <div class="input-wrap has-suffix">
+              <input type="number" id="rate" value="7" min="0" max="100" step="0.1">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Compounding Period</label>
+            <select id="freq">
+              <option value="1">Annually (1×/year)</option>
+              <option value="2">Semi-annually (2×/year)</option>
+              <option value="4">Quarterly (4×/year)</option>
+              <option value="12" selected>Monthly (12×/year)</option>
+              <option value="52">Weekly (52×/year)</option>
+              <option value="365">Daily (365×/year)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Duration (Years)</label>
+            <div class="input-wrap">
+              <input type="number" id="years" value="20" min="1" max="100" step="1">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Monthly Contribution</label>
+            <div class="input-wrap has-prefix">
+              <span class="input-prefix">$</span>
+              <input type="number" id="contribution" value="0" min="0" step="50" placeholder="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Currency Symbol</label>
+            <div class="input-wrap">
+              <input type="text" id="currency" value="$" maxlength="3" style="text-align:center; font-weight:700;">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Summary cards ─────────────────────────────────── -->
+    <div class="stat-grid" id="summary-cards">
+      <div class="empty-state" style="grid-column:1/-1; padding:1.5rem;">
+        <i class="ph ph-calculator"></i>
+        <p>Fill in the parameters above to see results.</p>
+      </div>
+    </div>
+
+    <!-- ── Chart ─────────────────────────────────────────── -->
+    <div class="chart-panel" id="chart-panel" style="display:none;">
+      <h3>Growth Over Time</h3>
+      <div class="chart-wrap">
+        <canvas id="growthChart"></canvas>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>Total Balance</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e2e8f0; border:1px solid #cbd5e1;"></div>Principal + Contributions</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div>Interest Earned</div>
+      </div>
+    </div>
+
+    <!-- ── Amortization table ─────────────────────────────── -->
+    <div class="table-panel" id="table-panel" style="display:none;">
+      <div class="table-panel-header">
+        <h3>Year-by-Year Breakdown</h3>
+        <button class="btn-secondary" onclick="exportCSV()" style="font-size:0.82rem;">
+          <i class="ph ph-download-simple"></i> Export CSV
+        </button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Opening Balance</th>
+              <th>Contributions</th>
+              <th>Interest Earned</th>
+              <th>Closing Balance</th>
+              <th>Total Gain</th>
+            </tr>
+          </thead>
+          <tbody id="amort-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ── Globals ────────────────────────────────────────────────────────
+let chartInstance = null;
+let tableData     = [];
+
+// ── Formatting helpers ─────────────────────────────────────────────
+function getCurrency() {
+  return document.getElementById('currency').value.trim() || '$';
+}
+
+function fmt(n) {
+  const sym = getCurrency();
+  return sym + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtShort(n) {
+  const sym = getCurrency();
+  if (Math.abs(n) >= 1e9) return sym + (n / 1e9).toFixed(2) + 'B';
+  if (Math.abs(n) >= 1e6) return sym + (n / 1e6).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1e3) return sym + (n / 1e3).toFixed(1) + 'K';
+  return sym + n.toFixed(0);
+}
+
+// ── Core calculation ───────────────────────────────────────────────
+function calculate() {
+  const principal    = parseFloat(document.getElementById('principal').value)    || 0;
+  const annualRate   = parseFloat(document.getElementById('rate').value)         || 0;
+  const freq         = parseInt(document.getElementById('freq').value)           || 12;
+  const years        = parseInt(document.getElementById('years').value)          || 1;
+  const contribution = parseFloat(document.getElementById('contribution').value) || 0;
+
+  if (principal < 0 || annualRate < 0 || years < 1) return;
+
+  const r = annualRate / 100 / freq;   // rate per period
+  const rows = [];
+
+  let balance = principal;
+
+  for (let y = 1; y <= years; y++) {
+    const opening      = balance;
+    const periodsThisYear = freq;
+    const contribYear  = contribution * 12; // monthly → annual
+
+    let closing = opening;
+    // compound period by period within the year
+    for (let p = 0; p < periodsThisYear; p++) {
+      closing = closing * (1 + r) + (contribution * 12 / freq);
+    }
+
+    const interestEarned = closing - opening - contribYear;
+    const totalInvested  = principal + contribution * 12 * y;
+    const totalGain      = closing - totalInvested;
+
+    rows.push({
+      year:        y,
+      opening:     opening,
+      contribs:    contribYear,
+      interest:    interestEarned,
+      closing:     closing,
+      totalGain:   totalGain,
+      totalInvested: totalInvested,
+    });
+
+    balance = closing;
+  }
+
+  tableData = rows;
+  renderSummary(rows, principal, contribution);
+  renderChart(rows, principal, contribution);
+  renderTable(rows);
+
+  document.getElementById('chart-panel').style.display = 'block';
+  document.getElementById('table-panel').style.display = 'block';
+}
+
+// ── Summary cards ──────────────────────────────────────────────────
+function renderSummary(rows, principal, monthlyContrib) {
+  const last         = rows[rows.length - 1];
+  const totalInvested = principal + monthlyContrib * 12 * rows.length;
+  const totalInterest = last.closing - totalInvested;
+  const multiplier    = totalInvested > 0 ? (last.closing / totalInvested).toFixed(2) : '—';
+
+  document.getElementById('summary-cards').innerHTML = `
+    <div class="stat-card highlight">
+      <div class="sc-label">Final Balance</div>
+      <div class="sc-value">${fmtShort(last.closing)}</div>
+      <div class="sc-sub">After ${rows.length} year${rows.length > 1 ? 's' : ''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Total Invested</div>
+      <div class="sc-value">${fmtShort(totalInvested)}</div>
+      <div class="sc-sub">Principal + contributions</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Total Interest</div>
+      <div class="sc-value" style="color:#10b981;">${fmtShort(totalInterest)}</div>
+      <div class="sc-sub">${totalInvested > 0 ? ((totalInterest / totalInvested) * 100).toFixed(1) + '% of invested' : ''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Money Multiplier</div>
+      <div class="sc-value">${multiplier}×</div>
+      <div class="sc-sub">Return on invested capital</div>
+    </div>
+  `;
+}
+
+// ── Chart ──────────────────────────────────────────────────────────
+function renderChart(rows, principal, monthlyContrib) {
+  const labels    = rows.map(r => 'Year ' + r.year);
+  const balances  = rows.map(r => parseFloat(r.closing.toFixed(2)));
+  const invested  = rows.map(r => parseFloat(r.totalInvested.toFixed(2)));
+  const interest  = rows.map(r => parseFloat(Math.max(0, r.closing - r.totalInvested).toFixed(2)));
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const labelColor = isDark ? '#94a3b8' : '#64748b';
+
+  const ctx = document.getElementById('growthChart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Total Balance',
+          data: balances,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.08)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2.5,
+          pointRadius: rows.length > 30 ? 0 : 3,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#3b82f6',
+        },
+        {
+          label: 'Principal + Contributions',
+          data: invested,
+          borderColor: isDark ? '#475569' : '#cbd5e1',
+          backgroundColor: 'transparent',
+          fill: false,
+          tension: 0.1,
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: 0,
+          pointHoverRadius: 4,
+        },
+        {
+          label: 'Interest Earned',
+          data: interest,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.06)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: isDark ? '#1e293b' : '#fff',
+          borderColor: isDark ? '#334155' : '#e2e8f0',
+          borderWidth: 1,
+          titleColor: isDark ? '#f8fafc' : '#0f172a',
+          bodyColor: isDark ? '#94a3b8' : '#64748b',
+          padding: 12,
+          callbacks: {
+            label: ctx => '  ' + ctx.dataset.label + ':  ' + fmt(ctx.parsed.y),
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: {
+            color: labelColor,
+            font: { size: 11 },
+            maxTicksLimit: 10,
+          }
+        },
+        y: {
+          grid: { color: gridColor },
+          ticks: {
+            color: labelColor,
+            font: { size: 11 },
+            callback: v => fmtShort(v),
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Amortization table ─────────────────────────────────────────────
+function renderTable(rows) {
+  document.getElementById('amort-body').innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.year}</td>
+      <td>${fmt(r.opening)}</td>
+      <td>${fmt(r.contribs)}</td>
+      <td class="td-interest">${fmt(r.interest)}</td>
+      <td class="td-total">${fmt(r.closing)}</td>
+      <td class="td-gain">${r.totalGain >= 0 ? '+' : ''}${fmt(r.totalGain)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── CSV export ─────────────────────────────────────────────────────
+function exportCSV() {
+  if (!tableData.length) return;
+  const sym = getCurrency();
+  const header = ['Year','Opening Balance','Contributions','Interest Earned','Closing Balance','Total Gain'];
+  const rows   = tableData.map(r => [
+    r.year,
+    r.opening.toFixed(2),
+    r.contribs.toFixed(2),
+    r.interest.toFixed(2),
+    r.closing.toFixed(2),
+    r.totalGain.toFixed(2),
+  ]);
+  const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'compound-interest.csv';
+  a.click();
+}
+
+// ── Live recalculation on any input change ─────────────────────────
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', calculate);
+});
+
+// ── Initial render ─────────────────────────────────────────────────
+calculate();
+</script>
+
+<script src="theme-toggle.js"></script>
+</body>
+</html>
