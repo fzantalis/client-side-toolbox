@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://zantalis.net/</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-json.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-csv-to-json.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-csv-explorer.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-yaml-json.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-content-analyzer.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-smart-case.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-markdown.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-diff.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-mock-data.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-pdf.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-webp.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-video-converter.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-color-extractor.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-exif.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-qr.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-svg.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-anonymizer.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-hourly-wage.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-invoice.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-tip.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-calculator.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-unit-converter.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-stopwatch.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-timezone.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-p2p.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-url-encoder.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-password.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-base64-image.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-jwt-builder.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-cert-viewer.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-hash.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-prompt-sanitizer.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-regex.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-cron.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-erd.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-subnet-calc.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-og-generator.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/privacy.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/terms.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/index.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>
