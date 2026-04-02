@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Image Resizer & Cropper | Free Developer Tool</title>
+  <meta name="title" content="Image Resizer & Cropper | Free Developer Tool">
+  <meta name="description" content="Resize, crop, or stretch images to exact dimensions entirely in your browser. Features format conversion and quality control. 100% private.">
+  <meta name="keywords" content="image resizer, image cropper, stretch image, fit image, client side image editor, developer tools">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-image-resizer.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-image-resizer.html">
+  <meta property="og:title" content="Image Resizer & Cropper | Free Developer Tool">
+  <meta property="og:description" content="Resize, crop, or stretch images to exact dimensions. Runs completely in your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-image-resizer.html">
+  <meta property="twitter:title" content="Image Resizer & Cropper | Free Developer Tool">
+  <meta property="twitter:description" content="Resize, crop, or stretch images with precision.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* --- Modern CSS Resets & Variables --- */
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #3b82f6;      
+      --primary-hover: #2563eb;
+      --accent: #0ea5e9;
+      --border: #e2e8f0;
+      --card-border: #f1f5f9;
+      --ring: rgba(59, 130, 246, 0.5);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --border: #334155;
+      --card-border: #334155;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Layout --- */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: background 0.3s ease;
+    }
+    [data-theme="dark"] .card-icon { background: rgba(59, 130, 246, 0.1); }
+
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .breadcrumb {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: var(--text-muted); text-decoration: none; font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .breadcrumb:hover { color: var(--primary); }
+
+    .tool-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+    .tool-header .card-icon { margin-bottom: 0; }
+    .tool-header h1 { margin-bottom: 0.25rem; font-size: 2rem; }
+    .tool-header p { margin-bottom: 0; }
+
+    .panel {
+      display: flex; flex-direction: column; background: var(--card-bg);
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.25rem; background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .panel-header h3 { font-size: 1rem; margin: 0; font-weight: 600; color: var(--text-muted); }
+    .panel-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; flex-grow: 1; background: var(--card-bg); }
+
+    /* Buttons */
+    button {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: inherit; font-size: 0.9rem; font-weight: 600;
+      padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
+      transition: all 0.2s; border: 1px solid transparent; justify-content: center;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text-main); }
+    .btn-secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+
+    /* Forms & Inputs */
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .form-input, .form-select {
+      width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text-main); font-family: 'Fira Code', monospace;
+      font-size: 0.95rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); background: var(--card-bg); }
+    .form-input::-webkit-outer-spin-button, .form-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    
+    /* Mobile Adjustments */
+    .responsive-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (min-width: 860px) { .responsive-grid { grid-template-columns: 1fr 1.2fr; } }
+
+    /* Tool-Specific Styles */
+    .dropzone {
+      border: 2px dashed var(--border); border-radius: 8px; padding: 2rem;
+      text-align: center; cursor: pointer; background: var(--bg);
+      transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+    }
+    .dropzone:hover, .dropzone.dragover { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+    .dropzone i { font-size: 2.5rem; color: var(--text-muted); }
+    .dropzone p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+    .dropzone strong { color: var(--primary); font-weight: 600; }
+    #file-input { display: none; }
+
+    .preview-container {
+      width: 100%; min-height: 250px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      /* Checkerboard pattern for transparency */
+      background-image: linear-gradient(45deg, var(--border) 25%, transparent 25%), linear-gradient(-45deg, var(--border) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--border) 75%), linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    
+    #preview-img { max-width: 100%; max-height: 400px; object-fit: contain; box-shadow: var(--shadow-md); display: none; }
+    #empty-state { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); gap: 0.5rem; }
+
+    .mode-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .mode-card {
+      border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 0.5rem;
+      text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg);
+      display: flex; flex-direction: column; gap: 0.4rem; align-items: center;
+    }
+    .mode-card i { font-size: 1.5rem; color: var(--text-muted); }
+    .mode-card span { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .mode-card.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+    .mode-card.active i, .mode-card.active span { color: var(--primary); }
+
+    .stats-row { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--text-muted); padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+    
+    input[type="range"] { width: 100%; accent-color: var(--primary); }
+    input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; background: none; padding: 0;}
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border); border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="nav-bar">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+  </div>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-image"></i></div>
+    <div>
+      <h1>Image Resizer & Cropper</h1>
+      <p>Resize, crop, or stretch images exactly how you want. Everything happens securely in your browser.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="responsive-grid">
+      
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Image Settings</h3>
+        </div>
+        <div class="panel-body">
+          
+          <label class="dropzone" id="dropzone" for="file-input">
+            <i class="ph ph-upload-simple"></i>
+            <p><strong>Click to browse</strong> or drag & drop an image</p>
+            <input type="file" id="file-input" accept="image/*">
+          </label>
+
+          <div class="input-row">
+            <div class="form-group">
+              <label>Target Width (px)</label>
+              <input type="number" id="inp-w" class="form-input" placeholder="e.g. 1920" oninput="processImage()">
+            </div>
+            <div class="form-group">
+              <label>Target Height (px)</label>
+              <input type="number" id="inp-h" class="form-input" placeholder="e.g. 1080" oninput="processImage()">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Resize Mode</label>
+            <div class="mode-cards">
+              <div class="mode-card active" data-mode="contain" onclick="setMode('contain')">
+                <i class="ph ph-corners-in"></i>
+                <span>Fit Area</span>
+              </div>
+              <div class="mode-card" data-mode="cover" onclick="setMode('cover')">
+                <i class="ph ph-crop"></i>
+                <span>Crop/Fill</span>
+              </div>
+              <div class="mode-card" data-mode="stretch" onclick="setMode('stretch')">
+                <i class="ph ph-arrows-out-line-horizontal"></i>
+                <span>Stretch</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="form-group">
+              <label>Export Format</label>
+              <select id="inp-format" class="form-select" onchange="toggleFormatOptions(); processImage();">
+                <option value="image/png">PNG (Lossless)</option>
+                <option value="image/jpeg">JPEG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </div>
+            <div class="form-group" id="bg-color-group">
+              <label>Pad Color (Fit Mode)</label>
+              <input type="color" id="inp-bg" value="#ffffff" oninput="processImage()">
+            </div>
+            <div class="form-group" id="quality-group" style="display:none;">
+              <label style="display:flex; justify-content:space-between;">
+                <span>Quality</span> <span id="quality-val">90%</span>
+              </label>
+              <input type="range" id="inp-quality" min="0.1" max="1" step="0.05" value="0.9" oninput="updateQuality(); processImage();">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Preview Output</h3>
+          <button class="btn-primary" id="btn-download" disabled onclick="downloadImage()" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">
+            <i class="ph ph-download-simple"></i> Download
+          </button>
+        </div>
+        <div class="panel-body" style="padding-top: 1rem;">
+          
+          <div class="stats-row">
+            <span id="stat-orig">Original: —</span>
+            <span id="stat-new" style="color: var(--primary);">Output: —</span>
+          </div>
+
+          <div class="preview-container">
+            <div id="empty-state">
+              <i class="ph ph-image" style="font-size: 3rem; opacity: 0.5;"></i>
+              <span>No image loaded</span>
+            </div>
+            <img id="preview-img" src="" alt="Preview">
+          </div>
+
+          <div class="stats-row" style="border:none; padding-bottom:0;">
+            <span id="stat-size">File size: —</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+let currentImage = null;
+let currentMode = 'contain';
+let finalDataUrl = '';
+let originalFilename = 'image';
+
+// Elements
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const inpW = document.getElementById('inp-w');
+const inpH = document.getElementById('inp-h');
+const previewImg = document.getElementById('preview-img');
+const emptyState = document.getElementById('empty-state');
+const btnDownload = document.getElementById('btn-download');
+
+// --- Event Listeners for File ---
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  if (!file.type.startsWith('image/')) return;
+  originalFilename = file.name.split('.')[0] || 'image';
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      currentImage = img;
+      document.getElementById('stat-orig').textContent = `Original: ${img.width} × ${img.height}`;
+      
+      // Auto-fill inputs if empty
+      if (!inpW.value) inpW.value = img.width;
+      if (!inpH.value) inpH.value = img.height;
+      
+      processImage();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- UI Controls ---
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.mode-card[data-mode="${mode}"]`).classList.add('active');
+  
+  // Show/Hide Pad Color input based on mode
+  document.getElementById('bg-color-group').style.display = (mode === 'contain') ? 'flex' : 'none';
+  processImage();
+}
+
+function toggleFormatOptions() {
+  const format = document.getElementById('inp-format').value;
+  const showQuality = format === 'image/jpeg' || format === 'image/webp';
+  document.getElementById('quality-group').style.display = showQuality ? 'flex' : 'none';
+  
+  // Hide background color for formats that don't support transparency if in contain mode
+  // Note: JPEG doesn't support transparency, so 'contain' padded areas will turn black if not filled.
+  if (format === 'image/jpeg' && currentMode === 'contain') {
+      document.getElementById('bg-color-group').style.display = 'flex';
+  }
+}
+
+function updateQuality() {
+  const val = Math.round(document.getElementById('inp-quality').value * 100);
+  document.getElementById('quality-val').textContent = `${val}%`;
+}
+
+function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes';
+    const k = 1024, dm = decimals < 0 ? 0 : decimals, sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
+
+// --- Core Image Processing ---
+function processImage() {
+  if (!currentImage) return;
+
+  let w = parseInt(inpW.value);
+  let h = parseInt(inpH.value);
+  
+  // Fallbacks
+  if (isNaN(w) || w <= 0) w = currentImage.width;
+  if (isNaN(h) || h <= 0) h = currentImage.height;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  const format = document.getElementById('inp-format').value;
+  const isJpeg = format === 'image/jpeg';
+
+  // Fill background if JPEG or if mode is 'contain' and a color is set
+  // PNG/WebP default to transparent unless in contain mode where user specifies color.
+  if (currentMode === 'contain' || isJpeg) {
+     const bgColor = document.getElementById('inp-bg').value;
+     // If PNG/WebP and user wants transparency in padding, they can't set it via standard color picker (which is hex).
+     // Assuming if they are on PNG and contain, the color picker applies.
+     ctx.fillStyle = isJpeg ? (currentMode !== 'contain' ? '#ffffff' : bgColor) : bgColor;
+     ctx.fillRect(0, 0, w, h);
+  }
+
+  // Draw logic
+  if (currentMode === 'stretch') {
+    ctx.drawImage(currentImage, 0, 0, w, h);
+  } 
+  else if (currentMode === 'contain') {
+    const scale = Math.min(w / currentImage.width, h / currentImage.height);
+    const nw = currentImage.width * scale;
+    const nh = currentImage.height * scale;
+    const dx = (w - nw) / 2;
+    const dy = (h - nh) / 2;
+    ctx.drawImage(currentImage, dx, dy, nw, nh);
+  } 
+  else if (currentMode === 'cover') {
+    const scale = Math.max(w / currentImage.width, h / currentImage.height);
+    const nw = currentImage.width * scale;
+    const nh = currentImage.height * scale;
+    const dx = (w - nw) / 2;
+    const dy = (h - nh) / 2;
+    ctx.drawImage(currentImage, dx, dy, nw, nh);
+  }
+
+  // Export
+  const quality = parseFloat(document.getElementById('inp-quality').value);
+  finalDataUrl = canvas.toDataURL(format, quality);
+
+  // Update UI
+  previewImg.src = finalDataUrl;
+  emptyState.style.display = 'none';
+  previewImg.style.display = 'block';
+  btnDownload.disabled = false;
+  
+  document.getElementById('stat-new').textContent = `Output: ${w} × ${h}`;
+  
+  // Calculate approximate file size from base64 length
+  // Base64 string length * (3/4) gives approximate bytes
+  const base64Length = finalDataUrl.length - (finalDataUrl.indexOf(',') + 1);
+  const sizeInBytes = Math.ceil(base64Length * 0.75);
+  document.getElementById('stat-size').textContent = `Est. File size: ~${formatBytes(sizeInBytes)}`;
+}
+
+// --- Download ---
+function downloadImage() {
+  if (!finalDataUrl) return;
+  const format = document.getElementById('inp-format').value;
+  const ext = format.split('/')[1] === 'jpeg' ? 'jpg' : format.split('/')[1];
+  
+  const link = document.createElement('a');
+  link.download = `${originalFilename}-resized.${ext}`;
+  link.href = finalDataUrl;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Init
+toggleFormatOptions();
+</script>
+
+<script src="theme-toggle.js"></script>
+
+</body>
+</html>
