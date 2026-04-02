@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Unix Timestamp Converter | Free Developer Tool</title>
+  <meta name="title" content="Unix Timestamp Converter | Free Developer Tool">
+  <meta name="description" content="Convert any Unix timestamp to human-readable date formats in Local and UTC time, or convert dates back to Unix epoch. Runs entirely in your browser.">
+  <meta name="keywords" content="unix timestamp converter, epoch converter, unix to date, date to unix, timestamp calculator, developer tools">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-unix-converter.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-unix-converter.html">
+  <meta property="og:title" content="Unix Timestamp Converter | Free Developer Tool">
+  <meta property="og:description" content="Convert any Unix timestamp to a human date in any timezone, with relative time display.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-unix-converter.html">
+  <meta property="twitter:title" content="Unix Timestamp Converter | Free Developer Tool">
+  <meta property="twitter:description" content="Instantly convert between Unix timestamps and human dates.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* --- Modern CSS Resets & Variables --- */
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #3b82f6;      
+      --primary-hover: #2563eb;
+      --accent: #0ea5e9;
+      --border: #e2e8f0;
+      --card-border: #f1f5f9;
+      --ring: rgba(59, 130, 246, 0.5);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --border: #334155;
+      --card-border: #334155;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Layout --- */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: background 0.3s ease;
+    }
+    [data-theme="dark"] .card-icon { background: rgba(59, 130, 246, 0.1); }
+
+    .breadcrumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      transition: color 0.2s ease;
+    }
+    .breadcrumb:hover { color: var(--primary); }
+
+    .tool-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+    .tool-header .card-icon { margin-bottom: 0; }
+    .tool-header h1 { margin-bottom: 0.25rem; font-size: 2rem; }
+    .tool-header p { margin-bottom: 0; }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-header h3 { font-size: 1rem; margin: 0; font-weight: 600; color: var(--text-muted); }
+
+    .panel-body { 
+      padding: 1.5rem; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 1.25rem; 
+      flex-grow: 1; 
+      background: var(--card-bg); 
+    }
+
+    /* Buttons */
+    button {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: inherit; font-size: 0.9rem; font-weight: 600;
+      padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
+      transition: all 0.2s; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text-main); }
+    .btn-secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+
+    /* Forms & Inputs */
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .input-row { display: flex; gap: 0.5rem; }
+    .input-row input { flex-grow: 1; }
+    
+    .form-input, .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+      background: var(--card-bg);
+    }
+
+    /* Mobile Adjustments */
+    .responsive-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 860px) {
+      .responsive-grid { grid-template-columns: 1fr 1.2fr; }
+    }
+
+    /* Tool-Specific Styles */
+    .live-clock-banner {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .live-clock-banner div:first-child { color: var(--primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .live-clock-value { font-family: 'DM Mono', monospace; font-size: 1.25rem; font-weight: 600; color: var(--text-main); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .stat-box.highlight { border-color: var(--primary); background: rgba(59, 130, 246, 0.03); }
+    .stat-box.highlight .stat-value { color: var(--primary); font-size: 1.25rem; }
+
+    .result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .result-item label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .result-item div {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-clock"></i></div>
+    <div>
+      <h1>Unix Timestamp Converter</h1>
+      <p>Convert any Unix epoch to human dates, and vice-versa. All conversions happen instantly in your browser.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="responsive-grid">
+      
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+        
+        <div class="live-clock-banner">
+          <div>
+            <i class="ph ph-pulse"></i> Current Unix Time
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span class="live-clock-value" id="live-time">...</span>
+            <button class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="copyLiveTime()">
+              <i class="ph ph-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Convert Time</h3>
+            <button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="setToNow()">
+              <i class="ph ph-target"></i> Set to Now
+            </button>
+          </div>
+          <div class="panel-body">
+            
+            <div class="form-group">
+              <label for="inp-timestamp">Unix Timestamp</label>
+              <div class="input-row">
+                <input type="number" id="inp-timestamp" class="form-input" placeholder="e.g. 1712345678" oninput="handleInput('ts')">
+                <select id="inp-ts-unit" class="form-select" style="width: auto; flex-shrink: 0;" onchange="handleInput('ts')">
+                  <option value="s">Seconds</option>
+                  <option value="ms">Milliseconds</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin: 0.5rem 0;">
+              &mdash; OR &mdash;
+            </div>
+
+            <div class="form-group">
+              <label for="inp-local">Local Date & Time</label>
+              <input type="datetime-local" id="inp-local" class="form-input" step="1" oninput="handleInput('local')">
+            </div>
+
+            <div class="form-group">
+              <label for="inp-utc">UTC Date & Time</label>
+              <input type="datetime-local" id="inp-utc" class="form-input" step="1" oninput="handleInput('utc')">
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Results</h3>
+        </div>
+        <div class="panel-body">
+          
+          <div class="stats-grid">
+            <div class="stat-box highlight">
+              <div class="stat-value" id="res-relative">—</div>
+              <div class="stat-label">Relative Time</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="res-sec">—</div>
+              <div class="stat-label">Seconds</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="res-ms">—</div>
+              <div class="stat-label">Milliseconds</div>
+            </div>
+          </div>
+
+          <div class="result-list">
+            <div class="result-item">
+              <label>Local Time (<span id="res-tz-name">...</span>)</label>
+              <div id="res-local-str">—</div>
+            </div>
+            <div class="result-item">
+              <label>UTC Time (GMT)</label>
+              <div id="res-utc-str">—</div>
+            </div>
+            <div class="result-item">
+              <label>ISO 8601</label>
+              <div id="res-iso">—</div>
+            </div>
+            <div class="result-item">
+              <label>RFC 2822</label>
+              <div id="res-rfc">—</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// Elements
+const elLiveTime = document.getElementById('live-time');
+const elInpTs = document.getElementById('inp-timestamp');
+const elInpUnit = document.getElementById('inp-ts-unit');
+const elInpLocal = document.getElementById('inp-local');
+const elInpUtc = document.getElementById('inp-utc');
+
+// State
+let currentDate = new Date();
+let liveTimer = null;
+let currentUnixSeconds = Math.floor(Date.now() / 1000);
+
+// Init timezone name
+document.getElementById('res-tz-name').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+// Format helper for datetime-local input (YYYY-MM-DDThh:mm:ss)
+function toDatetimeLocal(d, isUTC) {
+  if (isNaN(d.getTime())) return '';
+  const pad = (n) => n.toString().padStart(2, '0');
+  
+  const Y = isUTC ? d.getUTCFullYear() : d.getFullYear();
+  const M = isUTC ? d.getUTCMonth() + 1 : d.getMonth() + 1;
+  const D = isUTC ? d.getUTCDate() : d.getDate();
+  const h = isUTC ? d.getUTCHours() : d.getHours();
+  const m = isUTC ? d.getUTCMinutes() : d.getMinutes();
+  const s = isUTC ? d.getUTCSeconds() : d.getSeconds();
+
+  return `${Y}-${pad(M)}-${pad(D)}T${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+// Relative time calculation
+function getRelativeTime(d) {
+  if (isNaN(d.getTime())) return '—';
+  
+  const now = new Date();
+  const diffMs = d.getTime() - now.getTime();
+  const diffSec = Math.round(diffMs / 1000);
+  const absSec = Math.abs(diffSec);
+
+  const isFuture = diffSec > 0;
+  
+  if (absSec < 5) return 'Just now';
+  
+  const units = [
+    { max: 60, value: 1, name: 'second' },
+    { max: 3600, value: 60, name: 'minute' },
+    { max: 86400, value: 3600, name: 'hour' },
+    { max: 2592000, value: 86400, name: 'day' },
+    { max: 31536000, value: 2592000, name: 'month' },
+    { max: Infinity, value: 31536000, name: 'year' }
+  ];
+
+  for (let i = 0; i < units.length; i++) {
+    if (absSec < units[i].max) {
+      const val = Math.round(absSec / units[i].value);
+      const str = `${val} ${units[i].name}${val !== 1 ? 's' : ''}`;
+      return isFuture ? `in ${str}` : `${str} ago`;
+    }
+  }
+}
+
+// Master update function
+function updateUI(source) {
+  if (isNaN(currentDate.getTime())) {
+    resetOutputs();
+    return;
+  }
+
+  // Update inputs if they weren't the source
+  if (source !== 'ts') {
+    const isMs = elInpUnit.value === 'ms';
+    elInpTs.value = isMs ? currentDate.getTime() : Math.floor(currentDate.getTime() / 1000);
+  }
+  if (source !== 'local') {
+    elInpLocal.value = toDatetimeLocal(currentDate, false);
+  }
+  if (source !== 'utc') {
+    elInpUtc.value = toDatetimeLocal(currentDate, true);
+  }
+
+  // Update Results
+  document.getElementById('res-relative').textContent = getRelativeTime(currentDate);
+  document.getElementById('res-sec').textContent = Math.floor(currentDate.getTime() / 1000);
+  document.getElementById('res-ms').textContent = currentDate.getTime();
+  
+  document.getElementById('res-local-str').textContent = currentDate.toString();
+  document.getElementById('res-utc-str').textContent = currentDate.toUTCString();
+  document.getElementById('res-iso').textContent = currentDate.toISOString();
+  
+  // RFC 2822 rough equivalent using toUTCString format manipulation
+  const rfcParts = currentDate.toUTCString().split(' ');
+  // "Thu, 02 Apr 2026 08:03:09 GMT" -> "Thu, 02 Apr 2026 08:03:09 +0000"
+  if (rfcParts.length >= 6) {
+    document.getElementById('res-rfc').textContent = `${rfcParts[0]} ${rfcParts[1]} ${rfcParts[2]} ${rfcParts[3]} ${rfcParts[4]} +0000`;
+  } else {
+    document.getElementById('res-rfc').textContent = '—';
+  }
+}
+
+function handleInput(source) {
+  if (source === 'ts') {
+    const val = parseFloat(elInpTs.value);
+    if (isNaN(val)) {
+      currentDate = new Date(NaN);
+    } else {
+      const isMs = elInpUnit.value === 'ms';
+      // If user switches dropdown, we don't recalculate the raw input, we just treat the input as the new unit
+      // Handle the case where user enters huge number for seconds or small for ms gracefully
+      currentDate = new Date(isMs ? val : val * 1000);
+    }
+  } else if (source === 'local') {
+    const val = elInpLocal.value;
+    currentDate = val ? new Date(val) : new Date(NaN);
+  } else if (source === 'utc') {
+    const val = elInpUtc.value;
+    currentDate = val ? new Date(val + 'Z') : new Date(NaN); // Append Z to force UTC parsing
+  }
+
+  updateUI(source);
+}
+
+function resetOutputs() {
+  document.getElementById('res-relative').textContent = '—';
+  document.getElementById('res-sec').textContent = '—';
+  document.getElementById('res-ms').textContent = '—';
+  document.getElementById('res-local-str').textContent = '—';
+  document.getElementById('res-utc-str').textContent = '—';
+  document.getElementById('res-iso').textContent = '—';
+  document.getElementById('res-rfc').textContent = '—';
+}
+
+function setToNow() {
+  currentDate = new Date();
+  updateUI('none'); // Update all inputs
+}
+
+// Live ticking clock
+function tick() {
+  const now = new Date();
+  currentUnixSeconds = Math.floor(now.getTime() / 1000);
+  elLiveTime.textContent = currentUnixSeconds;
+  
+  // Update relative time live if valid date exists
+  if (!isNaN(currentDate.getTime())) {
+    document.getElementById('res-relative').textContent = getRelativeTime(currentDate);
+  }
+  
+  requestAnimationFrame(tick);
+}
+
+function copyLiveTime() {
+  navigator.clipboard.writeText(currentUnixSeconds).then(() => {
+    const btn = document.querySelector('.live-clock-banner button i');
+    btn.className = 'ph ph-check';
+    setTimeout(() => { btn.className = 'ph ph-copy'; }, 1500);
+  });
+}
+
+// Initialize
+setToNow();
+requestAnimationFrame(tick);
+
+</script>
+
+<script src="theme-toggle.js"></script>
+
+</body>
+</html>
