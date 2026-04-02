@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+
+  <title>Triangle Solver | Free Geometry Calculator with Diagram</title>
+  <meta name="title" content="Triangle Solver | Free Geometry Calculator with Diagram">
+  <meta name="description" content="Enter any combination of sides and angles to solve a triangle completely. Get all sides, angles, area, perimeter, and height with an accurate live diagram. 100% private, runs entirely in your browser.">
+  <meta name="keywords" content="triangle solver, triangle calculator, geometry calculator, law of sines, law of cosines, triangle sides angles, SSS SAS ASA AAS, triangle area calculator, free geometry tool, math calculator">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-triangle.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-triangle.html">
+  <meta property="og:title" content="Triangle Solver | Free Geometry Calculator with Diagram">
+  <meta property="og:description" content="Solve any triangle from any 2 sides or angles. Live diagram, area, perimeter, height. Runs in your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-triangle.html">
+  <meta property="twitter:title" content="Triangle Solver | Free Geometry Calculator with Diagram">
+  <meta property="twitter:description" content="Solve any triangle from sides and angles with a live diagram. Free and private.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* ── Main layout ────────────────────────────────────── */
+    .solver-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 960px) {
+      .solver-grid { grid-template-columns: 380px 1fr; align-items: start; }
+    }
+
+    /* ── Input section ──────────────────────────────────── */
+    .input-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .input-label-row h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Triangle input grid: 3 rows × 2 columns (label + input) */
+    .tri-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .tri-input-row {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .tri-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 1.05rem;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    /* Sides: blue tones */
+    .badge-a { background: rgba(59,130,246,0.12); color: #3b82f6; }
+    .badge-b { background: rgba(14,165,233,0.12); color: #0ea5e9; }
+    .badge-c { background: rgba(99,102,241,0.12); color: #6366f1; }
+    /* Angles: warm tones */
+    .badge-A { background: rgba(239,68,68,0.10);  color: #ef4444; }
+    .badge-B { background: rgba(245,158,11,0.10); color: #f59e0b; }
+    .badge-C { background: rgba(16,185,129,0.10); color: #10b981; }
+
+    .tri-input-field {
+      position: relative;
+    }
+    .tri-input-field input {
+      width: 100%;
+      padding: 0.65rem 2.8rem 0.65rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -moz-appearance: textfield;
+    }
+    .tri-input-field input::-webkit-outer-spin-button,
+    .tri-input-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .tri-input-field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+    .tri-input-field input.has-value {
+      border-color: var(--primary);
+      background: rgba(59,130,246,0.03);
+    }
+    .tri-input-field input.solved-value {
+      border-color: #10b981;
+      background: rgba(16,185,129,0.04);
+      color: #10b981;
+    }
+    .tri-unit {
+      position: absolute;
+      right: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .tri-input-field input.solved-value + .tri-unit { color: #10b981; }
+
+    .divider-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.5rem 0;
+    }
+    .divider-label::before,
+    .divider-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Unit toggle ────────────────────────────────────── */
+    .unit-toggle {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .unit-btn {
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .unit-btn:hover { border-color: var(--text-muted); color: var(--text-main); transform: none; }
+    .unit-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ── Action buttons ─────────────────────────────────── */
+    .action-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Error / info message ───────────────────────────── */
+    .msg-box {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+    }
+    .msg-box.error   { display: flex; background: rgba(239,68,68,0.08);  color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+    .msg-box.info    { display: flex; background: rgba(59,130,246,0.08); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2); }
+    .msg-box.success { display: flex; background: rgba(16,185,129,0.08); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+
+    /* ── Results grid ───────────────────────────────────── */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .res-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    .res-card .rc-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    .res-card .rc-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .res-card .rc-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+    .res-card.highlight { border-color: var(--primary); background: rgba(59,130,246,0.03); }
+    .res-card.highlight .rc-value { color: var(--primary); font-size: 1.25rem; }
+
+    /* ── Diagram panel ──────────────────────────────────── */
+    .diagram-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      min-height: 340px;
+      justify-content: center;
+    }
+    .diagram-panel svg { width: 100%; height: auto; overflow: visible; }
+
+    .diagram-empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .diagram-empty i {
+      font-size: 3rem;
+      color: var(--border);
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Step-by-step solution ──────────────────────────── */
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .step-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      line-height: 1.5;
+    }
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-item code {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      background: rgba(59,130,246,0.08);
+      color: var(--primary);
+      padding: 0.05rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    /* ── Case selector ──────────────────────────────────── */
+    .case-selector {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .case-pill {
+      padding: 0.3rem 0.75rem;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .case-pill:hover { border-color: var(--primary); color: var(--primary); transform: none; }
+    .case-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-triangle"></i></div>
+    <div>
+      <h1>Triangle Solver</h1>
+      <p>Enter any valid combination of sides and angles — get every measurement plus a live diagram.</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Quick-fill presets -->
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-header">
+        <h3>Quick Examples</h3>
+        <div class="unit-toggle">
+          <button class="unit-btn active" id="btn-deg" onclick="setAngleUnit('deg')">Degrees</button>
+          <button class="unit-btn" id="btn-rad" onclick="setAngleUnit('rad')">Radians</button>
+        </div>
+      </div>
+      <div class="panel-body" style="padding-top:0.5rem; padding-bottom:0.75rem;">
+        <div class="case-selector">
+          <button class="case-pill" onclick="loadPreset('345')">3-4-5 Right</button>
+          <button class="case-pill" onclick="loadPreset('equilateral')">Equilateral</button>
+          <button class="case-pill" onclick="loadPreset('isosceles')">Isosceles</button>
+          <button class="case-pill" onclick="loadPreset('306090')">30-60-90</button>
+          <button class="case-pill" onclick="loadPreset('454590')">45-45-90</button>
+          <button class="case-pill" onclick="loadPreset('golden')">Golden Gnomon</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="solver-grid">
+
+      <!-- LEFT: Inputs + Results -->
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+        <!-- Input panel -->
+        <div class="panel">
+          <div class="panel-header"><h3>Known Values</h3></div>
+          <div class="panel-body">
+
+            <div class="input-label-row">
+              <h4>Sides</h4>
+              <span style="font-size:0.75rem; color:var(--text-muted);">any units</span>
+            </div>
+
+            <div class="tri-inputs">
+              <div class="tri-input-row">
+                <div class="tri-badge badge-a">a</div>
+                <div class="tri-input-field">
+                  <input type="number" id="inp-a" placeholder="side a" min="0" step="any" oninput="onInput('a')">
+                  <span class="tri-unit">units</span>
+                </div>
+              </div>
+              <div class="tri-input-row">
+                <div class="tri-badge badge-b">b</div>
+                <div class="tri-input-field">
+                  <input type="number" id="inp-b" placeholder="side b" min="0" step="any" oninput="onInput('b')">
+                  <span class="tri-unit">units</span>
+                </div>
+              </div>
+              <div class="tri-input-row">
+                <div class="tri-badge badge-c">c</div>
+                <div class="tri-input-field">
+                  <input type="number" id="inp-c" placeholder="side c" min="0" step="any" oninput="onInput('c')">
+                  <span class="tri-unit">units</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider-label">Angles — opposite to sides a, b, c</div>
+
+            <div class="tri-inputs">
+              <div class="tri-input-row">
+                <div class="tri-badge badge-A">A</div>
+                <div class="tri-input-field">
+                  <input type="number" id="inp-A" placeholder="angle A" min="0" step="any" oninput="onInput('A')">
+                  <span class="tri-unit" id="unit-A">deg</span>
+                </div>
+              </div>
+              <div class="tri-input-row">
+                <div class="tri-badge badge-B">B</div>
+                <div class="tri-input-field">
+                  <input type="number" id="inp-B" placeholder="angle B" min="0" step="any" oninput="onInput('B')">
+                  <span class="tri-unit" id="unit-B">deg</span>
+                </div>
+              </div>
+              <div class="tri-input-row">
+                <div class="tri-badge badge-C">C</div>
+                <div class="tri-input-field">
+                  <input type="number" id="inp-C" placeholder="angle C" min="0" step="any" oninput="onInput('C')">
+                  <span class="tri-unit" id="unit-C">deg</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button class="btn-primary" onclick="solve()">
+                <i class="ph ph-equals"></i> Solve
+              </button>
+              <button class="btn-secondary" onclick="resetAll()">
+                <i class="ph ph-arrow-counter-clockwise"></i> Reset
+              </button>
+            </div>
+
+            <div class="msg-box" id="msg-box">
+              <i class="ph ph-warning-circle"></i>
+              <span id="msg-text"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results-section" style="display:none;">
+          <div class="results-grid" id="results-grid"></div>
+
+          <!-- Step-by-step -->
+          <div class="panel">
+            <div class="panel-header"><h3>Solution Method</h3></div>
+            <div class="panel-body">
+              <div class="steps-list" id="steps-list"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Diagram -->
+      <div class="diagram-panel" id="diagram-panel">
+        <div class="diagram-empty" id="diagram-empty">
+          <i class="ph ph-triangle"></i>
+          <p>Enter at least 3 known values<br>to see the diagram.</p>
+        </div>
+        <svg id="tri-svg" viewBox="0 0 400 320" style="display:none;"></svg>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let angleUnit = 'deg';   // 'deg' | 'rad'
+let userInputs = {};     // which fields the user typed
+let solvedData = null;
+
+const EPS = 1e-9;
+
+// ═══════════════════════════════════════════════════════
+// ANGLE UNIT
+// ═══════════════════════════════════════════════════════
+function setAngleUnit(u) {
+  angleUnit = u;
+  document.getElementById('btn-deg').classList.toggle('active', u === 'deg');
+  document.getElementById('btn-rad').classList.toggle('active', u === 'rad');
+  ['A','B','C'].forEach(k => {
+    document.getElementById(`unit-${k}`).textContent = u;
+  });
+  // Convert existing angle inputs
+  ['A','B','C'].forEach(k => {
+    const el = document.getElementById(`inp-${k}`);
+    if (el.value !== '') {
+      const old = parseFloat(el.value);
+      if (!isNaN(old)) {
+        el.value = u === 'rad'
+          ? r6(old * Math.PI / 180)
+          : r6(old * 180 / Math.PI);
+      }
+    }
+  });
+  if (solvedData) solve();
+}
+
+// Convert user angle input → radians for internal math
+function toRad(val) {
+  return angleUnit === 'deg' ? val * Math.PI / 180 : val;
+}
+// Convert radians → display unit
+function fromRad(rad) {
+  return angleUnit === 'deg' ? rad * 180 / Math.PI : rad;
+}
+
+// ═══════════════════════════════════════════════════════
+// FORMAT HELPERS
+// ═══════════════════════════════════════════════════════
+function r6(n)  { return parseFloat(n.toFixed(6)); }
+function r4(n)  { return parseFloat(n.toFixed(4)); }
+function disp(n, decimals) {
+  if (n === undefined || n === null || isNaN(n)) return '—';
+  return parseFloat(n.toFixed(decimals ?? 4)).toString();
+}
+
+// ═══════════════════════════════════════════════════════
+// READ USER INPUTS
+// ═══════════════════════════════════════════════════════
+function readInputs() {
+  const raw = {};
+  ['a','b','c','A','B','C'].forEach(k => {
+    const v = parseFloat(document.getElementById(`inp-${k}`).value);
+    if (!isNaN(v) && v > 0) raw[k] = v;
+  });
+  return raw;
+}
+
+function onInput(key) {
+  const el = document.getElementById(`inp-${key}`);
+  el.classList.toggle('has-value', el.value !== '');
+  if (el.value === '') el.classList.remove('solved-value');
+}
+
+// ═══════════════════════════════════════════════════════
+// SHOW MESSAGE
+// ═══════════════════════════════════════════════════════
+function showMsg(text, type) {
+  const box = document.getElementById('msg-box');
+  box.className = 'msg-box ' + type;
+  document.getElementById('msg-text').textContent = text;
+}
+function clearMsg() {
+  document.getElementById('msg-box').className = 'msg-box';
+}
+
+// ═══════════════════════════════════════════════════════
+// CORE SOLVER
+// Returns { a, b, c, A, B, C } all in raw units (sides unitless, angles radians)
+// steps: array of explanation strings
+// ═══════════════════════════════════════════════════════
+function solveTriangle(known) {
+  const steps = [];
+  let { a, b, c } = known;
+  // Convert angles to radians
+  let A = known.A !== undefined ? toRad(known.A) : undefined;
+  let B = known.B !== undefined ? toRad(known.B) : undefined;
+  let C = known.C !== undefined ? toRad(known.C) : undefined;
+
+  const PI = Math.PI;
+
+  // Count knowns
+  const nSides  = [a,b,c].filter(v => v !== undefined).length;
+  const nAngles = [A,B,C].filter(v => v !== undefined).length;
+  const total   = nSides + nAngles;
+
+  if (total < 3) return { error: 'Need at least 3 values to solve. Enter more known values.' };
+
+  // Validate positive sides
+  if ([a,b,c].some(v => v !== undefined && v <= 0))
+    return { error: 'All sides must be positive.' };
+  // Validate angle ranges
+  const angVal = [A,B,C].filter(v => v !== undefined);
+  if (angVal.some(v => v <= 0 || v >= PI))
+    return { error: 'Angles must be between 0° and 180° (exclusive).' };
+  // Sum of known angles
+  const angSum = angVal.reduce((s, v) => s + v, 0);
+  if (angSum >= PI - EPS)
+    return { error: 'The known angles already sum to 180° or more. Not a valid triangle.' };
+
+  // ── Case: all 3 sides (SSS) ──────────────────────────
+  if (nSides === 3 && nAngles === 0) {
+    steps.push(`SSS — all three sides given. Use the Law of Cosines to find each angle.`);
+    const cosA = (b*b + c*c - a*a) / (2*b*c);
+    const cosB = (a*a + c*c - b*b) / (2*a*c);
+    if (Math.abs(cosA) > 1 || Math.abs(cosB) > 1)
+      return { error: 'These three sides cannot form a valid triangle (triangle inequality fails).' };
+    A = Math.acos(cosA);
+    B = Math.acos(cosB);
+    C = PI - A - B;
+    steps.push(`cos A = (b² + c² − a²) / 2bc → A = ${disp(fromRad(A))}${angleUnit}`);
+    steps.push(`cos B = (a² + c² − b²) / 2ac → B = ${disp(fromRad(B))}${angleUnit}`);
+    steps.push(`C = 180° − A − B = ${disp(fromRad(C))}${angleUnit}`);
+  }
+
+  // ── Case: 2 sides + included angle (SAS) ────────────
+  else if (nSides === 2 && nAngles === 1) {
+    // Identify which SAS case
+    if (a !== undefined && b !== undefined && C !== undefined) {
+      steps.push(`SAS — sides a, b and included angle C given.`);
+      c = Math.sqrt(a*a + b*b - 2*a*b*Math.cos(C));
+      steps.push(`Law of Cosines: c² = a² + b² − 2ab·cos C → c = ${disp(c)}`);
+      A = Math.asin(Math.min(1, a * Math.sin(C) / c));
+      B = PI - A - C;
+      steps.push(`Law of Sines: sin A / a = sin C / c → A = ${disp(fromRad(A))}${angleUnit}`);
+      steps.push(`B = 180° − A − C = ${disp(fromRad(B))}${angleUnit}`);
+    } else if (a !== undefined && c !== undefined && B !== undefined) {
+      steps.push(`SAS — sides a, c and included angle B given.`);
+      b = Math.sqrt(a*a + c*c - 2*a*c*Math.cos(B));
+      steps.push(`Law of Cosines: b² = a² + c² − 2ac·cos B → b = ${disp(b)}`);
+      A = Math.asin(Math.min(1, a * Math.sin(B) / b));
+      C = PI - A - B;
+      steps.push(`Law of Sines: sin A / a = sin B / b → A = ${disp(fromRad(A))}${angleUnit}`);
+      steps.push(`C = 180° − A − B = ${disp(fromRad(C))}${angleUnit}`);
+    } else if (b !== undefined && c !== undefined && A !== undefined) {
+      steps.push(`SAS — sides b, c and included angle A given.`);
+      a = Math.sqrt(b*b + c*c - 2*b*c*Math.cos(A));
+      steps.push(`Law of Cosines: a² = b² + c² − 2bc·cos A → a = ${disp(a)}`);
+      B = Math.asin(Math.min(1, b * Math.sin(A) / a));
+      C = PI - A - B;
+      steps.push(`Law of Sines: sin B / b = sin A / a → B = ${disp(fromRad(B))}${angleUnit}`);
+      steps.push(`C = 180° − A − B = ${disp(fromRad(C))}${angleUnit}`);
+    }
+    // SSA — two sides + non-included angle (ambiguous case)
+    else if (a !== undefined && b !== undefined && A !== undefined) {
+      steps.push(`SSA — sides a, b and angle A given (possible ambiguous case).`);
+      const sinB = b * Math.sin(A) / a;
+      if (sinB > 1) return { error: 'No valid triangle: sin B > 1 with these values.' };
+      B = Math.asin(sinB);
+      C = PI - A - B;
+      c = a * Math.sin(C) / Math.sin(A);
+      steps.push(`Law of Sines: sin B = b·sin A / a = ${disp(sinB)} → B = ${disp(fromRad(B))}${angleUnit}`);
+      steps.push(`C = 180° − A − B = ${disp(fromRad(C))}${angleUnit}`);
+      steps.push(`c = a·sin C / sin A = ${disp(c)}`);
+      if (Math.abs(sinB - 1) > EPS && B < PI/2 && A < PI/2)
+        steps.push(`Note: A second solution may exist (ambiguous SSA). Showing the acute solution.`);
+    } else if (a !== undefined && c !== undefined && A !== undefined) {
+      steps.push(`SSA — sides a, c and angle A given.`);
+      const sinC = c * Math.sin(A) / a;
+      if (sinC > 1) return { error: 'No valid triangle: sin C > 1 with these values.' };
+      C = Math.asin(sinC);
+      B = PI - A - C;
+      b = a * Math.sin(B) / Math.sin(A);
+      steps.push(`Law of Sines: sin C = c·sin A / a → C = ${disp(fromRad(C))}${angleUnit}`);
+      steps.push(`B = 180° − A − C = ${disp(fromRad(B))}${angleUnit}`);
+      steps.push(`b = a·sin B / sin A = ${disp(b)}`);
+    } else if (b !== undefined && c !== undefined && B !== undefined) {
+      steps.push(`SSA — sides b, c and angle B given.`);
+      const sinC = c * Math.sin(B) / b;
+      if (sinC > 1) return { error: 'No valid triangle: sin C > 1 with these values.' };
+      C = Math.asin(sinC);
+      A = PI - B - C;
+      a = b * Math.sin(A) / Math.sin(B);
+      steps.push(`Law of Sines: sin C = c·sin B / b → C = ${disp(fromRad(C))}${angleUnit}`);
+      steps.push(`A = 180° − B − C = ${disp(fromRad(A))}${angleUnit}`);
+      steps.push(`a = b·sin A / sin B = ${disp(a)}`);
+    } else {
+      return { error: 'Unsupported combination. Try a different set of known values.' };
+    }
+  }
+
+  // ── Case: 2 angles + any side (AAS / ASA) ────────────
+  else if (nAngles === 2 && nSides === 1) {
+    // Derive missing angle first
+    if (A !== undefined && B !== undefined) {
+      C = PI - A - B;
+      steps.push(`Two angles known: C = 180° − A − B = ${disp(fromRad(C))}${angleUnit}`);
+    } else if (A !== undefined && C !== undefined) {
+      B = PI - A - C;
+      steps.push(`Two angles known: B = 180° − A − C = ${disp(fromRad(B))}${angleUnit}`);
+    } else if (B !== undefined && C !== undefined) {
+      A = PI - B - C;
+      steps.push(`Two angles known: A = 180° − B − C = ${disp(fromRad(A))}${angleUnit}`);
+    }
+    if (A + B + C < PI - EPS || A + B + C > PI + EPS)
+      return { error: 'Angles do not sum to 180°. Check your values.' };
+    if ([A,B,C].some(v => v <= 0))
+      return { error: 'All angles must be positive. Check your values.' };
+
+    // Now use Law of Sines to find all sides
+    if (a !== undefined) {
+      b = a * Math.sin(B) / Math.sin(A);
+      c = a * Math.sin(C) / Math.sin(A);
+      steps.push(`Law of Sines: b = a·sin B / sin A = ${disp(b)}`);
+      steps.push(`Law of Sines: c = a·sin C / sin A = ${disp(c)}`);
+    } else if (b !== undefined) {
+      a = b * Math.sin(A) / Math.sin(B);
+      c = b * Math.sin(C) / Math.sin(B);
+      steps.push(`Law of Sines: a = b·sin A / sin B = ${disp(a)}`);
+      steps.push(`Law of Sines: c = b·sin C / sin B = ${disp(c)}`);
+    } else if (c !== undefined) {
+      a = c * Math.sin(A) / Math.sin(C);
+      b = c * Math.sin(B) / Math.sin(C);
+      steps.push(`Law of Sines: a = c·sin A / sin C = ${disp(a)}`);
+      steps.push(`Law of Sines: b = c·sin B / sin C = ${disp(b)}`);
+    }
+  }
+
+  // ── Case: 3 angles only (AAA) — infinite solutions ───
+  else if (nAngles === 3 && nSides === 0) {
+    const sum = A + B + C;
+    if (Math.abs(sum - PI) > 0.01)
+      return { error: 'Three angles must sum to exactly 180°.' };
+    return { error: 'AAA — three angles are not enough to determine side lengths (infinitely many similar triangles exist). Add at least one side.' };
+  }
+
+  // ── Validate result ──────────────────────────────────
+  if ([a,b,c,A,B,C].some(v => v === undefined || isNaN(v) || !isFinite(v)))
+    return { error: 'Could not solve — check that your values form a valid triangle.' };
+  if ([a,b,c].some(v => v <= 0))
+    return { error: 'Computed a zero or negative side — these values cannot form a valid triangle.' };
+  if ([A,B,C].some(v => v <= 0 || v >= PI))
+    return { error: 'Computed an invalid angle — these values cannot form a valid triangle.' };
+
+  // Triangle inequality
+  if (a + b <= c + EPS || a + c <= b + EPS || b + c <= a + EPS)
+    return { error: 'Triangle inequality violated — no valid triangle exists with these values.' };
+
+  // Area and perimeter
+  const area      = 0.5 * a * b * Math.sin(C);
+  const perimeter = a + b + c;
+  const s         = perimeter / 2;           // semi-perimeter
+  const areaHeron = Math.sqrt(s*(s-a)*(s-b)*(s-c)); // cross-check
+  const ha        = 2 * area / a;            // heights
+  const hb        = 2 * area / b;
+  const hc        = 2 * area / c;
+  const R         = (a * b * c) / (4 * area); // circumradius
+  const r_in      = area / s;                  // inradius
+
+  steps.push(`Area = ½·a·b·sin C = ${disp(area)}`);
+  steps.push(`Perimeter = a + b + c = ${disp(perimeter)}`);
+
+  return { a, b, c, A, B, C, area, perimeter, ha, hb, hc, R, r_in, steps };
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN SOLVE
+// ═══════════════════════════════════════════════════════
+function solve() {
+  clearMsg();
+  const known = readInputs();
+  const result = solveTriangle(known);
+
+  if (result.error) {
+    showMsg(result.error, 'error');
+    document.getElementById('results-section').style.display = 'none';
+    document.getElementById('tri-svg').style.display = 'none';
+    document.getElementById('diagram-empty').style.display = 'block';
+    return;
+  }
+
+  solvedData = result;
+
+  // Fill solved values back into inputs (green)
+  const fields = { a: result.a, b: result.b, c: result.c, A: result.A, B: result.B, C: result.C };
+  ['a','b','c'].forEach(k => {
+    const el = document.getElementById(`inp-${k}`);
+    const wasUser = known[k] !== undefined;
+    el.value = disp(result[k], 6);
+    el.classList.remove('has-value', 'solved-value');
+    el.classList.add(wasUser ? 'has-value' : 'solved-value');
+  });
+  ['A','B','C'].forEach(k => {
+    const el = document.getElementById(`inp-${k}`);
+    const wasUser = known[k] !== undefined;
+    el.value = disp(fromRad(result[k]), 6);
+    el.classList.remove('has-value', 'solved-value');
+    el.classList.add(wasUser ? 'has-value' : 'solved-value');
+  });
+
+  // Render results cards
+  const ud = angleUnit === 'deg' ? '°' : ' rad';
+  const { a, b, c, A, B, C, area, perimeter, ha, hb, hc, R, r_in } = result;
+  document.getElementById('results-grid').innerHTML = `
+    <div class="res-card">
+      <div class="rc-label">Side a</div>
+      <div class="rc-value">${disp(a,4)}</div>
+      <div class="rc-sub">opposite angle A</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Side b</div>
+      <div class="rc-value">${disp(b,4)}</div>
+      <div class="rc-sub">opposite angle B</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Side c</div>
+      <div class="rc-value">${disp(c,4)}</div>
+      <div class="rc-sub">opposite angle C</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Angle A</div>
+      <div class="rc-value">${disp(fromRad(A),4)}${ud}</div>
+      <div class="rc-sub">at vertex A</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Angle B</div>
+      <div class="rc-value">${disp(fromRad(B),4)}${ud}</div>
+      <div class="rc-sub">at vertex B</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Angle C</div>
+      <div class="rc-value">${disp(fromRad(C),4)}${ud}</div>
+      <div class="rc-sub">at vertex C</div>
+    </div>
+    <div class="res-card highlight">
+      <div class="rc-label">Area</div>
+      <div class="rc-value">${disp(area,4)}</div>
+      <div class="rc-sub">square units</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Perimeter</div>
+      <div class="rc-value">${disp(perimeter,4)}</div>
+      <div class="rc-sub">a + b + c</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Height hₐ</div>
+      <div class="rc-value">${disp(ha,4)}</div>
+      <div class="rc-sub">to side a</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Height h_b</div>
+      <div class="rc-value">${disp(hb,4)}</div>
+      <div class="rc-sub">to side b</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Circumradius R</div>
+      <div class="rc-value">${disp(R,4)}</div>
+      <div class="rc-sub">circumscribed circle</div>
+    </div>
+    <div class="res-card">
+      <div class="rc-label">Inradius r</div>
+      <div class="rc-value">${disp(r_in,4)}</div>
+      <div class="rc-sub">inscribed circle</div>
+    </div>
+  `;
+
+  // Steps
+  document.getElementById('steps-list').innerHTML = result.steps.map((s, i) => `
+    <div class="step-item">
+      <div class="step-num">${i+1}</div>
+      <span>${s}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('results-section').style.display = 'block';
+
+  // Draw diagram
+  drawDiagram(result);
+  showMsg('Triangle solved successfully.', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// SVG DIAGRAM
+// ═══════════════════════════════════════════════════════
+function drawDiagram(t) {
+  const { a, b, c, A, B, C, ha } = t;
+  const svg   = document.getElementById('tri-svg');
+  const empty = document.getElementById('diagram-empty');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+  // ── Place vertices ────────────────────────────────────
+  // Place C at origin, B at (a, 0), then A computed from angles
+  const W = 360, H = 280, PAD = 54;
+  // Raw vertex positions (C at left-bottom, B at right-bottom)
+  const Cx_r = 0,  Cy_r = 0;
+  const Bx_r = a,  By_r = 0;
+  // A is above the base
+  const Ax_r = b * Math.cos(C);
+  const Ay_r = b * Math.sin(C);
+
+  // Fit to canvas with padding
+  const minX = Math.min(Ax_r, Bx_r, Cx_r);
+  const maxX = Math.max(Ax_r, Bx_r, Cx_r);
+  const minY = Math.min(Ay_r, By_r, Cy_r);
+  const maxY = Math.max(Ay_r, By_r, Cy_r);
+  const scaleX = (W - PAD*2) / (maxX - minX || 1);
+  const scaleY = (H - PAD*2) / (maxY - minY || 1);
+  const scale  = Math.min(scaleX, scaleY);
+
+  function tx(x) { return PAD + (x - minX) * scale; }
+  // flip Y so triangle points upward
+  function ty(y) { return H - PAD - (y - minY) * scale; }
+
+  const Ax = tx(Ax_r), Ay = ty(Ay_r);
+  const Bx = tx(Bx_r), By = ty(By_r);
+  const Cx2 = tx(Cx_r), Cy2 = ty(Cy_r);
+
+  const col = {
+    stroke:  isDark ? '#94a3b8' : '#475569',
+    fill:    isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.07)',
+    sideA:   '#ef4444',
+    sideB:   '#3b82f6',
+    sideC:   '#6366f1',
+    angA:    '#ef4444',
+    angB:    '#f59e0b',
+    angC:    '#10b981',
+    label:   isDark ? '#f1f5f9' : '#0f172a',
+    muted:   isDark ? '#94a3b8' : '#64748b',
+    height:  isDark ? 'rgba(148,163,184,0.4)' : 'rgba(100,116,139,0.4)',
+  };
+
+  // ── Height foot (from A perpendicular to BC) ──────────
+  // BC is horizontal in our coord (C at left, B at right)
+  const Hx = Ax, Hy = By;   // foot of altitude from A to BC
+
+  // ── Arc radius for angle indicators ───────────────────
+  const arcR = Math.min(scale * Math.min(a,b,c) * 0.22, 28);
+
+  // ── Midpoints for side labels ─────────────────────────
+  const midA = { x: (Bx+Cx2)/2, y: (By+Cy2)/2 };  // side a = BC
+  const midB = { x: (Ax+Cx2)/2, y: (Ay+Cy2)/2 };  // side b = AC
+  const midC = { x: (Ax+Bx)/2,  y: (Ay+By)/2  };  // side c = AB
+
+  // Offset labels outward from triangle centroid
+  const centX = (Ax+Bx+Cx2)/3, centY = (Ay+By+Cy2)/3;
+  function labelOff(mx, my, dist) {
+    const dx = mx - centX, dy = my - centY;
+    const len = Math.sqrt(dx*dx+dy*dy) || 1;
+    return { x: mx + dx/len*dist, y: my + dy/len*dist };
+  }
+
+  const labA = labelOff(midA.x, midA.y, 18);
+  const labB = labelOff(midB.x, midB.y, 18);
+  const labC = labelOff(midC.x, midC.y, 18);
+
+  // Vertex label positions (offset away from centroid)
+  function vertLabel(vx, vy, dist) {
+    const dx = vx - centX, dy = vy - centY;
+    const len = Math.sqrt(dx*dx+dy*dy)||1;
+    return { x: vx + dx/len*dist, y: vy + dy/len*dist };
+  }
+  const vlA = vertLabel(Ax, Ay, 22);
+  const vlB = vertLabel(Bx, By, 22);
+  const vlC = vertLabel(Cx2, Cy2, 22);
+
+  // ── Angle arc helper ──────────────────────────────────
+  function angleArc(vx, vy, ang, r, from_ang_world) {
+    // from_ang_world: angle of the first edge from vertex in screen coords
+    const a1 = from_ang_world;
+    const a2 = a1 + ang; // going counterclockwise (SVG y-flipped)
+    const x1 = vx + r * Math.cos(a1);
+    const y1 = vy + r * Math.sin(a1);
+    const x2 = vx + r * Math.cos(a2);
+    const y2 = vy + r * Math.sin(a2);
+    const large = ang > Math.PI ? 1 : 0;
+    return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+  }
+
+  // Compute world angles of edges leaving each vertex (screen space, y flipped)
+  function edgeAngle(fromX, fromY, toX, toY) {
+    return Math.atan2(toY - fromY, toX - fromX);
+  }
+  // At A: edges to B and C
+  const aA1 = edgeAngle(Ax, Ay, Bx, By);
+  const aA2 = edgeAngle(Ax, Ay, Cx2, Cy2);
+  // At B: edges to A and C
+  const aB1 = edgeAngle(Bx, By, Cx2, Cy2);
+  const aB2 = edgeAngle(Bx, By, Ax, Ay);
+  // At C: edges to A and B
+  const aC1 = edgeAngle(Cx2, Cy2, Bx, By);
+  const aC2 = edgeAngle(Cx2, Cy2, Ax, Ay);
+
+  // For arc, we sweep from one edge to the other through the interior
+  function interiorArc(vx, vy, ang1, ang2, r, interiorAngle) {
+    // Normalize
+    let a1 = ang1, a2 = ang2;
+    let diff = ((a2 - a1) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+    if (Math.abs(diff - interiorAngle) > 0.01) {
+      // swap to go through interior
+      [a1, a2] = [a2, a1];
+      diff = ((a2 - a1) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+    }
+    const x1 = vx + r * Math.cos(a1);
+    const y1 = vy + r * Math.sin(a1);
+    const x2 = vx + r * Math.cos(a2);
+    const y2 = vy + r * Math.sin(a2);
+    const large = diff > Math.PI ? 1 : 0;
+    const mid = a1 + diff/2;
+    const mx = vx + r*0.6 * Math.cos(mid);
+    const my = vy + r*0.6 * Math.sin(mid);
+    return { path: `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`, midX: mx, midY: my };
+  }
+
+  const arcA = interiorArc(Ax, Ay, aA1, aA2, arcR, A);
+  const arcB = interiorArc(Bx, By, aB1, aB2, arcR, B);
+  const arcC = interiorArc(Cx2, Cy2, aC1, aC2, arcR, C);
+
+  // Right-angle marker for 90° angles
+  function rightAngleMark(vx, vy, ang1, ang2, size) {
+    const dx1 = Math.cos(ang1)*size, dy1 = Math.sin(ang1)*size;
+    const dx2 = Math.cos(ang2)*size, dy2 = Math.sin(ang2)*size;
+    return `M ${vx+dx1} ${vy+dy1} L ${vx+dx1+dx2} ${vy+dy1+dy2} L ${vx+dx2} ${vy+dy2}`;
+  }
+
+  const isRightA = Math.abs(A - Math.PI/2) < 0.001;
+  const isRightB = Math.abs(B - Math.PI/2) < 0.001;
+  const isRightC = Math.abs(C - Math.PI/2) < 0.001;
+
+  // ── Height line ───────────────────────────────────────
+  // Only draw if foot lands on segment BC (between B and C)
+  const footOnBC = Hx >= Math.min(Bx, Cx2) - 1 && Hx <= Math.max(Bx, Cx2) + 1;
+
+  svg.innerHTML = `
+    <!-- Triangle fill -->
+    <polygon points="${Ax},${Ay} ${Bx},${By} ${Cx2},${Cy2}"
+             fill="${col.fill}" stroke="none"/>
+
+    <!-- Height line -->
+    ${footOnBC ? `
+    <line x1="${Ax}" y1="${Ay}" x2="${Hx}" y2="${Hy}"
+          stroke="${col.height}" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <path d="M ${Hx-5},${Hy} L ${Hx-5},${Hy-5} L ${Hx+5},${Hy-5} L ${Hx+5},${Hy}"
+          fill="none" stroke="${col.height}" stroke-width="1"/>
+    ` : ''}
+
+    <!-- Sides -->
+    <line x1="${Bx}" y1="${By}" x2="${Cx2}" y2="${Cy2}"
+          stroke="${col.sideA}" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="${Ax}" y1="${Ay}" x2="${Cx2}" y2="${Cy2}"
+          stroke="${col.sideB}" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="${Ax}" y1="${Ay}" x2="${Bx}" y2="${By}"
+          stroke="${col.sideC}" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Angle arcs / right-angle marks -->
+    ${isRightA
+      ? `<path d="${rightAngleMark(Ax,Ay,aA1,aA2,10)}" fill="none" stroke="${col.angA}" stroke-width="1.5"/>`
+      : `<path d="${arcA.path}" fill="none" stroke="${col.angA}" stroke-width="1.5"/>`
+    }
+    ${isRightB
+      ? `<path d="${rightAngleMark(Bx,By,aB1,aB2,10)}" fill="none" stroke="${col.angB}" stroke-width="1.5"/>`
+      : `<path d="${arcB.path}" fill="none" stroke="${col.angB}" stroke-width="1.5"/>`
+    }
+    ${isRightC
+      ? `<path d="${rightAngleMark(Cx2,Cy2,aC1,aC2,10)}" fill="none" stroke="${col.angC}" stroke-width="1.5"/>`
+      : `<path d="${arcC.path}" fill="none" stroke="${col.angC}" stroke-width="1.5"/>`
+    }
+
+    <!-- Vertex labels (A, B, C) -->
+    <text x="${vlA.x}" y="${vlA.y}" text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="15" font-weight="500" fill="${col.angA}">A</text>
+    <text x="${vlB.x}" y="${vlB.y}" text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="15" font-weight="500" fill="${col.angB}">B</text>
+    <text x="${vlC.x}" y="${vlC.y}" text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="15" font-weight="500" fill="${col.angC}">C</text>
+
+    <!-- Side labels (a, b, c) with values -->
+    <text x="${labA.x}" y="${labA.y}" text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="12" font-weight="500" fill="${col.sideA}">a = ${disp(a,3)}</text>
+    <text x="${labB.x}" y="${labB.y}" text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="12" font-weight="500" fill="${col.sideB}">b = ${disp(b,3)}</text>
+    <text x="${labC.x}" y="${labC.y}" text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="12" font-weight="500" fill="${col.sideC}">c = ${disp(c,3)}</text>
+
+    <!-- Angle values at arc midpoints -->
+    ${!isRightA ? `<text x="${arcA.midX + (arcA.midX-Ax)*0.7}" y="${arcA.midY + (arcA.midY-Ay)*0.7}"
+          text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="10" fill="${col.angA}"
+          >${disp(fromRad(A),1)}${angleUnit==='deg'?'°':' r'}</text>` : ''}
+    ${!isRightB ? `<text x="${arcB.midX + (arcB.midX-Bx)*0.7}" y="${arcB.midY + (arcB.midY-By)*0.7}"
+          text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="10" fill="${col.angB}"
+          >${disp(fromRad(B),1)}${angleUnit==='deg'?'°':' r'}</text>` : ''}
+    ${!isRightC ? `<text x="${arcC.midX + (arcC.midX-Cx2)*0.7}" y="${arcC.midY + (arcC.midY-Cy2)*0.7}"
+          text-anchor="middle" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="10" fill="${col.angC}"
+          >${disp(fromRad(C),1)}${angleUnit==='deg'?'°':' r'}</text>` : ''}
+
+    <!-- Height label -->
+    ${footOnBC ? `<text x="${Hx+10}" y="${(Ay+Hy)/2}" dominant-baseline="central"
+          font-family="'DM Mono',monospace" font-size="10" fill="${col.muted}"
+          >hₐ=${disp(ha,2)}</text>` : ''}
+
+    <!-- Right-angle label -->
+    ${isRightA ? `<text x="${vlA.x+2}" y="${vlA.y+14}" text-anchor="middle"
+          font-size="10" fill="${col.angA}" font-family="'DM Mono',monospace">90°</text>` : ''}
+    ${isRightB ? `<text x="${vlB.x+2}" y="${vlB.y+14}" text-anchor="middle"
+          font-size="10" fill="${col.angB}" font-family="'DM Mono',monospace">90°</text>` : ''}
+    ${isRightC ? `<text x="${vlC.x+2}" y="${vlC.y+14}" text-anchor="middle"
+          font-size="10" fill="${col.angC}" font-family="'DM Mono',monospace">90°</text>` : ''}
+  `;
+
+  svg.style.display = 'block';
+  empty.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════
+function resetAll() {
+  ['a','b','c','A','B','C'].forEach(k => {
+    const el = document.getElementById(`inp-${k}`);
+    el.value = '';
+    el.classList.remove('has-value', 'solved-value');
+  });
+  clearMsg();
+  solvedData = null;
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('tri-svg').style.display = 'none';
+  document.getElementById('diagram-empty').style.display = 'block';
+  document.querySelectorAll('.case-pill').forEach(p => p.classList.remove('active'));
+}
+
+// ═══════════════════════════════════════════════════════
+// PRESETS
+// ═══════════════════════════════════════════════════════
+function loadPreset(name) {
+  resetAll();
+  document.querySelectorAll('.case-pill').forEach(p =>
+    p.classList.toggle('active', p.getAttribute('onclick').includes(`'${name}'`))
+  );
+
+  // All in degrees, sides are unitless
+  const presets = {
+    '345':        { a: 3,  b: 4,  c: 5 },
+    'equilateral':{ a: 6,  b: 6,  c: 6 },
+    'isosceles':  { a: 5,  b: 5,  c: 8 },
+    '306090':     { A: 30, B: 60, C: 90, a: 1 },
+    '454590':     { A: 45, B: 45, C: 90, a: 1 },
+    'golden':     { A: 36, B: 36, C: 108, a: 1 },
+  };
+  const p = presets[name];
+  if (!p) return;
+
+  // Convert angles if in radians
+  Object.entries(p).forEach(([k, v]) => {
+    const el = document.getElementById(`inp-${k}`);
+    let val = v;
+    if (['A','B','C'].includes(k) && angleUnit === 'rad') val = r6(v * Math.PI / 180);
+    el.value = val;
+    el.classList.add('has-value');
+  });
+
+  solve();
+}
+
+// ═══════════════════════════════════════════════════════
+// KEYBOARD SHORTCUT — Enter to solve
+// ═══════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') solve();
+});
+</script>
+
+<script src="theme-toggle.js"></script>
+</body>
+</html>
