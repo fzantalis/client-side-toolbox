@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
   
   <title>Data Outlier Spotter | Free Statistical Calculator</title>
   <meta name="title" content="Data Outlier Spotter | Free Statistical Calculator">
   <meta name="description" content="Paste a column of numbers to instantly calculate mean, median, standard deviation, and spot statistical outliers. 100% private and runs entirely in your browser.">
   <meta name="keywords" content="outlier detector, outlier calculator, data analysis tool, find outliers, mean median standard deviation calculator, IQR method, statistical anomalies">
-  <meta name="author" content="Client-Side Toolbox">
+  <meta name="author" content="fzantalis">
 
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://zantalis.net/demo-outlier-spotter.html">
@@ -17,13 +18,14 @@
   <meta property="og:url" content="https://zantalis.net/demo-outlier-spotter.html">
   <meta property="og:title" content="Data Outlier Spotter | Free Statistical Calculator">
   <meta property="og:description" content="Paste a dataset to get mean, median, std dev, and automatically flagged outliers.">
-  <meta property="og:image" content="https://zantalis.net/og-outlier.jpg">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://zantalis.net/demo-outlier-spotter.html">
   <meta property="twitter:title" content="Data Outlier Spotter | Free Statistical Calculator">
   <meta property="twitter:description" content="Find statistical anomalies and calculate dataset metrics instantly.">
-  <meta property="twitter:image" content="https://zantalis.net/og-outlier.jpg">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
 
+  <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -102,6 +104,13 @@
     [data-theme="dark"] .card-icon { background: rgba(59, 130, 246, 0.1); }
 
     /* --- Tool Sub-Page Specific Styles --- */
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
     .breadcrumb {
       display: inline-flex;
       align-items: center;
@@ -109,7 +118,6 @@
       color: var(--text-muted);
       text-decoration: none;
       font-weight: 500;
-      margin-bottom: 2rem;
       transition: color 0.2s ease;
     }
 
@@ -182,6 +190,7 @@
     .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
     .btn-secondary { background: transparent; border-color: var(--border); color: var(--text-main); }
     .btn-secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+    .btn-icon { padding: 0.4rem 0.6rem; font-size: 1.1rem; }
 
     .panel-body { 
       padding: 1.5rem; 
@@ -297,7 +306,12 @@
 <body>
 
 <div class="container">
-  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+  <div class="nav-bar">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <button class="btn-secondary btn-icon" id="theme-toggle" aria-label="Toggle Dark Mode">
+      <i class="ph ph-moon" id="theme-icon"></i>
+    </button>
+  </div>
 
   <header class="tool-header">
     <div class="card-icon"><i class="ph ph-crosshair"></i></div>
@@ -381,6 +395,11 @@
         <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
         View Source on GitHub
       </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
     </div>
   </footer>
 </div>
@@ -511,7 +530,33 @@ document.getElementById('data-input').addEventListener('keydown', function(e) {
     analyzeData();
   }
 });
+
+// Inline Theme Toggle (Fallback in case theme-toggle.js is missing/broken)
+const themeToggleBtn = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeIcon.className = theme === 'dark' ? 'ph ph-sun' : 'ph ph-moon';
+}
+
+// Check initial preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+  applyTheme(savedTheme);
+} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  applyTheme('dark');
+}
+
+themeToggleBtn.addEventListener('click', () => {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme(newTheme);
+  localStorage.setItem('theme', newTheme);
+});
 </script>
+
+<script src="theme-toggle.js"></script>
 
 </body>
 </html>
