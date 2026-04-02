@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+
+  <title>Pomodoro & Study Timer | Free Private Focus Timer</title>
+  <meta name="title" content="Pomodoro & Study Timer | Free Private Focus Timer">
+  <meta name="description" content="A full-featured Pomodoro and study timer with customizable work and break intervals, session history, total focused-time tracking, and sound notifications. 100% private, runs entirely in your browser.">
+  <meta name="keywords" content="pomodoro timer, study timer, focus timer, break timer, pomodoro technique, productivity timer, free pomodoro, browser pomodoro, offline timer, session tracker, study tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-pomodoro.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-pomodoro.html">
+  <meta property="og:title" content="Pomodoro & Study Timer | Free Private Focus Timer">
+  <meta property="og:description" content="Customizable work/break intervals, session tracking, and total focus time. No data leaves your browser.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-pomodoro.html">
+  <meta property="twitter:title" content="Pomodoro & Study Timer | Free Private Focus Timer">
+  <meta property="twitter:description" content="Customizable Pomodoro timer with session history and focus tracking. Free and private.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* ── Page layout ────────────────────────────────────── */
+    .pomo-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 900px) {
+      .pomo-grid { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
+
+    /* ── Timer card ─────────────────────────────────────── */
+    .timer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-md);
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle ambient glow behind ring — color changes per mode */
+    .timer-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; left: 50%;
+      transform: translateX(-50%);
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      opacity: 0.07;
+      transition: background 0.6s ease;
+      pointer-events: none;
+    }
+    .timer-card.mode-work::before   { background: #3b82f6; }
+    .timer-card.mode-short::before  { background: #10b981; }
+    .timer-card.mode-long::before   { background: #8b5cf6; }
+
+    /* ── Mode pills ─────────────────────────────────────── */
+    .mode-pills {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .mode-pill {
+      padding: 0.35rem 1rem;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: inherit;
+    }
+    .mode-pill:hover { border-color: var(--text-muted); color: var(--text-main); transform: none; }
+    .mode-pill.active-work  { background: rgba(59,130,246,0.1);  border-color: #3b82f6; color: #3b82f6; }
+    .mode-pill.active-short { background: rgba(16,185,129,0.1);  border-color: #10b981; color: #10b981; }
+    .mode-pill.active-long  { background: rgba(139,92,246,0.1);  border-color: #8b5cf6; color: #8b5cf6; }
+
+    /* ── SVG ring ────────────────────────────────────────── */
+    .ring-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      flex-shrink: 0;
+    }
+    .ring-svg { transform: rotate(-90deg); }
+    .ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 10;
+    }
+    .ring-fg {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+    }
+
+    /* Time display centred inside ring */
+    .ring-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+    }
+    .timer-display {
+      font-family: 'DM Mono', monospace;
+      font-size: 3rem;
+      font-weight: 500;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .timer-mode-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+    .timer-session-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      letter-spacing: 0.04em;
+      margin-top: 0.1rem;
+    }
+    .badge-work  { background: rgba(59,130,246,0.12);  color: #3b82f6; }
+    .badge-short { background: rgba(16,185,129,0.12);  color: #10b981; }
+    .badge-long  { background: rgba(139,92,246,0.12);  color: #8b5cf6; }
+
+    /* ── Control buttons ─────────────────────────────────── */
+    .timer-controls {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .ctrl-btn {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .ctrl-btn:hover { border-color: var(--text-muted); color: var(--text-main); transform: scale(1.05); }
+
+    .play-btn {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1.5rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.18s;
+      box-shadow: 0 4px 14px rgba(59,130,246,0.4);
+    }
+    .play-btn:hover { transform: scale(1.07); box-shadow: 0 6px 20px rgba(59,130,246,0.5); }
+    .play-btn.mode-short { background: #10b981; box-shadow: 0 4px 14px rgba(16,185,129,0.4); }
+    .play-btn.mode-long  { background: #8b5cf6; box-shadow: 0 4px 14px rgba(139,92,246,0.4); }
+
+    /* ── Stat chips ──────────────────────────────────────── */
+    .stat-chips {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+    }
+    .chip-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .chip-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+    }
+
+    /* ── Settings panel ──────────────────────────────────── */
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .setting-label strong {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .setting-label span {
+      font-size: 0.77rem;
+      color: var(--text-muted);
+    }
+    .setting-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .num-btn {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-main);
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1;
+      padding: 0;
+    }
+    .num-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: none; }
+    .num-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-main);
+      min-width: 42px;
+      text-align: center;
+    }
+
+    /* Toggle switch (reuse from teleprompter) */
+    .toggle-switch {
+      position: relative; width: 36px; height: 20px; flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--border); border-radius: 20px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-track::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px; width: 16px; height: 16px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(16px); }
+
+    /* ── Session log ─────────────────────────────────────── */
+    .session-log {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .session-entry {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 0.9rem;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      animation: slideIn 0.25s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .se-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .se-dot.work  { background: #3b82f6; }
+    .se-dot.short { background: #10b981; }
+    .se-dot.long  { background: #8b5cf6; }
+    .se-label { flex: 1; font-weight: 600; color: var(--text-main); }
+    .se-duration { font-family: 'DM Mono', monospace; color: var(--text-muted); font-size: 0.8rem; }
+    .se-time { font-size: 0.75rem; color: var(--text-muted); }
+
+    .log-empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    .log-empty i { font-size: 1.75rem; display: block; margin-bottom: 0.5rem; color: var(--border); }
+
+    /* ── Today's summary bar ─────────────────────────────── */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .sum-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    .sum-card strong {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--primary);
+      margin-bottom: 0.2rem;
+    }
+    .sum-card span {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .sum-card.green strong  { color: #10b981; }
+    .sum-card.purple strong { color: #8b5cf6; }
+    .sum-card.amber strong  { color: #f59e0b; }
+
+    /* Tomato dots row */
+    .tomato-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+      padding: 0.75rem 0 0;
+    }
+    .tomato {
+      font-size: 1.1rem;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+    .tomato.earned { animation: pop 0.3s ease; }
+    @keyframes pop {
+      0%   { transform: scale(0.5); }
+      70%  { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    .tomato-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-timer"></i></div>
+    <div>
+      <h1>Pomodoro &amp; Study Timer</h1>
+      <p>Customizable work and break intervals with session history and total focused-time tracking.</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── Today's summary ───────────────────────────────── -->
+    <div class="summary-bar">
+      <div class="sum-card">
+        <strong id="sum-focus">0m</strong>
+        <span>Focus Time</span>
+      </div>
+      <div class="sum-card green">
+        <strong id="sum-pomodoros">0</strong>
+        <span>Pomodoros</span>
+      </div>
+      <div class="sum-card purple">
+        <strong id="sum-breaks">0</strong>
+        <span>Breaks Taken</span>
+      </div>
+      <div class="sum-card amber">
+        <strong id="sum-streak">0</strong>
+        <span>Current Streak</span>
+      </div>
+    </div>
+
+    <!-- Tomato dots -->
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-header">
+        <h3>Today's Pomodoros</h3>
+        <button class="btn-secondary" onclick="clearAll()" style="font-size:0.78rem; padding:0.35rem 0.75rem;">
+          <i class="ph ph-trash"></i> Clear all
+        </button>
+      </div>
+      <div class="panel-body" style="padding-top:0.25rem;">
+        <div class="tomato-row" id="tomato-row">
+          <span class="tomato-label">Complete a work session to earn a 🍅</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main two-column grid ──────────────────────────── -->
+    <div class="pomo-grid">
+
+      <!-- LEFT: Timer -->
+      <div class="timer-card mode-work" id="timer-card">
+
+        <!-- Mode selector -->
+        <div class="mode-pills">
+          <button class="mode-pill active-work" data-mode="work"  onclick="switchMode('work')">Focus</button>
+          <button class="mode-pill"             data-mode="short" onclick="switchMode('short')">Short Break</button>
+          <button class="mode-pill"             data-mode="long"  onclick="switchMode('long')">Long Break</button>
+        </div>
+
+        <!-- Ring + time display -->
+        <div class="ring-wrap">
+          <svg class="ring-svg" width="220" height="220" viewBox="0 0 220 220">
+            <circle class="ring-bg" cx="110" cy="110" r="96"/>
+            <circle class="ring-fg" id="ring-fg" cx="110" cy="110" r="96"
+                    stroke="#3b82f6"
+                    stroke-dasharray="603.19"
+                    stroke-dashoffset="0"/>
+          </svg>
+          <div class="ring-inner">
+            <div class="timer-display" id="timer-display">25:00</div>
+            <div class="timer-mode-label" id="timer-mode-label">Focus</div>
+            <div class="timer-session-badge badge-work" id="timer-badge">Session 1</div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="timer-controls">
+          <button class="ctrl-btn" onclick="skipBack()" title="Restart this interval">
+            <i class="ph ph-skip-back"></i>
+          </button>
+          <button class="play-btn mode-work" id="play-btn" onclick="toggleTimer()">
+            <i class="ph ph-play" id="play-icon"></i>
+          </button>
+          <button class="ctrl-btn" onclick="skipForward()" title="Skip to next interval">
+            <i class="ph ph-skip-forward"></i>
+          </button>
+        </div>
+
+        <!-- Stat chips -->
+        <div class="stat-chips">
+          <div class="chip">
+            <div class="chip-val" id="chip-session">1</div>
+            <div class="chip-label">Session</div>
+          </div>
+          <div class="chip">
+            <div class="chip-val" id="chip-total">0:00</div>
+            <div class="chip-label">Focus today</div>
+          </div>
+          <div class="chip">
+            <div class="chip-val" id="chip-elapsed">0:00</div>
+            <div class="chip-label">This interval</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Settings + Log -->
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+        <!-- Settings -->
+        <div class="panel">
+          <div class="panel-header"><h3>Settings</h3></div>
+          <div class="panel-body">
+            <div class="settings-group">
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Focus duration</strong>
+                  <span>Work interval length</span>
+                </div>
+                <div class="setting-control">
+                  <button class="num-btn" onclick="adjustSetting('work',-1)">−</button>
+                  <div class="num-val" id="val-work">25 min</div>
+                  <button class="num-btn" onclick="adjustSetting('work',1)">+</button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Short break</strong>
+                  <span>Between focus sessions</span>
+                </div>
+                <div class="setting-control">
+                  <button class="num-btn" onclick="adjustSetting('short',-1)">−</button>
+                  <div class="num-val" id="val-short">5 min</div>
+                  <button class="num-btn" onclick="adjustSetting('short',1)">+</button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Long break</strong>
+                  <span>After every N sessions</span>
+                </div>
+                <div class="setting-control">
+                  <button class="num-btn" onclick="adjustSetting('long',-1)">−</button>
+                  <div class="num-val" id="val-long">15 min</div>
+                  <button class="num-btn" onclick="adjustSetting('long',1)">+</button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Long break after</strong>
+                  <span>Sessions before long break</span>
+                </div>
+                <div class="setting-control">
+                  <button class="num-btn" onclick="adjustSetting('cycle',-1)">−</button>
+                  <div class="num-val" id="val-cycle">4 sessions</div>
+                  <button class="num-btn" onclick="adjustSetting('cycle',1)">+</button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Auto-start breaks</strong>
+                  <span>Start break automatically</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="tog-autobreak" checked>
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Auto-start focus</strong>
+                  <span>Start next session automatically</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="tog-autofocus">
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Sound notifications</strong>
+                  <span>Chime when interval ends</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="tog-sound" checked>
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  <strong>Browser notifications</strong>
+                  <span>Desktop alert on completion</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="tog-notif" onchange="requestNotifPerm(this)">
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Session log -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Session Log</h3>
+            <button class="btn-secondary" onclick="clearLog()" style="font-size:0.78rem; padding:0.35rem 0.75rem;">
+              <i class="ph ph-eraser"></i> Clear log
+            </button>
+          </div>
+          <div class="panel-body" style="padding:1rem;">
+            <div class="session-log" id="session-log">
+              <div class="log-empty" id="log-empty">
+                <i class="ph ph-clock-countdown"></i>
+                Complete a session to see it logged here.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const cfg = {
+  work:  25,   // minutes
+  short: 5,
+  long:  15,
+  cycle: 4,    // sessions before long break
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const st = {
+  mode:          'work',   // 'work' | 'short' | 'long'
+  running:       false,
+  remaining:     cfg.work * 60,   // seconds
+  totalDuration: cfg.work * 60,
+  sessionCount:  0,        // completed work sessions today
+  breakCount:    0,
+  totalFocusSec: 0,        // accumulated focus seconds today
+  elapsedSec:    0,        // seconds elapsed in current interval
+  streak:        0,        // consecutive completed work sessions without manual skip
+  interval:      null,
+  lastTick:      null,
+  log:           [],       // session log entries
+};
+
+// ═══════════════════════════════════════════════════════
+// DOM
+// ═══════════════════════════════════════════════════════
+const ringFg     = document.getElementById('ring-fg');
+const display    = document.getElementById('timer-display');
+const modeLabel  = document.getElementById('timer-mode-label');
+const badge      = document.getElementById('timer-badge');
+const playBtn    = document.getElementById('play-btn');
+const playIcon   = document.getElementById('play-icon');
+const timerCard  = document.getElementById('timer-card');
+const logEl      = document.getElementById('session-log');
+const logEmpty   = document.getElementById('log-empty');
+const tomatoRow  = document.getElementById('tomato-row');
+
+const CIRCUMFERENCE = 2 * Math.PI * 96; // ≈ 603.19
+
+// ═══════════════════════════════════════════════════════
+// RING COLORS
+// ═══════════════════════════════════════════════════════
+const COLORS = { work: '#3b82f6', short: '#10b981', long: '#8b5cf6' };
+const LABELS = { work: 'Focus', short: 'Short Break', long: 'Long Break' };
+
+// ═══════════════════════════════════════════════════════
+// FORMAT HELPERS
+// ═══════════════════════════════════════════════════════
+function fmtMMSS(sec) {
+  const m = Math.floor(Math.abs(sec) / 60);
+  const s = Math.floor(Math.abs(sec) % 60);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function fmtHHMM(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function fmtElapsed(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function timeNow() {
+  return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER RING + DISPLAY
+// ═══════════════════════════════════════════════════════
+function render() {
+  // Time display
+  display.textContent = fmtMMSS(st.remaining);
+
+  // Ring progress (1 = full, 0 = empty — we go from full to empty)
+  const pct    = st.remaining / st.totalDuration;
+  const offset = CIRCUMFERENCE * (1 - pct);
+  ringFg.style.strokeDashoffset = offset;
+  ringFg.style.stroke = COLORS[st.mode];
+
+  // Mode label & badge
+  modeLabel.textContent = LABELS[st.mode];
+  badge.textContent     = st.mode === 'work'
+    ? `Session ${st.sessionCount + 1}`
+    : (st.mode === 'short' ? 'Short Break' : 'Long Break');
+  badge.className = `timer-session-badge badge-${st.mode}`;
+
+  // Card & button accent color
+  timerCard.className = `timer-card mode-${st.mode}`;
+  playBtn.className   = `play-btn mode-${st.mode}`;
+
+  // Play/pause icon
+  playIcon.className = st.running ? 'ph ph-pause' : 'ph ph-play';
+
+  // Chips
+  document.getElementById('chip-session').textContent = st.sessionCount + 1;
+  document.getElementById('chip-total').textContent   = fmtElapsed(st.totalFocusSec);
+  document.getElementById('chip-elapsed').textContent = fmtElapsed(st.elapsedSec);
+
+  // Summary bar
+  document.getElementById('sum-focus').textContent     = fmtHHMM(st.totalFocusSec);
+  document.getElementById('sum-pomodoros').textContent = st.sessionCount;
+  document.getElementById('sum-breaks').textContent    = st.breakCount;
+  document.getElementById('sum-streak').textContent    = st.streak + (st.streak === 1 ? ' 🔥' : st.streak >= 3 ? ' 🔥' : '');
+
+  // Page title
+  document.title = `${fmtMMSS(st.remaining)} — ${LABELS[st.mode]} | Pomodoro`;
+}
+
+// ═══════════════════════════════════════════════════════
+// TIMER TICK
+// ═══════════════════════════════════════════════════════
+function tick() {
+  if (!st.running) return;
+
+  const now   = Date.now();
+  const delta = Math.round((now - st.lastTick) / 1000);
+  st.lastTick = now;
+
+  const stepSec = Math.max(1, delta);
+
+  st.remaining  -= stepSec;
+  st.elapsedSec += stepSec;
+  if (st.mode === 'work') st.totalFocusSec += stepSec;
+
+  if (st.remaining <= 0) {
+    st.remaining = 0;
+    render();
+    intervalComplete();
+    return;
+  }
+
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// INTERVAL COMPLETE
+// ═══════════════════════════════════════════════════════
+function intervalComplete() {
+  stopTimer();
+  playChime();
+
+  if (st.mode === 'work') {
+    st.sessionCount++;
+    st.streak++;
+    addTomato();
+    logEntry('work', cfg.work * 60);
+    sendNotif('Focus session complete! 🍅', 'Time for a break.');
+
+    // Determine next break type
+    const isLongBreak = st.sessionCount % cfg.cycle === 0;
+    if (document.getElementById('tog-autobreak').checked) {
+      setTimeout(() => switchMode(isLongBreak ? 'long' : 'short', true), 800);
+    } else {
+      switchMode(isLongBreak ? 'long' : 'short');
+    }
+  } else {
+    st.breakCount++;
+    const dur = st.mode === 'short' ? cfg.short : cfg.long;
+    logEntry(st.mode, dur * 60);
+    sendNotif('Break over!', 'Ready to focus?');
+
+    if (document.getElementById('tog-autofocus').checked) {
+      setTimeout(() => switchMode('work', true), 800);
+    } else {
+      switchMode('work');
+    }
+  }
+
+  updateSummary();
+}
+
+// ═══════════════════════════════════════════════════════
+// START / STOP / TOGGLE
+// ═══════════════════════════════════════════════════════
+function toggleTimer() {
+  if (st.running) {
+    stopTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  st.running  = true;
+  st.lastTick = Date.now();
+  st.interval = setInterval(tick, 500);
+  render();
+}
+
+function stopTimer() {
+  st.running = false;
+  clearInterval(st.interval);
+  render();
+}
+
+function skipBack() {
+  stopTimer();
+  st.remaining  = st.totalDuration;
+  st.elapsedSec = 0;
+  render();
+}
+
+function skipForward() {
+  if (st.running) stopTimer();
+  // Treat as incomplete — no credit, reset streak if skipping work
+  if (st.mode === 'work') {
+    st.streak = 0;
+    logEntry('work', st.elapsedSec, true); // skipped
+  } else {
+    logEntry(st.mode, st.elapsedSec, true);
+  }
+  intervalComplete();
+}
+
+// ═══════════════════════════════════════════════════════
+// MODE SWITCH
+// ═══════════════════════════════════════════════════════
+function switchMode(mode, autoStart) {
+  stopTimer();
+  st.mode = mode;
+
+  const durations = { work: cfg.work, short: cfg.short, long: cfg.long };
+  st.totalDuration = durations[mode] * 60;
+  st.remaining     = st.totalDuration;
+  st.elapsedSec    = 0;
+
+  // Update pill active state
+  document.querySelectorAll('.mode-pill').forEach(p => {
+    p.className = 'mode-pill';
+    if (p.dataset.mode === mode) p.classList.add(`active-${mode}`);
+  });
+
+  render();
+  if (autoStart) startTimer();
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+const LIMITS = { work: [1, 90], short: [1, 30], long: [1, 60], cycle: [1, 10] };
+
+function adjustSetting(key, delta) {
+  const [min, max] = LIMITS[key];
+  cfg[key] = Math.max(min, Math.min(max, cfg[key] + delta));
+
+  if (key === 'cycle') {
+    document.getElementById('val-cycle').textContent = cfg.cycle + ' sessions';
+  } else {
+    document.getElementById(`val-${key}`).textContent = cfg[key] + ' min';
+  }
+
+  // If current mode matches changed setting, update timer (only if not running)
+  if (!st.running && key !== 'cycle') {
+    const modeMap = { work: 'work', short: 'short', long: 'long' };
+    if (modeMap[key] === st.mode) {
+      st.totalDuration = cfg[key] * 60;
+      st.remaining     = st.totalDuration;
+      st.elapsedSec    = 0;
+      render();
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SESSION LOG
+// ═══════════════════════════════════════════════════════
+function logEntry(type, durationSec, skipped) {
+  const entry = {
+    type,
+    duration: durationSec,
+    skipped:  !!skipped,
+    time:     timeNow(),
+    label:    LABELS[type] + (skipped ? ' (skipped)' : ''),
+  };
+  st.log.unshift(entry);
+  renderLog();
+}
+
+function renderLog() {
+  if (!st.log.length) {
+    logEl.innerHTML = '';
+    logEl.appendChild(logEmpty);
+    return;
+  }
+  logEl.innerHTML = st.log.slice(0, 30).map(e => `
+    <div class="session-entry">
+      <div class="se-dot ${e.type}"></div>
+      <div class="se-label">${e.label}</div>
+      <div class="se-duration">${fmtElapsed(e.duration)}</div>
+      <div class="se-time">${e.time}</div>
+    </div>
+  `).join('');
+}
+
+function clearLog() {
+  st.log = [];
+  renderLog();
+}
+
+// ═══════════════════════════════════════════════════════
+// TOMATOES
+// ═══════════════════════════════════════════════════════
+function addTomato() {
+  const span = document.createElement('span');
+  span.className = 'tomato earned';
+  span.textContent = '🍅';
+  span.title = `Session ${st.sessionCount} — ${timeNow()}`;
+
+  // Remove placeholder text if present
+  const placeholder = tomatoRow.querySelector('.tomato-label');
+  if (placeholder) placeholder.remove();
+
+  tomatoRow.appendChild(span);
+
+  // Every 4 tomatoes, add a subtle separator
+  if (st.sessionCount % 4 === 0) {
+    const sep = document.createElement('span');
+    sep.style.cssText = 'width:1px;height:20px;background:var(--border);display:inline-block;margin:0 0.25rem;';
+    tomatoRow.appendChild(sep);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════════════════════
+function updateSummary() {
+  document.getElementById('sum-focus').textContent     = fmtHHMM(st.totalFocusSec);
+  document.getElementById('sum-pomodoros').textContent = st.sessionCount;
+  document.getElementById('sum-breaks').textContent    = st.breakCount;
+  document.getElementById('sum-streak').textContent    = st.streak >= 3 ? st.streak + ' 🔥' : st.streak;
+}
+
+function clearAll() {
+  stopTimer();
+  st.sessionCount  = 0;
+  st.breakCount    = 0;
+  st.totalFocusSec = 0;
+  st.streak        = 0;
+  st.log           = [];
+  tomatoRow.innerHTML = '<span class="tomato-label">Complete a work session to earn a 🍅</span>';
+  renderLog();
+  updateSummary();
+  switchMode('work');
+}
+
+// ═══════════════════════════════════════════════════════
+// SOUND (Web Audio API — pure browser, no files)
+// ═══════════════════════════════════════════════════════
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playChime() {
+  if (!document.getElementById('tog-sound').checked) return;
+  try {
+    const ctx = getAudioCtx();
+    // Three ascending tones
+    [[523.25, 0], [659.25, 0.18], [783.99, 0.36]].forEach(([freq, delay]) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type      = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+      gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.55);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime  + delay + 0.6);
+    });
+  } catch(e) { /* AudioContext blocked */ }
+}
+
+// ═══════════════════════════════════════════════════════
+// BROWSER NOTIFICATIONS
+// ═══════════════════════════════════════════════════════
+function sendNotif(title, body) {
+  if (!document.getElementById('tog-notif').checked) return;
+  if (Notification.permission !== 'granted') return;
+  new Notification(title, { body, icon: '/icon.svg' });
+}
+
+function requestNotifPerm(checkbox) {
+  if (!checkbox.checked) return;
+  if (Notification.permission === 'granted') return;
+  Notification.requestPermission().then(p => {
+    if (p !== 'granted') checkbox.checked = false;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  // Don't intercept inside inputs
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    toggleTimer();
+  }
+  if (e.key === 'r' || e.key === 'R') skipBack();
+  if (e.key === 'ArrowRight') skipForward();
+  if (e.key === '1') switchMode('work');
+  if (e.key === '2') switchMode('short');
+  if (e.key === '3') switchMode('long');
+});
+
+// ═══════════════════════════════════════════════════════
+// VISIBILITY — pause/resume on tab switch
+// ═══════════════════════════════════════════════════════
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Store timestamp so we can catch up when visible again
+    if (st.running) st.lastTick = Date.now();
+  } else {
+    // Catch up ticks missed while hidden
+    if (st.running) {
+      const missed = Math.round((Date.now() - st.lastTick) / 1000);
+      if (missed > 0) {
+        st.remaining  = Math.max(0, st.remaining - missed);
+        st.elapsedSec += missed;
+        if (st.mode === 'work') st.totalFocusSec = Math.min(st.totalFocusSec + missed, 86400);
+        st.lastTick = Date.now();
+        if (st.remaining <= 0) intervalComplete();
+        else render();
+      }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+render();
+</script>
+
+<script src="theme-toggle.js"></script>
+</body>
+</html>
