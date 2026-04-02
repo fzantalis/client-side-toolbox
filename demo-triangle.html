@@ -340,7 +340,6 @@
 
   <main>
 
-    <!-- Quick-fill presets -->
     <div class="panel" style="margin-bottom:1.5rem;">
       <div class="panel-header">
         <h3>Quick Examples</h3>
@@ -363,10 +362,8 @@
 
     <div class="solver-grid">
 
-      <!-- LEFT: Inputs + Results -->
       <div style="display:flex; flex-direction:column; gap:1.5rem;">
 
-        <!-- Input panel -->
         <div class="panel">
           <div class="panel-header"><h3>Known Values</h3></div>
           <div class="panel-body">
@@ -442,11 +439,9 @@
           </div>
         </div>
 
-        <!-- Results -->
         <div id="results-section" style="display:none;">
           <div class="results-grid" id="results-grid"></div>
 
-          <!-- Step-by-step -->
           <div class="panel">
             <div class="panel-header"><h3>Solution Method</h3></div>
             <div class="panel-body">
@@ -457,7 +452,6 @@
 
       </div>
 
-      <!-- RIGHT: Diagram -->
       <div class="diagram-panel" id="diagram-panel">
         <div class="diagram-empty" id="diagram-empty">
           <i class="ph ph-triangle"></i>
@@ -602,8 +596,10 @@ function solveTriangle(known) {
     return { error: 'Angles must be between 0° and 180° (exclusive).' };
   // Sum of known angles
   const angSum = angVal.reduce((s, v) => s + v, 0);
-  if (angSum >= PI - EPS)
+  if (nAngles < 3 && angSum >= PI - EPS)
     return { error: 'The known angles already sum to 180° or more. Not a valid triangle.' };
+  if (nAngles === 3 && Math.abs(angSum - PI) > EPS)
+    return { error: 'Three angles must sum to exactly 180°.' };
 
   // ── Case: all 3 sides (SSS) ──────────────────────────
   if (nSides === 3 && nAngles === 0) {
@@ -686,16 +682,16 @@ function solveTriangle(known) {
     }
   }
 
-  // ── Case: 2 angles + any side (AAS / ASA) ────────────
-  else if (nAngles === 2 && nSides === 1) {
-    // Derive missing angle first
-    if (A !== undefined && B !== undefined) {
+  // ── Case: 2 or 3 angles + at least 1 side (AAS / ASA / AAA+side) ────────────
+  else if (nAngles >= 2 && nSides >= 1) {
+    // Derive missing angle first if needed
+    if (C === undefined && A !== undefined && B !== undefined) {
       C = PI - A - B;
       steps.push(`Two angles known: C = 180° − A − B = ${disp(fromRad(C))}${angleUnit}`);
-    } else if (A !== undefined && C !== undefined) {
+    } else if (B === undefined && A !== undefined && C !== undefined) {
       B = PI - A - C;
       steps.push(`Two angles known: B = 180° − A − C = ${disp(fromRad(B))}${angleUnit}`);
-    } else if (B !== undefined && C !== undefined) {
+    } else if (A === undefined && B !== undefined && C !== undefined) {
       A = PI - B - C;
       steps.push(`Two angles known: A = 180° − B − C = ${disp(fromRad(A))}${angleUnit}`);
     }
@@ -748,7 +744,7 @@ function solveTriangle(known) {
   const perimeter = a + b + c;
   const s         = perimeter / 2;           // semi-perimeter
   const areaHeron = Math.sqrt(s*(s-a)*(s-b)*(s-c)); // cross-check
-  const ha        = 2 * area / a;            // heights
+  const ha        = 2 * area / a;             // heights
   const hb        = 2 * area / b;
   const hc        = 2 * area / c;
   const R         = (a * b * c) / (4 * area); // circumradius
@@ -1028,11 +1024,9 @@ function drawDiagram(t) {
   const footOnBC = Hx >= Math.min(Bx, Cx2) - 1 && Hx <= Math.max(Bx, Cx2) + 1;
 
   svg.innerHTML = `
-    <!-- Triangle fill -->
     <polygon points="${Ax},${Ay} ${Bx},${By} ${Cx2},${Cy2}"
              fill="${col.fill}" stroke="none"/>
 
-    <!-- Height line -->
     ${footOnBC ? `
     <line x1="${Ax}" y1="${Ay}" x2="${Hx}" y2="${Hy}"
           stroke="${col.height}" stroke-width="1.2" stroke-dasharray="4 3"/>
@@ -1040,7 +1034,6 @@ function drawDiagram(t) {
           fill="none" stroke="${col.height}" stroke-width="1"/>
     ` : ''}
 
-    <!-- Sides -->
     <line x1="${Bx}" y1="${By}" x2="${Cx2}" y2="${Cy2}"
           stroke="${col.sideA}" stroke-width="2.5" stroke-linecap="round"/>
     <line x1="${Ax}" y1="${Ay}" x2="${Cx2}" y2="${Cy2}"
@@ -1048,7 +1041,6 @@ function drawDiagram(t) {
     <line x1="${Ax}" y1="${Ay}" x2="${Bx}" y2="${By}"
           stroke="${col.sideC}" stroke-width="2.5" stroke-linecap="round"/>
 
-    <!-- Angle arcs / right-angle marks -->
     ${isRightA
       ? `<path d="${rightAngleMark(Ax,Ay,aA1,aA2,10)}" fill="none" stroke="${col.angA}" stroke-width="1.5"/>`
       : `<path d="${arcA.path}" fill="none" stroke="${col.angA}" stroke-width="1.5"/>`
@@ -1062,7 +1054,6 @@ function drawDiagram(t) {
       : `<path d="${arcC.path}" fill="none" stroke="${col.angC}" stroke-width="1.5"/>`
     }
 
-    <!-- Vertex labels (A, B, C) -->
     <text x="${vlA.x}" y="${vlA.y}" text-anchor="middle" dominant-baseline="central"
           font-family="'DM Mono',monospace" font-size="15" font-weight="500" fill="${col.angA}">A</text>
     <text x="${vlB.x}" y="${vlB.y}" text-anchor="middle" dominant-baseline="central"
@@ -1070,7 +1061,6 @@ function drawDiagram(t) {
     <text x="${vlC.x}" y="${vlC.y}" text-anchor="middle" dominant-baseline="central"
           font-family="'DM Mono',monospace" font-size="15" font-weight="500" fill="${col.angC}">C</text>
 
-    <!-- Side labels (a, b, c) with values -->
     <text x="${labA.x}" y="${labA.y}" text-anchor="middle" dominant-baseline="central"
           font-family="'DM Mono',monospace" font-size="12" font-weight="500" fill="${col.sideA}">a = ${disp(a,3)}</text>
     <text x="${labB.x}" y="${labB.y}" text-anchor="middle" dominant-baseline="central"
@@ -1078,7 +1068,6 @@ function drawDiagram(t) {
     <text x="${labC.x}" y="${labC.y}" text-anchor="middle" dominant-baseline="central"
           font-family="'DM Mono',monospace" font-size="12" font-weight="500" fill="${col.sideC}">c = ${disp(c,3)}</text>
 
-    <!-- Angle values at arc midpoints -->
     ${!isRightA ? `<text x="${arcA.midX + (arcA.midX-Ax)*0.7}" y="${arcA.midY + (arcA.midY-Ay)*0.7}"
           text-anchor="middle" dominant-baseline="central"
           font-family="'DM Mono',monospace" font-size="10" fill="${col.angA}"
@@ -1092,12 +1081,10 @@ function drawDiagram(t) {
           font-family="'DM Mono',monospace" font-size="10" fill="${col.angC}"
           >${disp(fromRad(C),1)}${angleUnit==='deg'?'°':' r'}</text>` : ''}
 
-    <!-- Height label -->
     ${footOnBC ? `<text x="${Hx+10}" y="${(Ay+Hy)/2}" dominant-baseline="central"
           font-family="'DM Mono',monospace" font-size="10" fill="${col.muted}"
           >hₐ=${disp(ha,2)}</text>` : ''}
 
-    <!-- Right-angle label -->
     ${isRightA ? `<text x="${vlA.x+2}" y="${vlA.y+14}" text-anchor="middle"
           font-size="10" fill="${col.angA}" font-family="'DM Mono',monospace">90°</text>` : ''}
     ${isRightB ? `<text x="${vlB.x+2}" y="${vlB.y+14}" text-anchor="middle"
