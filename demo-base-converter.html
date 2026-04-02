@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Number Base Converter | Free Developer Tool</title>
+  <meta name="title" content="Number Base Converter | Free Developer Tool">
+  <meta name="description" content="Instantly convert any number between binary, octal, decimal, and hexadecimal. Features infinite precision and live bit-width display. Runs entirely in your browser.">
+  <meta name="keywords" content="base converter, hex converter, binary converter, decimal to hex, hex to binary, bit width calculator, BigInt converter, developer tools">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-base-converter.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-base-converter.html">
+  <meta property="og:title" content="Number Base Converter | Free Developer Tool">
+  <meta property="og:description" content="Convert any number between binary, octal, decimal, hex — with infinite precision and bit-width display.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-base-converter.html">
+  <meta property="twitter:title" content="Number Base Converter | Free Developer Tool">
+  <meta property="twitter:description" content="Instantly convert numbers across bases with live bit-width analysis.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* --- Modern CSS Resets & Variables --- */
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #3b82f6;      
+      --primary-hover: #2563eb;
+      --accent: #0ea5e9;
+      --border: #e2e8f0;
+      --card-border: #f1f5f9;
+      --ring: rgba(59, 130, 246, 0.5);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --border: #334155;
+      --card-border: #334155;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Layout --- */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: background 0.3s ease;
+    }
+    [data-theme="dark"] .card-icon { background: rgba(59, 130, 246, 0.1); }
+
+    .breadcrumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      transition: color 0.2s ease;
+    }
+    .breadcrumb:hover { color: var(--primary); }
+
+    .tool-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+    .tool-header .card-icon { margin-bottom: 0; }
+    .tool-header h1 { margin-bottom: 0.25rem; font-size: 2rem; }
+    .tool-header p { margin-bottom: 0; }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-header h3 { font-size: 1rem; margin: 0; font-weight: 600; color: var(--text-muted); }
+
+    .panel-body { 
+      padding: 1.5rem; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 1.25rem; 
+      flex-grow: 1; 
+      background: var(--card-bg); 
+    }
+
+    /* Buttons */
+    button {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: inherit; font-size: 0.9rem; font-weight: 600;
+      padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
+      transition: all 0.2s; border: 1px solid transparent;
+    }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text-main); }
+    .btn-secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+    .btn-icon { padding: 0.25rem; border: none; color: var(--text-muted); background: transparent; }
+    .btn-icon:hover { color: var(--primary); background: transparent; transform: scale(1.1); }
+
+    /* Inputs */
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; }
+    .form-group-header { display: flex; justify-content: space-between; align-items: center; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .base-input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'DM Mono', monospace;
+      font-size: 1.05rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      resize: vertical;
+      min-height: 52px;
+      line-height: 1.4;
+      word-break: break-all;
+    }
+    .base-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+      background: var(--card-bg);
+    }
+    .base-input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    }
+
+    /* Prefix tags (0x, 0b) */
+    .prefix-tag {
+      position: absolute;
+      left: 1rem;
+      top: 2.35rem; /* Aligned with text input */
+      font-family: 'DM Mono', monospace;
+      font-weight: 600;
+      color: var(--text-muted);
+      pointer-events: none;
+      user-select: none;
+    }
+    .has-prefix { padding-left: 2.5rem; }
+
+    /* Mobile Adjustments */
+    .responsive-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 860px) {
+      .responsive-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .stat-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .stat-box.highlight { border-color: var(--primary); background: rgba(59, 130, 246, 0.03); }
+    .stat-box.highlight .stat-value { color: var(--primary); font-size: 1.5rem; }
+
+    /* Formatted Output Area */
+    .formatted-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      word-break: break-all;
+      line-height: 1.6;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .formatted-box span.nibble {
+      display: inline-block;
+      margin-right: 0.4rem;
+    }
+    .formatted-box span.byte {
+      display: inline-block;
+      margin-right: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-binary"></i></div>
+    <div>
+      <h1>Number Base Converter</h1>
+      <p>Convert numbers instantly across bases with infinite precision. Supports massive integers and detects bit-width.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="responsive-grid">
+      
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Input / Convert</h3>
+          <button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="clearAll()">
+            <i class="ph ph-trash"></i> Clear
+          </button>
+        </div>
+        <div class="panel-body">
+          
+          <div class="form-group">
+            <div class="form-group-header">
+              <label for="inp-dec">Decimal (Base 10)</label>
+              <button class="btn-icon" onclick="copyValue('inp-dec')" title="Copy Decimal"><i class="ph ph-copy"></i></button>
+            </div>
+            <textarea id="inp-dec" class="base-input" rows="2" placeholder="0" oninput="convert('dec')"></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group-header">
+              <label for="inp-hex">Hexadecimal (Base 16)</label>
+              <button class="btn-icon" onclick="copyValue('inp-hex')" title="Copy Hex"><i class="ph ph-copy"></i></button>
+            </div>
+            <span class="prefix-tag">0x</span>
+            <textarea id="inp-hex" class="base-input has-prefix" rows="2" placeholder="0" oninput="convert('hex')"></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group-header">
+              <label for="inp-bin">Binary (Base 2)</label>
+              <button class="btn-icon" onclick="copyValue('inp-bin')" title="Copy Binary"><i class="ph ph-copy"></i></button>
+            </div>
+            <span class="prefix-tag">0b</span>
+            <textarea id="inp-bin" class="base-input has-prefix" rows="3" placeholder="0" oninput="convert('bin')"></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group-header">
+              <label for="inp-oct">Octal (Base 8)</label>
+              <button class="btn-icon" onclick="copyValue('inp-oct')" title="Copy Octal"><i class="ph ph-copy"></i></button>
+            </div>
+            <span class="prefix-tag">0o</span>
+            <textarea id="inp-oct" class="base-input has-prefix" rows="1" placeholder="0" oninput="convert('oct')"></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Memory & Bit Analysis</h3>
+        </div>
+        <div class="panel-body">
+          
+          <div class="stats-grid">
+            <div class="stat-box highlight">
+              <div class="stat-value" id="stat-bits">0</div>
+              <div class="stat-label">Min Bits Required</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-bytes">0</div>
+              <div class="stat-label">Min Bytes</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-type">—</div>
+              <div class="stat-label">Standard Type</div>
+            </div>
+          </div>
+
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: -0.5rem;">
+            Formatted Binary (Spaced by Nibble/Byte)
+          </div>
+          <div class="formatted-box" id="formatted-bin">0000</div>
+
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem; margin-bottom: -0.5rem;">
+            Formatted Hexadecimal
+          </div>
+          <div class="formatted-box" id="formatted-hex" style="min-height: 48px;">00</div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// State
+let currentValue = 0n;
+
+// Core Converter Logic
+function convert(source) {
+  const el = document.getElementById(`inp-${source}`);
+  // Strip spaces, underscores, commas from input to allow flexible pasting
+  let rawStr = el.value.replace(/[\s,_]/g, ''); 
+  
+  if (!rawStr) {
+    clearAll(false);
+    return;
+  }
+
+  try {
+    if (source === 'dec') {
+      currentValue = BigInt(rawStr);
+    } else if (source === 'hex') {
+      rawStr = rawStr.replace(/^0x/i, '');
+      currentValue = BigInt('0x' + (rawStr || '0'));
+    } else if (source === 'bin') {
+      rawStr = rawStr.replace(/^0b/i, '');
+      currentValue = BigInt('0b' + (rawStr || '0'));
+    } else if (source === 'oct') {
+      rawStr = rawStr.replace(/^0o/i, '');
+      currentValue = BigInt('0o' + (rawStr || '0'));
+    }
+    
+    el.classList.remove('error');
+    updateAllInputs(source);
+    updateStats();
+  } catch (e) {
+    // If parsing fails (invalid character), mark input red and don't update others
+    el.classList.add('error');
+  }
+}
+
+function updateAllInputs(skipSource) {
+  const isNegative = currentValue < 0n;
+  // BigInt toString handles the negative sign, but we have to be careful with hex/bin representation.
+  // Generally, base converters just prepend the minus sign.
+  
+  if (skipSource !== 'dec') {
+    document.getElementById('inp-dec').value = currentValue.toString(10);
+    document.getElementById('inp-dec').classList.remove('error');
+  }
+  if (skipSource !== 'hex') {
+    const hexStr = (isNegative ? '-' : '') + (currentValue < 0n ? -currentValue : currentValue).toString(16).toUpperCase();
+    document.getElementById('inp-hex').value = hexStr;
+    document.getElementById('inp-hex').classList.remove('error');
+  }
+  if (skipSource !== 'bin') {
+    const binStr = (isNegative ? '-' : '') + (currentValue < 0n ? -currentValue : currentValue).toString(2);
+    document.getElementById('inp-bin').value = binStr;
+    document.getElementById('inp-bin').classList.remove('error');
+  }
+  if (skipSource !== 'oct') {
+    const octStr = (isNegative ? '-' : '') + (currentValue < 0n ? -currentValue : currentValue).toString(8);
+    document.getElementById('inp-oct').value = octStr;
+    document.getElementById('inp-oct').classList.remove('error');
+  }
+}
+
+function updateStats() {
+  const absVal = currentValue < 0n ? -currentValue : currentValue;
+  const binStr = absVal.toString(2);
+  
+  const bitWidth = absVal === 0n ? 1 : binStr.length;
+  const byteWidth = Math.ceil(bitWidth / 8) || 1;
+  
+  document.getElementById('stat-bits').textContent = bitWidth;
+  document.getElementById('stat-bytes').textContent = byteWidth;
+  
+  // Standard Type Inference
+  let standardType = "Custom Size";
+  if (bitWidth <= 8) standardType = "8-bit (Byte)";
+  else if (bitWidth <= 16) standardType = "16-bit (Word)";
+  else if (bitWidth <= 32) standardType = "32-bit (DWord)";
+  else if (bitWidth <= 64) standardType = "64-bit (QWord)";
+  else if (bitWidth <= 128) standardType = "128-bit (DQWord)";
+  else if (bitWidth <= 256) standardType = "256-bit (YWord)";
+  
+  document.getElementById('stat-type').textContent = standardType;
+
+  // Render Formatted Binary
+  // Pad binary to full bytes for cleaner rendering
+  const paddedLength = byteWidth * 8;
+  const fullBinStr = binStr.padStart(paddedLength, '0');
+  
+  let formattedBinHtml = '';
+  if (currentValue < 0n) formattedBinHtml += '- ';
+  
+  for (let i = 0; i < fullBinStr.length; i += 4) {
+    const nibble = fullBinStr.substring(i, i + 4);
+    // Every 8 bits, add a slightly larger margin (distinguished via CSS class)
+    const isByteBoundary = ((i + 4) % 8 === 0);
+    formattedBinHtml += `<span class="${isByteBoundary ? 'byte' : 'nibble'}">${nibble}</span>`;
+  }
+  document.getElementById('formatted-bin').innerHTML = formattedBinHtml || '0000';
+
+  // Render Formatted Hex
+  let hexStr = absVal.toString(16).toUpperCase();
+  // Pad to even number of characters (full bytes)
+  if (hexStr.length % 2 !== 0) hexStr = '0' + hexStr;
+  
+  let formattedHexStr = '';
+  if (currentValue < 0n) formattedHexStr += '- ';
+  
+  for (let i = 0; i < hexStr.length; i += 2) {
+    formattedHexStr += hexStr.substring(i, i + 2) + ' ';
+    // Extra space every 4 bytes (8 hex chars)
+    if ((i + 2) % 8 === 0) formattedHexStr += ' ';
+  }
+  document.getElementById('formatted-hex').textContent = formattedHexStr.trim() || '00';
+}
+
+function clearAll(resetValue = true) {
+  ['dec', 'hex', 'bin', 'oct'].forEach(id => {
+    const el = document.getElementById(`inp-${id}`);
+    el.value = '';
+    el.classList.remove('error');
+  });
+  
+  if (resetValue) {
+    currentValue = 0n;
+    document.getElementById('stat-bits').textContent = '0';
+    document.getElementById('stat-bytes').textContent = '0';
+    document.getElementById('stat-type').textContent = '—';
+    document.getElementById('formatted-bin').textContent = '0000';
+    document.getElementById('formatted-hex').textContent = '00';
+  }
+}
+
+function copyValue(elementId) {
+  const el = document.getElementById(elementId);
+  if (!el.value) return;
+  
+  navigator.clipboard.writeText(el.value).then(() => {
+    const btnIcon = el.previousElementSibling.querySelector('i');
+    btnIcon.className = 'ph ph-check';
+    btnIcon.style.color = 'var(--primary)';
+    setTimeout(() => {
+      btnIcon.className = 'ph ph-copy';
+      btnIcon.style.color = '';
+    }, 1500);
+  });
+}
+
+// Initial state
+updateStats();
+</script>
+
+<script src="theme-toggle.js"></script>
+
+</body>
+</html>
