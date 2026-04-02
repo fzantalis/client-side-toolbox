@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Outlier Spotter | Free Statistical Calculator</title>
+  <meta name="title" content="Data Outlier Spotter | Free Statistical Calculator">
+  <meta name="description" content="Paste a column of numbers to instantly calculate mean, median, standard deviation, and spot statistical outliers. 100% private and runs entirely in your browser.">
+  <meta name="keywords" content="outlier detector, outlier calculator, data analysis tool, find outliers, mean median standard deviation calculator, IQR method, statistical anomalies">
+  <meta name="author" content="Client-Side Toolbox">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-outlier-spotter.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-outlier-spotter.html">
+  <meta property="og:title" content="Data Outlier Spotter | Free Statistical Calculator">
+  <meta property="og:description" content="Paste a dataset to get mean, median, std dev, and automatically flagged outliers.">
+  <meta property="og:image" content="https://zantalis.net/og-outlier.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-outlier-spotter.html">
+  <meta property="twitter:title" content="Data Outlier Spotter | Free Statistical Calculator">
+  <meta property="twitter:description" content="Find statistical anomalies and calculate dataset metrics instantly.">
+  <meta property="twitter:image" content="https://zantalis.net/og-outlier.jpg">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* --- Modern CSS Resets & Variables --- */
+    :root {
+      /* Softer, modern gradient background */
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      
+      /* Text Hierarchy */
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      
+      /* Brand Colors */
+      --primary: #3b82f6;      
+      --primary-hover: #2563eb;
+      --accent: #0ea5e9;
+      
+      /* Modern UI Elements */
+      --border: #e2e8f0;
+      --card-border: #f1f5f9;
+      --ring: rgba(59, 130, 246, 0.5);
+      
+      /* Layered, subtle shadows (Apple/Stripe style) */
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    /* Dark theme overrides */
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --border: #334155;
+      --card-border: #334155;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Layout --- */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* --- Sections & Cards --- */
+    .card-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="dark"] .card-icon { background: rgba(59, 130, 246, 0.1); }
+
+    /* --- Tool Sub-Page Specific Styles --- */
+    .breadcrumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      transition: color 0.2s ease;
+    }
+
+    .breadcrumb:hover { color: var(--primary); }
+
+    .tool-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .tool-header .card-icon { margin-bottom: 0; }
+    .tool-header h1 { margin-bottom: 0.25rem; font-size: 2rem; }
+    .tool-header p { margin-bottom: 0; }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h3 { font-size: 1rem; margin: 0; font-weight: 600; color: var(--text-muted); }
+    .panel-actions { display: flex; gap: 0.5rem; }
+
+    /* Refined Inputs and Outputs */
+    textarea {
+      flex-grow: 1;
+      width: 100%;
+      min-height: 250px;
+      border: none;
+      padding: 1.25rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+      background: var(--card-bg);
+      color: var(--text-main);
+    }
+    textarea:focus { outline: none; }
+
+    /* Modern Buttons */
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text-main); }
+    .btn-secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+
+    .panel-body { 
+      padding: 1.5rem; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 1rem; 
+      flex-grow: 1; 
+      background: var(--card-bg); 
+      overflow-y: auto; 
+    }
+
+    /* Mobile Adjustments */
+    .responsive-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .responsive-grid { grid-template-columns: 1fr 1.2fr; }
+    }
+
+    /* --- Tool-Specific Styles: Outlier Spotter --- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .stat-box.highlight {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.05);
+    }
+    .stat-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+    .stat-box.highlight .stat-value { color: #ef4444; }
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .data-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1.25rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .data-cloud:empty::before {
+      content: 'Awaiting data...';
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+    .num-badge {
+      font-family: 'DM Mono', monospace;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+    .num-badge.outlier {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #ef4444;
+      font-weight: 600;
+      box-shadow: 0 0 0 1px #ef4444;
+    }
+    [data-theme="dark"] .num-badge.outlier {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .msg-box {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+      background: rgba(239,68,68,0.08);
+      color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-crosshair"></i></div>
+    <div>
+      <h1>Data Outlier Spotter</h1>
+      <p>Paste a column of numbers. Instantly get the mean, median, std deviation, and easily spot anomalies.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="responsive-grid">
+      
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Data Input</h3>
+          <div class="panel-actions">
+            <button class="btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="loadExample()">Example</button>
+          </div>
+        </div>
+        <textarea id="data-input" placeholder="Paste your numbers here...&#10;e.g.&#10;14.2&#10;15.1&#10;14.8&#10;99.9 (Outlier!)&#10;13.9&#10;&#10;Commas, spaces, and text mixed with numbers are automatically filtered."></textarea>
+        <div class="panel-header" style="border-top: 1px solid var(--border); border-bottom: none;">
+          <button class="btn-secondary" onclick="clearData()">
+            <i class="ph ph-trash"></i> Clear
+          </button>
+          <button class="btn-primary" onclick="analyzeData()">
+            <i class="ph ph-magnifying-glass"></i> Analyze Data
+          </button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Analysis Results</h3>
+        </div>
+        <div class="panel-body">
+          
+          <div class="msg-box" id="error-msg">
+            <i class="ph ph-warning-circle"></i>
+            <span id="error-text">Please enter valid numerical data.</span>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-value" id="res-count">—</div>
+              <div class="stat-label">Count (N)</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="res-mean">—</div>
+              <div class="stat-label">Mean</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="res-median">—</div>
+              <div class="stat-label">Median</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="res-std">—</div>
+              <div class="stat-label">Sample Std Dev</div>
+            </div>
+            <div class="stat-box highlight">
+              <div class="stat-value" id="res-outliers">—</div>
+              <div class="stat-label">Outliers Found</div>
+            </div>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+            <strong>Sorted Dataset</strong> (Outliers highlighted using IQR method <span id="bounds-text"></span>)
+          </p>
+          <div class="data-cloud" id="data-cloud"></div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// Format helper for numbers to prevent massive decimals
+function formatNum(num) {
+  if (isNaN(num)) return "—";
+  // Round to max 4 decimal places
+  return Number(Math.round(num + "e+4") + "e-4");
+}
+
+// Calculate Percentile/Quantile for IQR calculation
+function quantile(sortedArr, q) {
+  const pos = (sortedArr.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  if (sortedArr[base + 1] !== undefined) {
+    return sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base]);
+  } else {
+    return sortedArr[base];
+  }
+}
+
+function analyzeData() {
+  const inputEl = document.getElementById('data-input');
+  const errorBox = document.getElementById('error-msg');
+  const text = inputEl.value;
+
+  // Hide error initially
+  errorBox.style.display = 'none';
+
+  // Extract all numbers (allows negatives and decimals)
+  const rawMatches = text.match(/-?\d+(\.\d+)?/g);
+  
+  if (!rawMatches || rawMatches.length === 0) {
+    document.getElementById('error-text').textContent = 'No valid numbers found in the input.';
+    errorBox.style.display = 'flex';
+    resetUI();
+    return;
+  }
+
+  // Parse and sort data numerically
+  let data = rawMatches.map(Number).sort((a, b) => a - b);
+  const n = data.length;
+
+  if (n < 3) {
+    document.getElementById('error-text').textContent = 'Please enter at least 3 numbers for statistical analysis.';
+    errorBox.style.display = 'flex';
+    resetUI();
+    return;
+  }
+
+  // 1. Mean
+  const sum = data.reduce((a, b) => a + b, 0);
+  const mean = sum / n;
+
+  // 2. Median
+  const mid = Math.floor(n / 2);
+  const median = n % 2 !== 0 ? data[mid] : (data[mid - 1] + data[mid]) / 2;
+
+  // 3. Sample Standard Deviation
+  const variance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / (n - 1);
+  const stdDev = Math.sqrt(variance);
+
+  // 4. Outlier Detection (Tukey's Fences / IQR Method)
+  const q1 = quantile(data, 0.25);
+  const q3 = quantile(data, 0.75);
+  const iqr = q3 - q1;
+  
+  // 1.5 * IQR is standard for mild outliers. 3.0 for extreme.
+  const lowerBound = q1 - 1.5 * iqr;
+  const upperBound = q3 + 1.5 * iqr;
+
+  // Map data to highlight logic
+  let outlierCount = 0;
+  let htmlCloud = '';
+
+  data.forEach(val => {
+    const isOutlier = (val < lowerBound) || (val > upperBound);
+    if (isOutlier) outlierCount++;
+    
+    const classStr = isOutlier ? 'num-badge outlier' : 'num-badge';
+    htmlCloud += `<div class="${classStr}">${val}</div>`;
+  });
+
+  // Update UI Stats
+  document.getElementById('res-count').textContent = n;
+  document.getElementById('res-mean').textContent = formatNum(mean);
+  document.getElementById('res-median').textContent = formatNum(median);
+  document.getElementById('res-std').textContent = formatNum(stdDev);
+  document.getElementById('res-outliers').textContent = outlierCount;
+  
+  document.getElementById('bounds-text').textContent = `(Limits: ${formatNum(lowerBound)} to ${formatNum(upperBound)})`;
+  
+  // Update Data Cloud
+  document.getElementById('data-cloud').innerHTML = htmlCloud;
+}
+
+function resetUI() {
+  document.getElementById('res-count').textContent = "—";
+  document.getElementById('res-mean').textContent = "—";
+  document.getElementById('res-median').textContent = "—";
+  document.getElementById('res-std').textContent = "—";
+  document.getElementById('res-outliers').textContent = "—";
+  document.getElementById('bounds-text').textContent = "";
+  document.getElementById('data-cloud').innerHTML = "";
+}
+
+function clearData() {
+  document.getElementById('data-input').value = '';
+  document.getElementById('error-msg').style.display = 'none';
+  resetUI();
+}
+
+function loadExample() {
+  const exampleData = [
+    "12.5", "13.1", "12.8", "14.0", "13.5", "12.9",
+    "13.2", "45.8", "12.7", "13.3", "12.6", "-8.5", "13.8"
+  ].join("\n");
+  document.getElementById('data-input').value = exampleData;
+  analyzeData();
+}
+
+// Auto-run if user hits CMD/CTRL + Enter inside the textarea
+document.getElementById('data-input').addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    analyzeData();
+  }
+});
+</script>
+
+</body>
+</html>
