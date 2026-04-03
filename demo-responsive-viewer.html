@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Responsive Website Viewer | Free Developer Tool</title>
+  <meta name="title" content="Responsive Website Viewer | Free Developer Tool">
+  <meta name="description" content="Test your website's responsiveness across multiple devices, phones, tablets, and monitors. 100% private, client-side emulator.">
+  <meta name="keywords" content="responsive tester, website emulator, mobile viewport tester, test website resolution, responsive design tool, developer tools">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-responsive-viewer.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-responsive-viewer.html">
+  <meta property="og:title" content="Responsive Website Viewer | Free Developer Tool">
+  <meta property="og:description" content="Test your website's responsiveness across multiple devices and resolutions.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-responsive-viewer.html">
+  <meta property="twitter:title" content="Responsive Website Viewer | Free Developer Tool">
+  <meta property="twitter:description" content="Test your website across multiple device viewports instantly.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* --- Modern CSS Resets & Variables --- */
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #3b82f6;      
+      --primary-hover: #2563eb;
+      --accent: #0ea5e9;
+      --border: #e2e8f0;
+      --card-border: #f1f5f9;
+      --ring: rgba(59, 130, 246, 0.5);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --border: #334155;
+      --card-border: #334155;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Layout --- */
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+    .card-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; border-radius: 12px;
+      background: #eff6ff; color: var(--primary); font-size: 1.5rem;
+      margin-bottom: 1.25rem; transition: background 0.3s ease;
+    }
+    [data-theme="dark"] .card-icon { background: rgba(59, 130, 246, 0.1); }
+
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .breadcrumb {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: var(--text-muted); text-decoration: none; font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .breadcrumb:hover { color: var(--primary); }
+    .btn-icon { padding: 0.4rem 0.6rem; font-size: 1.1rem; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 6px;}
+    .btn-icon:hover { background: var(--border); color: var(--text-main); }
+
+    .tool-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+    .tool-header .card-icon { margin-bottom: 0; }
+    .tool-header h1 { margin-bottom: 0.25rem; font-size: 2rem; }
+    .tool-header p { margin-bottom: 0; max-width: 700px; }
+
+    .panel {
+      display: flex; flex-direction: column; background: var(--card-bg);
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;
+    }
+    .panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.25rem; background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .panel-header h3 { font-size: 1rem; margin: 0; font-weight: 600; color: var(--text-muted); }
+    .panel-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; background: var(--card-bg); }
+
+    /* Buttons & Inputs */
+    button {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: inherit; font-size: 0.9rem; font-weight: 600;
+      padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer;
+      transition: all 0.2s; border: 1px solid transparent; justify-content: center;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text-main); }
+    .btn-secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex-grow: 1; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .controls-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
+    
+    .form-input, .form-select {
+      width: 100%; padding: 0.65rem 1rem; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text-main); font-family: 'Inter', sans-serif;
+      font-size: 0.95rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); background: var(--card-bg); }
+
+    /* Notice Banner */
+    .msg-box {
+      padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+      display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;
+      background: rgba(59,130,246,0.08); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);
+    }
+
+    /* Emulator Area */
+    .emulator-stage {
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      min-height: 600px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Hide scaled overflow */
+      position: relative;
+      /* Checkerboard */
+      background-image: linear-gradient(45deg, var(--border) 25%, transparent 25%), linear-gradient(-45deg, var(--border) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--border) 75%), linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    .device-wrapper {
+      background: #ffffff;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--text-muted);
+      border-radius: 2px;
+      position: relative;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: center center;
+    }
+
+    /* Make the bezel look slightly like a device */
+    .device-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -24px; left: -8px; right: -8px; bottom: -24px;
+      border: 8px solid #334155;
+      border-radius: 20px;
+      z-index: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+    
+    [data-theme="dark"] .device-wrapper::before {
+      border-color: #0f172a;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      position: relative;
+      z-index: 1;
+      background: #fff; /* Always white background for iframe fallback */
+    }
+
+    .empty-state {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    input[type="range"] { accent-color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="nav-bar">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <button class="btn-icon" id="theme-toggle" aria-label="Toggle Dark Mode">
+      <i class="ph ph-moon" id="theme-icon"></i>
+    </button>
+  </div>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-devices"></i></div>
+    <div>
+      <h1>Responsive Website Viewer</h1>
+      <p>Test your UI layouts across multiple devices. Enter a URL below to see how it renders on mobile, tablet, and desktop viewports.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel">
+      <div class="panel-body">
+        
+        <div class="msg-box">
+          <i class="ph ph-info"></i>
+          <span><strong>Note:</strong> Some major sites (like Google or Facebook) actively block embedding. This tool works best for testing your own websites, dev URLs, and open domains.</span>
+        </div>
+
+        <form id="url-form" class="controls-row" onsubmit="loadUrl(event)">
+          
+          <div class="form-group" style="flex: 3; min-width: 250px;">
+            <label for="inp-url">Website URL</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="url" id="inp-url" class="form-input" placeholder="https://yourwebsite.com" required>
+              <button type="submit" class="btn-primary" style="padding: 0.65rem 1rem;">
+                <i class="ph ph-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group" style="flex: 2; min-width: 200px;">
+            <label for="inp-device">Device / Viewport</label>
+            <select id="inp-device" class="form-select" onchange="updateDevice()">
+              <optgroup label="Phones">
+                <option value="390x844">iPhone 13/14 Pro (390 x 844)</option>
+                <option value="430x932">iPhone 14 Pro Max (430 x 932)</option>
+                <option value="375x667">iPhone SE / 8 (375 x 667)</option>
+                <option value="360x800">Galaxy S22 (360 x 800)</option>
+                <option value="412x915">Pixel 7 (412 x 915)</option>
+              </optgroup>
+              <optgroup label="Tablets">
+                <option value="820x1180">iPad Air (820 x 1180)</option>
+                <option value="834x1194">iPad Pro 11" (834 x 1194)</option>
+                <option value="1024x1366">iPad Pro 12.9" (1024 x 1366)</option>
+                <option value="800x1280">Galaxy Tab (800 x 1280)</option>
+              </optgroup>
+              <optgroup label="Desktops / Laptops">
+                <option value="1280x720">HD Laptop (1280 x 720)</option>
+                <option value="1440x900">MacBook Air (1440 x 900)</option>
+                <option value="1920x1080" selected>Full HD Monitor (1920 x 1080)</option>
+                <option value="2560x1440">2K Display (2560 x 1440)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group" style="flex: 0;">
+            <label>Rotate</label>
+            <button type="button" class="btn-secondary" onclick="toggleRotation()" title="Toggle Landscape/Portrait">
+              <i class="ph ph-arrows-clockwise" id="rotate-icon"></i>
+            </button>
+          </div>
+
+          <div class="form-group" style="flex: 1; min-width: 150px;">
+            <label style="display: flex; justify-content: space-between;">
+              <span>Scale</span> <span id="scale-val">100%</span>
+            </label>
+            <input type="range" id="inp-scale" min="0.1" max="1" step="0.05" value="1" oninput="updateScale()" style="margin-top: 0.5rem;">
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Live Preview <span id="current-res" style="font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; margin-left: 0.5rem; color: var(--primary);">1920 × 1080</span></h3>
+        <a id="ext-link" href="#" target="_blank" class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; text-decoration: none; display: none;">
+          Open in New Tab <i class="ph ph-arrow-up-right"></i>
+        </a>
+      </div>
+      <div class="emulator-stage" id="stage">
+        
+        <div class="empty-state" id="empty-state">
+          <i class="ph ph-browser" style="font-size: 4rem; opacity: 0.5;"></i>
+          <span>Enter a URL to begin</span>
+        </div>
+
+        <div class="device-wrapper" id="device-wrapper" style="width: 1920px; height: 1080px; display: none;">
+          <iframe id="preview-frame" src="about:blank" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top:1rem; margin-bottom:1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
+         style="color:var(--text-muted); text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; font-weight:500; transition:color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:0.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const deviceWrapper = document.getElementById('device-wrapper');
+  const previewFrame = document.getElementById('preview-frame');
+  const emptyState = document.getElementById('empty-state');
+  const deviceSelect = document.getElementById('inp-device');
+  const scaleInput = document.getElementById('inp-scale');
+  const urlInput = document.getElementById('inp-url');
+  
+  let isLandscape = false;
+  let currentWidth = 1920;
+  let currentHeight = 1080;
+
+  function loadUrl(e) {
+    e.preventDefault();
+    let url = urlInput.value.trim();
+    
+    if (!url) return;
+    
+    // Auto prepend https if missing
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+      urlInput.value = url;
+    }
+
+    emptyState.style.display = 'none';
+    deviceWrapper.style.display = 'block';
+    
+    previewFrame.src = url;
+    
+    const extLink = document.getElementById('ext-link');
+    extLink.href = url;
+    extLink.style.display = 'inline-flex';
+
+    updateDevice();
+  }
+
+  function updateDevice() {
+    if (deviceWrapper.style.display === 'none') return;
+
+    const dimensions = deviceSelect.value.split('x');
+    let w = parseInt(dimensions[0]);
+    let h = parseInt(dimensions[1]);
+
+    // Apply rotation logic
+    if (isLandscape) {
+      const temp = w;
+      w = h;
+      h = temp;
+    }
+
+    currentWidth = w;
+    currentHeight = h;
+
+    deviceWrapper.style.width = `${w}px`;
+    deviceWrapper.style.height = `${h}px`;
+    
+    document.getElementById('current-res').textContent = `${w} × ${h}`;
+
+    autoFitScale();
+  }
+
+  function toggleRotation() {
+    isLandscape = !isLandscape;
+    const icon = document.getElementById('rotate-icon');
+    icon.style.transform = isLandscape ? 'rotate(90deg)' : 'rotate(0deg)';
+    icon.style.transition = 'transform 0.3s ease';
+    updateDevice();
+  }
+
+  function autoFitScale() {
+    const stage = document.getElementById('stage');
+    // Get usable area minus some padding
+    const stageW = stage.clientWidth - 80; 
+    const stageH = stage.clientHeight - 80;
+
+    // Calculate ratio needed to fit
+    const ratioW = stageW / currentWidth;
+    const ratioH = stageH / currentHeight;
+    let idealScale = Math.min(ratioW, ratioH);
+
+    // Don't scale up past 100%
+    if (idealScale > 1) idealScale = 1;
+    // Don't scale down past 10%
+    if (idealScale < 0.1) idealScale = 0.1;
+
+    // Snap slider to ideal scale
+    scaleInput.value = idealScale;
+    updateScale();
+  }
+
+  function updateScale() {
+    const scale = parseFloat(scaleInput.value);
+    deviceWrapper.style.transform = `scale(${scale})`;
+    document.getElementById('scale-val').textContent = `${Math.round(scale * 100)}%`;
+  }
+
+  // Handle window resize to adjust scale if needed
+  window.addEventListener('resize', () => {
+    if (deviceWrapper.style.display !== 'none') {
+        // Debounce slightly for performance
+        clearTimeout(window.resizeTimer);
+        window.resizeTimer = setTimeout(autoFitScale, 150);
+    }
+  });
+
+  // --- Inline Theme Toggle ---
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeIcon.className = theme === 'dark' ? 'ph ph-sun' : 'ph ph-moon';
+  }
+
+  // Check initial preference
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    applyTheme('dark');
+  }
+
+  themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+</script>
+
+<script src="theme-toggle.js"></script>
+
+</body>
+</html>
