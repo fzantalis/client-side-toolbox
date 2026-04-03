@@ -24,6 +24,7 @@
   <meta property="twitter:title" content="Online Stopwatch & Timer | Free Millisecond Precision Tool">
   <meta property="twitter:description" content="Use this free online stopwatch with millisecond precision and lap tracking. A fast, reliable, client-side timer that runs entirely in your browser.">
   <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -32,6 +33,43 @@
     .lap-item { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border); font-family: 'Fira Code', monospace; font-size: 1.1rem; }
     .lap-item strong { color: var(--text-main); }
     .lap-item span { color: var(--text-muted); }
+
+    /* Responsive adjustments for mobile */
+    .timer-display {
+      font-family: 'Fira Code', monospace;
+      font-size: clamp(2.2rem, 11vw, 4rem); /* Scales down automatically on small screens */
+      letter-spacing: -2px;
+      color: var(--text-main);
+      margin-bottom: 2rem;
+      white-space: nowrap; /* Prevents the timer from splitting into two lines */
+    }
+
+    .controls-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap; /* Allows buttons to wrap on very narrow screens */
+      justify-content: center;
+      width: 100%;
+    }
+
+    .controls-wrapper button {
+      flex: 1 1 auto;
+      min-width: 100px;
+      padding: 0.75rem 1rem;
+      font-size: 1.05rem;
+      justify-content: center;
+    }
+
+    /* Stop buttons from stretching too wide on tablets/desktops */
+    @media (min-width: 480px) {
+      .controls-wrapper button {
+        flex: 0 1 auto;
+        padding: 0.75rem 1.5rem;
+      }
+      .controls-wrapper #startBtn {
+        padding: 0.75rem 2rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -48,13 +86,13 @@
       <div class="panel">
         <div class="panel-header"><h3>Timer</h3></div>
         <div class="panel-body" style="justify-content: center; align-items: center; text-align: center;">
-          <div class="result-display" id="timeDisplay" style="font-family: 'Fira Code', monospace; font-size: 3.5rem; letter-spacing: -2px; color: var(--text-main); height: auto; margin-bottom: 2rem;">
+          <div class="result-display timer-display" id="timeDisplay">
             00:00:00.00
           </div>
-          <div style="display: flex; gap: 1rem;">
-            <button class="btn-primary" id="startBtn" onclick="toggleTimer()" style="padding: 0.75rem 2rem; font-size: 1.1rem;"><i class="ph ph-play"></i> Start</button>
-            <button class="btn-secondary" onclick="recordLap()" style="padding: 0.75rem 1.5rem;"><i class="ph ph-flag"></i> Lap</button>
-            <button class="btn-secondary error-text" onclick="resetTimer()" style="padding: 0.75rem 1.5rem;"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
+          <div class="controls-wrapper">
+            <button class="btn-primary" id="startBtn" onclick="toggleTimer()"><i class="ph ph-play"></i> Start</button>
+            <button class="btn-secondary" onclick="recordLap()"><i class="ph ph-flag"></i> Lap</button>
+            <button class="btn-secondary error-text" onclick="resetTimer()"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
           </div>
         </div>
       </div>
