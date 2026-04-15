@@ -54,6 +54,50 @@
         <pre id="out">Output will appear here...</pre>
       </div>
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the URL Encoder & Decoder</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is URL Encoding (Percent Encoding)?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        URL encoding, also known as <strong>Percent-encoding</strong>, is a mechanism for encoding information in a Uniform Resource Identifier (URI). Characters that are not allowed in a URL must be encoded. This process replaces "unsafe" ASCII characters with a "%" followed by their two-digit hexadecimal equivalent. For example, a space becomes <code>%20</code>. This ensures that the URL remains valid and functional when transmitted across the internet.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">When to Use Encoding vs. Decoding</h3>
+      <p style="margin-bottom: 1rem;">This tool is essential for developers handling web data, API integrations, and SEO-friendly links:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Encoding for APIs:</strong> When sending data in a query string (e.g., <code>?query=hello world</code>), you must encode the values to prevent symbols like <code>&</code> or <code>?</code> from breaking the URL structure.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Decoding for Readability:</strong> Use the decoder to turn a messy, encoded string back into human-readable text. This is perfect for inspecting UTM parameters or tracking links.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Handling Special Characters:</strong> Non-Latin characters (like emojis or Cyrillic) cannot exist natively in a URL. Encoding translates them into a format that web servers can process correctly.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Difference: encodeURI vs encodeURIComponent</h3>
+      <p style="margin-bottom: 1.5rem;">
+        While this tool uses <code>encodeURIComponent</code> for maximum safety, it's important to understand the technical distinction:
+        <br><br>
+        <strong>encodeURI:</strong> Intended to encode a full URL. It ignores protocol symbols like <code>http://</code> or <code>/</code>.
+        <br>
+        <strong>encodeURIComponent:</strong> Encodes everything, including slashes and dots. This is the correct choice for encoding data being placed <em>inside</em> a query parameter.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Privacy</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Data sent in URLs often includes sensitive information like email addresses, redirect tokens, or internal IDs. Sending this data to a remote server just to encode or decode it is a significant security risk.
+      </p>
+      <p>
+        The URL Encoder/Decoder is a <strong>100% Client-Side application</strong>. All string manipulations are performed locally by your browser's JavaScript engine. Your data is never transmitted to our servers, logged, or stored. This ensures that your API keys, tokens, and personal strings remain entirely private while providing a fast and efficient tool that works even when you are offline.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
