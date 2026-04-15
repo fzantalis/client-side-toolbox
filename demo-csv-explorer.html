@@ -253,6 +253,37 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the CSV Explorer</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the CSV Explorer?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The CSV Explorer is a powerful, free online CSV viewer and data analyzer designed for data scientists, marketers, and developers. Comma-Separated Values (CSV) files are the universal standard for exporting database records, spreadsheet data, and application logs. However, opening heavy CSVs in traditional desktop software like Microsoft Excel can often result in formatting errors, frozen screens, or lost leading zeros. This client-side CSV tool bypasses those issues entirely, allowing you to instantly view, search, and graph your data directly within your web browser with zero lag.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Key Analytical Features</h3>
+      <p style="margin-bottom: 1rem;">This browser CSV reader does much more than just display rows and columns; it acts as a lightweight business intelligence dashboard:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Automated Data Profiling:</strong> As soon as you drop your file, the analyzer scans the entire dataset to detect numeric, text, and date columns. It calculates a high-level summary including total cell count, unique values, and exactly how many null (missing) values exist in each column.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">CSV Chart Generator:</strong> Click on any column profile card to instantly generate a visual graph. The tool intelligently chooses the right visualization—creating histograms for numeric data distributions (showing min, max, mean, and median) and bar charts for the top frequent text values.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Lightning-Fast Data Table:</strong> Navigate through massive datasets using the paginated table. Click any header to sort your data alphabetically or numerically, or use the global search bar to instantly filter rows across all columns.</li>
+        <li><strong style="color: var(--text-main);">Raw Text Preview:</strong> Need to see how the data is formatted under the hood? Toggle over to the "Raw CSV" tab to inspect the actual comma-delimited text without opening a separate text editor.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Absolute Data Privacy & Security</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Data security is paramount, especially when handling exported customer lists, financial reports, or proprietary analytics. Unlike many other online tools that force you to upload your files to their remote servers for processing, this tool operates 100% locally. Using modern JavaScript and the PapaParse library, your data is parsed and rendered entirely inside your computer's RAM. 
+      </p>
+      <p>
+        Because there are no server uploads, you can confidently analyze sensitive corporate datasets knowing that your information remains strictly confidential and inaccessible to anyone else. You can even load the webpage and disconnect from the internet to view your CSV online in a completely sandboxed, offline environment.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
