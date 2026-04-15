@@ -166,6 +166,46 @@
       </div>
     </main>
 
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the CIDR Subnet Calculator</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is CIDR and Subnetting?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        <strong>CIDR</strong> (Classless Inter-Domain Routing) and <strong>Subnetting</strong> are the backbone of modern IP networking. Subnetting is the practice of dividing a large network into smaller, manageable sub-networks (subnets). This improves network performance, security, and address organization. Our CIDR Subnet Calculator is a free, professional utility designed for network administrators and students to instantly find critical network parameters like the broadcast address, netmask, and the range of usable host IPs.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding Network Parameters</h3>
+      <p style="margin-bottom: 1rem;">When you input an IP and a prefix (like /24), the calculator determines several vital values:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Network Address:</strong> The first address in the subnet, used to identify the network itself. No hosts can be assigned this address.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Subnet Mask:</strong> A 32-bit number (like 255.255.255.0) that masks the IP address and divides the IP address into network address and host address bits.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Broadcast Address:</strong> The last address in the subnet, used to send data to all hosts on that network simultaneously.</li>
+        <li><strong style="color: var(--text-main);">Usable Host Range:</strong> The specific IPs that can be assigned to devices like laptops, servers, and routers. This is typically the range between the Network Address and the Broadcast Address.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Math Behind the Calculator</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Subnetting works by "borrowing" bits from the host portion of an IP address to create more network portions. For example, a <strong>/24</strong> prefix means the first 24 bits are dedicated to the network, leaving 8 bits for hosts ($2^8 = 256$ total IPs). Subtracting the network and broadcast addresses leaves 254 usable hosts. Our calculator handles this binary math instantly, even for complex large-scale networks (like /8) or tiny point-to-point links (like /31).
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy-First Networking</h3>
+      <p style="margin-bottom: 1.5rem;">
+        In network engineering, you are often dealing with sensitive internal IP schemes. Many online calculators require you to send your IP data to their servers for processing, which can be a security risk for internal documentation. 
+      </p>
+      <p>
+        The CIDR Subnet Calculator is a <strong>100% Client-Side application</strong>. All bitwise operations and IP calculations happen inside your browser using local JavaScript. Your internal network architecture remains completely private because no data is ever transmitted to our servers. You can even use this tool while disconnected from the internet, making it perfect for on-site data center work.
+      </p>
+    </div>
+  </section>
+
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
