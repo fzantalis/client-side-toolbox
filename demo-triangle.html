@@ -464,6 +464,78 @@
 
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Triangle Solver</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is a Triangle Solver?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Triangle Solver is a comprehensive geometry utility designed to find all measurements of a triangle from any three known values (sides or angles). Whether you are working on a trigonometry assignment, a DIY woodworking project, or a complex engineering task, this tool provides instant results, a live-scaled diagram, and a transparent breakdown of the mathematical steps used.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Mathematics of Solving Triangles</h3>
+      <p style="margin-bottom: 1rem;">To solve a triangle completely, the calculator utilizes several core trigonometric principles depending on the information provided:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Law of Sines:</strong> Used when a side and its opposite angle are known to find the remaining sides.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Law of Cosines:</strong> Crucial for Side-Angle-Side (SAS) or Side-Side-Side (SSS) scenarios to find a third side or missing angles.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Triangle Inequality Theorem:</strong> The solver automatically verifies that the sum of any two sides is greater than the third, ensuring the triangle is physically possible.</li>
+        <li><strong style="color: var(--text-main);">Heron's Formula:</strong> Used to calculate the exact area of the triangle when only the side lengths are known.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding Triangle Congruence</h3>
+      <p style="margin-bottom: 1rem;">Our solver handles all standard mathematical "cases" to ensure a unique solution whenever possible:</p>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+            <th style="padding: 0.5rem; color: var(--text-main);">Case</th>
+            <th style="padding: 0.5rem; color: var(--text-main);">Information Provided</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>SSS</strong></td>
+            <td style="padding: 0.5rem;">Three Side lengths</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>SAS</strong></td>
+            <td style="padding: 0.5rem;">Two Sides and the included Angle</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>ASA / AAS</strong></td>
+            <td style="padding: 0.5rem;">Two Angles and one Side length</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>SSA</strong></td>
+            <td style="padding: 0.5rem;">Two Sides and a non-included Angle (Ambiguous Case)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      
+
+[Image of different triangle types: Equilateral, Isosceles, Scalene, and Right-angled]
+
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Live Diagram & Visual Feedback</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Seeing the triangle is as important as knowing the numbers. Our tool generates a <strong>Live SVG Diagram</strong> that updates in real-time as you solve. This allows you to visually confirm the shape, see the altitude (height), and verify that the angles "look" correct before you move on to your next task.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Private and Local</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Engineering data and academic homework can be sensitive. Unlike other geometry websites that process your data on a remote server, this tool is <strong>100% Client-Side</strong>. 
+      </p>
+      <p>
+        All trigonometric calculations and SVG rendering happen entirely within your browser's local JavaScript engine. No data is ever transmitted, stored, or tracked. It works perfectly offline, ensuring your privacy and security while providing professional-grade accuracy for every calculation.
+      </p>
+    </div>
+  </section>
+
   <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top:1rem; margin-bottom:1rem;">
