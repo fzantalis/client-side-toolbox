@@ -370,6 +370,50 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Unix Timestamp Converter</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is Unix Time (Epoch Time)?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Unix time is a system for describing a point in time defined as the number of seconds that have elapsed since the <strong>Unix Epoch</strong>. The Epoch is the date and time <strong>00:00:00 UTC on January 1, 1970</strong>. Unlike human-readable dates, Unix timestamps are a single integer that increases every second, making them incredibly efficient for computers to store, compare, and sort.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Developers Use Timestamps</h3>
+      <p style="margin-bottom: 1rem;">Timestamps are the universal language of computer systems. This tool helps bridge the gap between machine data and human understanding for:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Database Debugging:</strong> Most databases (MySQL, PostgreSQL, MongoDB) store dates as integers. Our converter lets you paste a raw number from a query result and instantly see the real-world date.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">API Development:</strong> REST APIs often transmit time in milliseconds or seconds. You can use this tool to verify if your application is sending the correct expiration times for JWT tokens or sessions.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Log Analysis:</strong> Server logs frequently use Epoch time for high-performance logging. Instantly translate those timestamps to your local timezone to correlate events accurately.</li>
+        <li><strong style="color: var(--text-main);">Solving the Year 2038 Problem:</strong> As we approach 2038, many systems using 32-bit integers for time will overflow. Developers use converters like this to test how their systems handle future dates beyond the 32-bit limit.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Seconds vs. Milliseconds</h3>
+      <p style="margin-bottom: 1.5rem;">
+        A common point of confusion is whether a timestamp is in seconds or milliseconds. 
+        <br><br>
+        <strong>Seconds (Unix standard):</strong> Usually 10 digits long (e.g., <code>1712345678</code>). Used by most Unix-based systems and C++ / PHP / Python environments.
+        <br>
+        <strong>Milliseconds:</strong> Usually 13 digits long (e.g., <code>1712345678000</code>). This is the standard in **JavaScript (Java)** and many web-based APIs.
+        <br><br>
+        This tool includes a unit selector to automatically handle both formats, ensuring you don't accidentally calculate a date that is thousands of years in the future.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Privacy</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Timestamps often represent sensitive events—transaction times, user login windows, or private scheduling data. Sending these values to a server just to convert them exposes your data to third parties.
+      </p>
+      <p>
+        The Unix Timestamp Converter is a <strong>100% Client-Side application</strong>. All conversion logic is performed within your browser's local JavaScript engine using the high-performance <code>Date</code> object. Your data never leaves your computer, ensuring total privacy and allowing you to convert sensitive production timestamps with absolute peace of mind.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top:1rem; margin-bottom:1rem;">
