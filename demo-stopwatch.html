@@ -108,6 +108,44 @@
         </div>
       </div>
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Online Stopwatch & Lap Timer</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is an Online Stopwatch?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        An online stopwatch is a digital timekeeping utility that measures the amount of time elapsed from a particular time when activated to when the piece is deactivated. Unlike a standard clock, a stopwatch focuses on relative duration rather than the absolute time of day. This tool provides <strong>millisecond precision</strong>, making it suitable for high-accuracy tasks such as athletic timing, scientific experiments, or productivity tracking (like the <em>Time Blocking</em> method).
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding Lap Timing</h3>
+      <p style="margin-bottom: 1rem;">
+        The <strong>Lap</strong> feature allows you to record specific points in time without stopping the main clock. This is essential for:
+      </p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Interval Training:</strong> Recording the time of each individual lap in a run while keeping track of the total workout duration.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Workflow Analysis:</strong> Timing how long different segments of a complex task take to complete (e.g., coding vs. debugging).</li>
+        <li><strong style="color: var(--text-main);">Multi-Stage Cooking:</strong> Marking the time when specific ingredients are added to a recipe.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Technical Accuracy & Precision</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Our stopwatch uses the <code>Date.now()</code> method in JavaScript, which references the system's high-resolution hardware clock. This ensures that the time displayed remains accurate even if the browser's main thread is momentarily busy. By calculating the difference between the "Start" timestamp and the "Current" timestamp, the tool avoids the cumulative drift error often found in lower-quality timers that simply add milliseconds in a loop.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy & Reliability</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Timing sensitive experiments or personal routines requires absolute privacy. Many timer apps track your usage patterns or require a constant internet connection to function. 
+      </p>
+      <p>
+        The Online Stopwatch is a <strong>100% Client-Side application</strong>. Once the page is loaded, the timer logic runs entirely within your browser's local environment. No data regarding your sessions, lap times, or durations is ever sent to our servers. Because it uses standard web technologies, the timer remains stable and accurate even if your internet connection drops during a session.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
