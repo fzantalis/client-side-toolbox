@@ -121,6 +121,44 @@
         </div>
       </div>
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Free QR Code Generator</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is a QR Code?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        A Quick Response (QR) code is a type of two-dimensional matrix barcode that stores information as a series of pixels in a square-shaped grid. Unlike standard barcodes that only read horizontally, QR codes can be read both vertically and horizontally, allowing them to hold significantly more data—such as website URLs, contact information, or plain text. Our generator allows you to create these codes instantly with full control over their visual style and data integrity.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding Error Correction Levels</h3>
+      <p style="margin-bottom: 1rem;">One of the most powerful features of a QR code is its ability to be scanned even if part of the code is dirty or damaged. This is handled by "Error Correction Levels":</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Level L (Low):</strong> Best for digital screens where the code is unlikely to be damaged. It results in a simpler, cleaner-looking QR code.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Level M (Medium):</strong> The standard balance between data density and survivability. Recommended for most marketing materials.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Level Q (Quartile):</strong> Better for environments where the code might get slightly obscured or printed on textured surfaces.</li>
+        <li><strong style="color: var(--text-main);">Level H (High):</strong> Allows the code to remain scannable even if up to 30% of it is missing. This is the level required if you intend to overlay a logo in the center of your QR code.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why "Tracking-Free" Matters</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Many popular "free" QR generators actually create "Dynamic QR Codes." These work by sending users to a tracking server before redirecting them to the final destination. This allows companies to harvest user data, but it also means your QR code will stop working if that company goes out of business or starts charging a subscription fee. 
+      </p>
+      <p style="margin-bottom: 1.5rem;">
+        This tool generates <strong>Static QR Codes</strong>. The data is encoded directly into the pixels. There are no middlemen, no tracking redirects, and no expiration dates. Once you download your PNG, it will work forever, independently of this website.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy & Aesthetics</h3>
+      <p>
+        Because this is a <strong>client-side tool</strong>, your links and text are never sent to a server to generate the image. The QR generation happens entirely in your browser. Additionally, we provide full aesthetic control: you can change the foreground and background colors to match your brand, and adjust the padding to ensure the code fits perfectly into your design layout.
+      </p>
+    </div>
+  </section>
     
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
