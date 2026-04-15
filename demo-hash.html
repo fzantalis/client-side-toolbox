@@ -57,6 +57,40 @@
         </div>
       </div>
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the File Hash Checker</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the File Hash Checker?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The File Hash Checker is a free, client-side security utility that calculates the cryptographic checksum of any file. Think of a hash as a unique "digital fingerprint" for your data. By generating a SHA-256 hash and comparing it to the official hash provided by a software developer, you can cryptographically verify that the file you downloaded is exactly the same as the original, byte for byte.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Verify File Integrity?</h3>
+      <p style="margin-bottom: 1rem;">Checking file hashes is a critical security practice for system administrators, developers, and power users. You should always verify checksums to protect against two main threats:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Malicious Tampering:</strong> Hackers sometimes intercept downloads (man-in-the-middle attacks) or compromise download servers to inject spyware or ransomware into legitimate software (like operating system ISOs or app installers). If a file has been maliciously altered, its hash will completely change, alerting you to the danger.</li>
+        <li><strong style="color: var(--text-main);">Data Corruption:</strong> Large files can become corrupted during transit due to dropped network packets or failing hard drives. If a downloaded file is incomplete or damaged, the resulting checksum will not match the source, letting you know you need to redownload it before attempting an installation.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is SHA-256?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        SHA-256 (Secure Hash Algorithm 256-bit) is an industry-standard cryptographic hash function designed by the NSA. Regardless of whether you input a tiny 1KB text document or a massive 5GB video file, SHA-256 will always output a fixed 64-character hexadecimal string. Due to the "avalanche effect" in cryptography, altering even a single pixel in an image or a single letter in a document will result in a completely different and unpredictable hash output. It has largely replaced older, vulnerable hashing algorithms like MD5 and SHA-1.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Lightning Fast & 100% Private</h3>
+      <p>
+        Traditionally, calculating the hash of a large file required downloading and installing dedicated command-line software. Attempting to use other online hash generators often meant uploading your gigabyte-sized files to a remote server, which is slow and poses a massive privacy risk. 
+        <br><br>
+        This tool changes that by utilizing your browser's native <strong>Web Crypto API</strong>. When you select a file, the data is read locally into your device's RAM and hashed directly by your CPU. The file is never uploaded to the internet, ensuring absolute privacy and blazing-fast calculation speeds.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
