@@ -222,6 +222,52 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Client-Side Video Converter</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is FFmpeg WebAssembly?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        FFmpeg is the world's leading multimedia framework, able to decode, encode, transcode, and mux almost anything that humans and machines have created. Traditionally, this required a powerful desktop installation. Our tool uses <strong>WebAssembly (WASM)</strong> technology to bring the full power of FFmpeg directly into your web browser. This means you get professional-grade video processing without installing any software or uploading your private files to a third-party server.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding Video Compression (CRF)</h3>
+      <p style="margin-bottom: 1rem;">When compressing video, the most important setting is <strong>CRF (Constant Rate Factor)</strong>. This is the default quality-setting mode for H.264 and VP9 encoders:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Low CRF (18-20):</strong> Produces high-quality, "visually lossless" video but results in larger file sizes.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Medium CRF (23-25):</strong> The "sweet spot" for web video, offering a balance of clear visuals and efficient file size.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">High CRF (28+):</strong> Significantly reduces file size but introduces "artifacts" (blockiness) in high-motion scenes.</li>
+      </ul>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Resolution Scaling Matters</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Resolution (e.g., 1080p vs. 720p) is a primary driver of file size. If you are converting a 4K video for playback on a mobile device, scaling it down to 720p can reduce the file size by over 80% without a noticeable loss in clarity on smaller screens. This tool uses professional scaling algorithms to ensure your video stays sharp even when reduced in size.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Advanced GIF Generation</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Unlike simple online converters, our tool uses a <strong>Two-Pass Palette Generation</strong> method for GIFs. First, FFmpeg analyzes your video to create a custom 256-color map (palette), and then it applies that map to the final GIF. This results in much higher color accuracy and eliminates the "dithering" or "grainy" look common in low-quality GIF makers.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy & Hardware Performance</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Video files are deeply personal and often very large. Most "free" online converters make you upload your video to their servers, where it is stored and processed on their hardware. This is slow, uses massive amounts of bandwidth, and poses a significant privacy risk.
+      </p>
+      <p>
+        This Video Converter is <strong>100% Client-Side</strong>. Your video never leaves your computer. The processing speed depends entirely on your device's CPU. Because it runs locally, you can even use it with no internet connection once the tool has loaded, ensuring that your raw footage and finished edits stay exactly where they belong: on your own hard drive.
+      </p>
+    </div>
+  </section>
+
   <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
