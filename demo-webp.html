@@ -35,6 +35,47 @@
   <p id="status">Selected file: None</p>
   <canvas id="canvas" width="500" height="300" style="border:1px solid #ccc;margin-top:10px"></canvas><br/>
   <a id="downloadLink" download="converted.webp" style="display:none;">Download WebP</a>
+ 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Image to WebP Converter</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the WebP Format?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        <strong>WebP</strong> is a modern image format developed by Google that provides superior <strong>lossless and lossy compression</strong> for images on the web. Using WebP, webmasters and developers can create smaller, richer images that make the web faster. WebP lossless images are 26% smaller in size compared to PNGs, and WebP lossy images are 25-34% smaller than comparable JPEG images.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Convert Your Images to WebP?</h3>
+      <p style="margin-bottom: 1rem;">Switching to WebP is one of the most effective ways to optimize your website's performance and SEO:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Faster Loading Speeds:</strong> Smaller file sizes mean faster download times for your users, which is a critical factor for Core Web Vitals and user retention.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Improved SEO Rankings:</strong> Page speed is a direct ranking factor for search engines like Google. Optimizing images is a high-impact "quick win" for technical SEO.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Transparency Support:</strong> Like PNG, WebP supports alpha channel transparency, but often at a fraction of the file size.</li>
+        <li><strong style="color: var(--text-main);">Bandwidth Savings:</strong> Reduced file sizes lead to lower data consumption for your users (especially on mobile) and lower hosting costs for you.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How the Converter Works</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Our tool uses the browser's native canvas API to process your images. When you select a file (JPG, PNG, or even GIF), the browser renders it onto an invisible canvas. Then, the <code>canvas.toBlob()</code> method encodes the data into the WebP format. This ensures that the conversion is fast, accurate, and utilizes the same high-quality encoding engine used by modern browsers to render the web.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Privacy</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Most online image converters require you to upload your photos to their servers. This is not only slow but also poses a security risk if your images contain sensitive information. 
+      </p>
+      <p>
+        The Image to WebP Converter is a <strong>100% Client-Side application</strong>. Your images never leave your computer. The processing happens entirely within your browser's local environment. This means you can convert your personal photos, professional assets, or sensitive designs with total peace of mind, knowing that your data is never seen or stored by anyone else.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
