@@ -190,6 +190,37 @@
 
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the EXIF Metadata Viewer</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is EXIF Metadata?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Exchangeable Image File Format (EXIF) is a standard that specifies the formats for images and sound tags used by digital cameras and smartphones. Every time you snap a picture, your device invisibly embeds a highly detailed "digital fingerprint" directly into the image file. The EXIF Metadata Viewer is a free, browser-based tool that extracts this hidden text and formats it into a clean, readable dashboard, allowing you to see exactly how and where a photo was taken.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What Information Can You Extract?</h3>
+      <p style="margin-bottom: 1rem;">Depending on your camera settings and the file type (such as JPEG, TIFF, or HEIC), you can uncover a massive amount of forensic and photographic data:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">GPS Location Data:</strong> Many modern smartphones automatically tag photos with exact GPS coordinates. If location metadata is present, this tool extracts the latitude and longitude, generating a convenient link to pinpoint the exact location on Google Maps.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Camera & Lens Specs:</strong> Discover the exact camera manufacturer, model, and the specific lens profile used to capture the image.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Exposure Settings:</strong> Analyze the technical triad of photography: Shutter Speed, Aperture (F-Stop), and ISO levels. This feature is incredibly useful for aspiring photographers trying to replicate the look of professional shots.</li>
+        <li><strong style="color: var(--text-main);">Image Properties:</strong> View the true dimensions, color space, timestamps (when the photo was originally digitized), and software used to edit the image.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Importance of a Private EXIF Reader</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Photos often contain highly sensitive Personal Identifiable Information (PII), such as the exact GPS coordinates of your home, workplace, or children's school. Uploading these personal images to random online metadata readers is a severe privacy risk. 
+      </p>
+      <p>
+        This EXIF reader was built entirely around a "Zero-Trust" privacy model. Using advanced client-side JavaScript, your image is scanned locally within your browser's memory. Your personal photographs are <strong>never uploaded, transmitted, or saved</strong> to any external server. You get professional-grade metadata extraction with absolute peace of mind.
+      </p>
+    </div>
+  </section>
+
   <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
