@@ -358,6 +358,42 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Number Base Converter</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the Number Base Converter?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Number Base Converter is a free, high-performance developer tool designed to translate numbers across different numeral systems instantly. Whether you are debugging assembly code, configuring network masks, or working with low-level computer architecture, this tool provides real-time conversions between Decimal (Base-10), Hexadecimal (Base-16), Binary (Base-2), and Octal (Base-8). Built with modern BigInt support, it handles massively large numbers with infinite precision, completely bypassing the standard integer limits found in basic calculators.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding Numeral Systems in Programming</h3>
+      <p style="margin-bottom: 1rem;">Computer science relies heavily on different base systems to represent data efficiently:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Binary (Base-2):</strong> The fundamental language of computers. It uses only two digits, 0 and 1, representing off and on states in hardware transistors.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Hexadecimal (Base-16):</strong> Uses digits 0-9 and letters A-F. Hex is heavily used by developers because it is a human-friendly way to represent binary data. Exactly four binary bits make up one hexadecimal digit (a nibble), making memory addresses, color codes, and byte arrays much easier to read.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Octal (Base-8):</strong> Uses digits 0-7. While less common today, it is still frequently used in Unix/Linux systems for setting file permissions (chmod) and in certain legacy computing environments.</li>
+        <li><strong style="color: var(--text-main);">Decimal (Base-10):</strong> The standard numeric system used by humans in everyday mathematics.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Memory and Bit-Width Analysis</h3>
+      <p style="margin-bottom: 1.5rem;">
+        What sets this tool apart from standard hex converters is its built-in memory analysis capability. As you type, the tool actively calculates the exact memory footprint required to store your number. It displays the minimum number of bits and bytes required, and automatically categorizes the number into standard data types such as an 8-bit Byte, 16-bit Word, 32-bit DWord, or 64-bit QWord. This is an invaluable feature for systems programmers optimizing memory allocation or writing C/C++ and Rust applications.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How to Use the Converter</h3>
+      <ol style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Enter your Value:</strong> Type or paste your number into any of the four input fields. The tool automatically cleans up spaces, commas, and underscores, making it easy to paste raw code snippets.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Live Translation:</strong> As you type, all other bases update simultaneously. There is no need to press a "convert" button.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">View Formatted Data:</strong> Check the bottom panel for cleanly formatted representations of your data. The binary output is logically spaced by nibbles and bytes to help you visualize bitwise operations.</li>
+        <li><strong style="color: var(--text-main);">Copy to Clipboard:</strong> Click the copy icon next to any base label to instantly copy the converted value to your clipboard for use in your IDE or terminal.</li>
+      </ol>
+    </div>
+  </section>
+
   <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top:1rem; margin-bottom:1rem;">
