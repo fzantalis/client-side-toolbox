@@ -230,6 +230,44 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Cron Expression Builder</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the Cron Expression Builder?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Cron Expression Builder is a free, interactive developer tool designed to take the guesswork out of scheduling automated server tasks. In Unix-like operating systems (such as Linux and macOS), the <strong>cron</strong> daemon is used to execute scheduled commands, known as cron jobs. However, the syntax used in a <em>crontab</em> file can be notoriously difficult to read and write. This client-side cron generator translates complex asterisks and numbers into plain, human-readable English. It allows system administrators, web developers, and DevOps engineers to confidently build, validate, and debug their cron schedules directly in the browser.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding the 5-Part Cron Syntax</h3>
+      <p style="margin-bottom: 1rem;">A standard cron schedule consists of five distinct fields separated by spaces. From left to right, they represent:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Minute:</strong> 0 through 59.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Hour:</strong> 0 through 23 (uses 24-hour time).</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Day of the Month:</strong> 1 through 31.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Month:</strong> 1 through 12.</li>
+        <li><strong style="color: var(--text-main);">Day of the Week:</strong> 0 through 6 (where 0 represents Sunday).</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Special Characters Explained</h3>
+      <p style="margin-bottom: 1rem;">To create advanced schedules, you can use special operational characters in any of the five fields:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Asterisk (<code>*</code>):</strong> Represents "every" or "all" valid values. For example, an asterisk in the minute field means the task runs every single minute.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Comma (<code>,</code>):</strong> Separates items in a list. Typing <code>1,15,30</code> in the minute field triggers the job at the 1st, 15th, and 30th minute.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Hyphen (<code>-</code>):</strong> Defines a range. Using <code>9-17</code> in the hour field means the job runs every hour from 9 AM to 5 PM.</li>
+        <li><strong style="color: var(--text-main);">Slash (<code>/</code>):</strong> Specifies step values. Writing <code>*/15</code> in the minute field tells the server to run the job every 15 minutes.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Next-Run Calculator & Safety</h3>
+      <p>
+        A minor typo in a crontab file can have disastrous consequences, such as accidentally running a heavy database backup every minute instead of every month, ultimately crashing your server. To prevent this, our cron schedule validator features a real-time <strong>Next 5 Runs</strong> forecaster. As you tweak the expression, the tool calculates exactly when the job will trigger relative to your current local time. This allows you to visually audit the execution intervals and deploy your server configurations with absolute confidence.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
