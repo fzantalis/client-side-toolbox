@@ -43,6 +43,51 @@
         <pre id="svg-out">Result will appear here...</pre>
       </div>
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the SVG Optimizer & Cleaner</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is SVG Optimization?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Scalable Vector Graphics (SVG) are XML-based images that are incredibly efficient for the web. However, design software like Adobe Illustrator, Figma, or Inkscape often exports SVGs with unnecessary "bloat"—including XML declarations, editor metadata, comments, and empty groups. <strong>SVG Optimization</strong> is the process of stripping away this hidden data to reduce file size without changing the visual appearance of the image.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Should You Clean Your SVGs?</h3>
+      <p style="margin-bottom: 1rem;">Minifying your vector code is essential for modern web development for several reasons:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Faster Page Loads:</strong> Every byte counts. Cleaning complex icons or illustrations can often reduce file sizes by 30% to 60%, leading to faster rendering and better Core Web Vitals.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Cleaner Inline Code:</strong> If you paste SVGs directly into your HTML (inlining), optimized code is much easier to read and maintain within your components.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">SEO Benefits:</strong> Search engines reward fast-loading websites. By reducing the overall weight of your assets, you improve your site's technical SEO performance.</li>
+        <li><strong style="color: var(--text-main);">Remove Editor Tracking:</strong> Design tools often leave "signatures" or metadata about the software version and creator. Cleaning ensures your production code is professional and lean.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What This Tool Strips Away</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Our client-side cleaner target the most common types of SVG "junk," including:
+      </p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong>XML Declarations:</strong> Not needed when embedding SVGs in HTML5.</li>
+        <li style="margin-bottom: 0.5rem;"><strong>Metadata & Comments:</strong> Hidden notes and creator info that provide no visual value.</li>
+        <li style="margin-bottom: 0.5rem;"><strong>Empty Groups:</strong> Unnecessary <code>&lt;g&gt;</code> tags that create deep, inefficient DOM trees.</li>
+        <li><strong>Whitespace:</strong> Extra tabs and newlines that inflate the file size.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Safe & Secure Processing</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Because your SVG designs are part of your creative intellectual property, privacy is our priority. Unlike many online minifiers that upload your files to a cloud server, this tool is <strong>100% Client-Side</strong>.
+      </p>
+      <p>
+        The cleaning logic runs entirely in your browser's local JavaScript engine. Your vector data is never transmitted to a server, never stored, and never tracked. You can even use this tool while offline to safely process proprietary icons or logos with total confidence in your data's security.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
