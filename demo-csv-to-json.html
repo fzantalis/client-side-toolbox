@@ -54,6 +54,39 @@
         <pre id="out">Result will appear here...</pre>
       </div>
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the CSV to JSON & SQL Converter</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the CSV to JSON & SQL Converter?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The CSV to JSON & SQL Converter is a free, high-performance developer utility designed to bridge the gap between flat-file spreadsheet data and modern application databases. Comma-Separated Values (CSV) is the most common format for exporting data from software like Microsoft Excel or Google Sheets, but it is notoriously difficult to use directly within web applications or relational databases. This tool instantly parses your raw CSV text and transforms it into either a structured JSON array or a list of ready-to-execute SQL <code>INSERT</code> statements. 
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Convert CSV to JSON?</h3>
+      <p style="margin-bottom: 1rem;">JSON (JavaScript Object Notation) is the native language of the modern web. Converting your CSV to JSON is highly recommended if you are:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Building APIs:</strong> RESTful APIs and microservices almost exclusively send and receive data in JSON format.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Using NoSQL Databases:</strong> Modern document databases like MongoDB, Firebase, and CouchDB store data as JSON-like objects. This tool allows you to easily import legacy tabular data into these systems.</li>
+        <li><strong style="color: var(--text-main);">Frontend Development:</strong> If you are building a UI with React, Vue, or Angular, passing a JSON array of objects to your components is significantly easier than writing custom client-side CSV parsers. The tool automatically uses your CSV's first row as the key names for every subsequent object.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Generating SQL Insert Statements</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Database Administrators (DBAs) and backend engineers frequently need to migrate CSV data into relational databases like MySQL, PostgreSQL, or SQLite. Instead of wrestling with complex command-line import tools (like <code>LOAD DATA INFILE</code>) or writing custom Python scripts, you can use the "To SQL" feature. The generator reads your CSV headers to define the target columns and automatically wraps every row of data into safely formatted <code>INSERT INTO csv_data (...) VALUES (...)</code> queries. It even handles escaping quotation marks to ensure your SQL syntax remains valid.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Data Privacy</h3>
+      <p>
+        Data sets often contain highly sensitive information, such as customer emails, financial records, or proprietary business analytics. Security is our top priority. Unlike other online CSV converters that require you to upload your files to a remote server for processing, this tool operates entirely via local JavaScript in your browser. Your data never leaves your device, ensuring zero risk of interception or data retention by third parties.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
