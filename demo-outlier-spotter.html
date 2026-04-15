@@ -384,6 +384,72 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Data Outlier Spotter</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is an Outlier in Statistics?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        An outlier is a data point that differs significantly from other observations in a dataset. Outliers can be caused by experimental errors, measurement variability, or they may indicate a novel, true discovery. The Data Outlier Spotter is a free, professional-grade statistical tool that helps you clean your data by identifying these anomalies using the Interquartile Range (IQR) method—one of the most reliable ways to find "mild" and "extreme" deviations without being influenced by the outliers themselves.
+      </p>
+
+      
+
+[Image of Box and Whisker Plot with Outliers]
+
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How the IQR Detection Method Works</h3>
+      <p style="margin-bottom: 1rem;">
+        To find outliers, our tool calculates <strong>Tukey’s Fences</strong>. Unlike a standard Z-score (which relies on the Mean), the IQR method uses the Median, making it much more robust for skewed data:
+      </p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Calculate Q1 and Q3:</strong> The tool finds the 25th (Q1) and 75th (Q3) percentiles. The difference between them is the Interquartile Range (IQR).</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Define the "Fences":</strong> Any number lower than <code>Q1 - (1.5 * IQR)</code> or higher than <code>Q3 + (1.5 * IQR)</code> is flagged as a statistical outlier.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Visual Highlighting:</strong> The tool automatically sorts your data and highlights the "bad" values in red, allowing you to instantly decide whether to keep or exclude them from your analysis.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Key Statistical Metrics</h3>
+      <p style="margin-bottom: 1rem;">In addition to anomaly detection, this tool provides four essential descriptive statistics for any numerical column:</p>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+            <th style="padding: 0.5rem; color: var(--text-main);">Metric</th>
+            <th style="padding: 0.5rem; color: var(--text-main);">What it Tells You</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>Mean</strong></td>
+            <td style="padding: 0.5rem;">The mathematical average. Highly sensitive to outliers.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>Median</strong></td>
+            <td style="padding: 0.5rem;">The middle value. More accurate than the Mean for "noisy" data.</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>Std Deviation</strong></td>
+            <td style="padding: 0.5rem;">How spread out your numbers are around the average.</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.5rem;"><strong>N (Count)</strong></td>
+            <td style="padding: 0.5rem;">The total number of valid data points in your sample.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Clean and Private Data Analysis</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Whether you are analyzing scientific trial results, checking financial logs for fraud, or cleaning up a CSV for a machine learning model, privacy is paramount. Many online outlier calculators require you to upload your spreadsheets to their servers. 
+      </p>
+      <p>
+        The Data Outlier Spotter is a <strong>purely client-side application</strong>. When you paste your data, the statistical processing happens entirely within your browser's local memory. Your numbers never leave your device, ensuring that sensitive data—like business revenue or health metrics—remains completely confidential.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top:1rem; margin-bottom:1rem;">
