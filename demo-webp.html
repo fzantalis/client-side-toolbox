@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8">
+<head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
   
@@ -24,72 +25,146 @@
   <meta property="twitter:title" content="Image to WebP Converter | Free Online Browser-Based Tool">
   <meta property="twitter:description" content="Convert JPG, PNG, and other images to WebP format instantly in your browser. A secure, free, client-side image converter.">
   <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
-    <link rel="stylesheet" href="style.css"/>
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* Specific styles for WebP Tool */
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      background-image: 
+        linear-gradient(45deg, var(--border) 25%, transparent 25%), 
+        linear-gradient(-45deg, var(--border) 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, var(--border) 75%), 
+        linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      border: 1px solid var(--border);
+    }
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+    #status {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .input-wrapper {
+      padding: 2rem;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      text-align: center;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+    .input-wrapper:hover {
+      border-color: var(--primary);
+    }
+    #img {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Image to WebP Converter (Client-Side Demo)</h1>
-  <input type="file" id="img" accept="image/*" /><br/>
-  <p>After selecting an image, click 'Convert to WebP'.</p>
-  <button id="convertBtn" disabled>Convert to WebP</button>
-  <p id="status">Selected file: None</p>
-  <canvas id="canvas" width="500" height="300" style="border:1px solid #ccc;margin-top:10px"></canvas><br/>
-  <a id="downloadLink" download="converted.webp" style="display:none;">Download WebP</a>
- 
-  <section class="tool-section" style="margin-top: 4rem;">
-    <div class="section-header">
-      <i class="ph ph-article"></i>
-      <h2>About the Image to WebP Converter</h2>
-    </div>
-    
-    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
-      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the WebP Format?</h3>
-      <p style="margin-bottom: 1.5rem;">
-        <strong>WebP</strong> is a modern image format developed by Google that provides superior <strong>lossless and lossy compression</strong> for images on the web. Using WebP, webmasters and developers can create smaller, richer images that make the web faster. WebP lossless images are 26% smaller in size compared to PNGs, and WebP lossy images are 25-34% smaller than comparable JPEG images.
-      </p>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
 
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-image"></i></div>
+      <div class="tool-header-text">
+        <h1>Image to WebP Converter</h1>
+        <p>Convert JPG and PNG images to highly optimized WebP format instantly. 100% private and runs entirely in your browser.</p>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Select Image</h3>
+        </div>
+        <div class="panel-body">
+          <label for="img" class="input-wrapper" id="drop-zone">
+            <i class="ph ph-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary);"></i>
+            <p style="margin-top: 1rem; font-weight: 600;">Click to upload or drag and drop</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Supports PNG, JPG, BMP, GIF</p>
+            <input type="file" id="img" accept="image/*" />
+          </label>
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1rem;">
+            <span id="status">No file selected</span>
+            <button id="convertBtn" class="btn-primary" disabled><i class="ph ph-magic-wand"></i> Convert to WebP</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Preview & Download</h3>
+          <div class="panel-actions">
+            <a id="downloadLink" download="converted.webp" class="btn-primary" style="display:none; text-decoration: none;">
+              <i class="ph ph-download-simple"></i> Download WebP
+            </a>
+          </div>
+        </div>
+        <div class="panel-body preview-container">
+          <canvas id="canvas" width="500" height="300"></canvas>
+        </div>
+      </div>
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+      <div class="section-header">
+        <i class="ph ph-article"></i>
+        <h2>About the Image to WebP Converter</h2>
+      </div>
       
+      <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the WebP Format?</h3>
+        <p style="margin-bottom: 1.5rem;">
+          <strong>WebP</strong> is a modern image format developed by Google that provides superior <strong>lossless and lossy compression</strong> for images on the web. Using WebP, webmasters and developers can create smaller, richer images that make the web faster. WebP lossless images are 26% smaller in size compared to PNGs, and WebP lossy images are 25-34% smaller than comparable JPEG images.
+        </p>
 
-      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Convert Your Images to WebP?</h3>
-      <p style="margin-bottom: 1rem;">Switching to WebP is one of the most effective ways to optimize your website's performance and SEO:</p>
-      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
-        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Faster Loading Speeds:</strong> Smaller file sizes mean faster download times for your users, which is a critical factor for Core Web Vitals and user retention.</li>
-        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Improved SEO Rankings:</strong> Page speed is a direct ranking factor for search engines like Google. Optimizing images is a high-impact "quick win" for technical SEO.</li>
-        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Transparency Support:</strong> Like PNG, WebP supports alpha channel transparency, but often at a fraction of the file size.</li>
-        <li><strong style="color: var(--text-main);">Bandwidth Savings:</strong> Reduced file sizes lead to lower data consumption for your users (especially on mobile) and lower hosting costs for you.</li>
-      </ul>
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Convert Your Images to WebP?</h3>
+        <p style="margin-bottom: 1rem;">Switching to WebP is one of the most effective ways to optimize your website's performance and SEO:</p>
+        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Faster Loading Speeds:</strong> Smaller file sizes mean faster download times for your users, which is a critical factor for Core Web Vitals.</li>
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Improved SEO Rankings:</strong> Page speed is a direct ranking factor for Google.</li>
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Transparency Support:</strong> Like PNG, WebP supports alpha channel transparency at a fraction of the size.</li>
+          <li><strong style="color: var(--text-main);">Bandwidth Savings:</strong> Reduced file sizes lead to lower data consumption for users.</li>
+        </ul>
 
-      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How the Converter Works</h3>
-      <p style="margin-bottom: 1.5rem;">
-        Our tool uses the browser's native canvas API to process your images. When you select a file (JPG, PNG, or even GIF), the browser renders it onto an invisible canvas. Then, the <code>canvas.toBlob()</code> method encodes the data into the WebP format. This ensures that the conversion is fast, accurate, and utilizes the same high-quality encoding engine used by modern browsers to render the web.
-      </p>
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Privacy</h3>
+        <p>
+          The Image to WebP Converter is a <strong>100% Client-Side application</strong>. Your images never leave your computer. The processing happens entirely within your browser's local environment. This means total peace of mind for your personal or professional assets.
+        </p>
+      </div>
+    </section>
 
-      
-
-      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Privacy</h3>
-      <p style="margin-bottom: 1.5rem;">
-        Most online image converters require you to upload your photos to their servers. This is not only slow but also poses a security risk if your images contain sensitive information. 
-      </p>
-      <p>
-        The Image to WebP Converter is a <strong>100% Client-Side application</strong>. Your images never leave your computer. The processing happens entirely within your browser's local environment. This means you can convert your personal photos, professional assets, or sensitive designs with total peace of mind, knowing that your data is never seen or stored by anyone else.
-      </p>
-    </div>
-  </section>
-  
-  <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
-    <div style="margin-top: 1rem; margin-bottom: 1rem;">
-      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
-        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
-        View Source on GitHub
-      </a>
-    </div>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+        <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+          <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+          View Source on GitHub
+        </a>
+      </div>
       <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
         <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
         <span>&bull;</span>
         <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
       </div>
     </footer>
+  </div>
+
   <script>
     const imgInput = document.getElementById('img');
     const convertBtn = document.getElementById('convertBtn');
@@ -102,11 +177,11 @@
     imgInput.addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (!file) {
-        statusDisplay.textContent = 'Selected file: None';
+        statusDisplay.textContent = 'No file selected';
         convertBtn.disabled = true;
         return;
       }
-      statusDisplay.textContent = `Selected file: ${file.name}`;
+      statusDisplay.textContent = `File: ${file.name}`;
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -114,41 +189,28 @@
           loadedImage = img;
           canvas.width = img.width;
           canvas.height = img.height;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0);
           convertBtn.disabled = false;
         };
-        img.onerror = () => {
-          statusDisplay.textContent = 'Error loading image.';
-          convertBtn.disabled = true;
-        };
         img.src = e.target.result;
-      };
-      reader.onerror = () => {
-        statusDisplay.textContent = 'Error reading file.';
-        convertBtn.disabled = true;
       };
       reader.readAsDataURL(file);
     });
 
     convertBtn.addEventListener('click', () => {
-      if (!loadedImage) {
-        statusDisplay.textContent = 'No image loaded to convert.';
-        return;
-      }
+      if (!loadedImage) return;
       canvas.toBlob((blob) => {
         if (blob) {
           const url = URL.createObjectURL(blob);
           downloadLink.href = url;
-          downloadLink.style.display = 'inline-block';
-          statusDisplay.textContent = 'Conversion complete. Click Download.';
-        } else {
-          statusDisplay.textContent = 'Conversion to WebP failed.';
-          downloadLink.style.display = 'none';
+          downloadLink.style.display = 'inline-flex';
+          statusDisplay.textContent = 'Conversion complete!';
         }
-      }, 'image/webp');
+      }, 'image/webp', 0.85); // 0.85 quality
     });
   </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
 </body>
-<script src="theme-toggle.js"></script>
-<script src="script.js"></script>
 </html>
