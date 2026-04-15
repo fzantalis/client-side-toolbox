@@ -77,6 +77,44 @@
       </div>
 
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Color Palette Extractor</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the Color Palette Extractor?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Color Palette Extractor is a free, client-side web tool designed for graphic designers, web developers, and digital artists. It allows you to instantly generate a custom color palette by extracting the most dominant colors from any uploaded image. Whether you are trying to match the exact shade of a photograph for a website background, or you need to build a brand identity around a specific mood board, this tool does the heavy lifting for you. Best of all, image processing happens entirely in your browser using the HTML5 Canvas API, ensuring your photos remain 100% private and are never uploaded to a cloud server.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How the Image Color Picker Works</h3>
+      <p style="margin-bottom: 1rem;">Behind the scenes, the tool uses a smart mathematical sampling technique to determine the visual hierarchy of an image:</p>
+      <ol style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Pixel Parsing:</strong> When you upload an image, the tool renders it invisibly on a digital canvas and reads the raw pixel data.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Color Clustering:</strong> Instead of getting bogged down by thousands of microscopic variations of a single shade, the script groups highly similar colors together. This mimics how the human eye perceives dominant hues rather than single stray pixels.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Frequency Sorting:</strong> The colors are tallied up and sorted by frequency, meaning the colors that cover the most surface area in your photo will bubble up to the top.</li>
+        <li><strong style="color: var(--text-main);">Palette Generation:</strong> Finally, the top six most prevalent colors are displayed as a beautiful, easy-to-read swatch grid.</li>
+      </ol>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">CSS Formats Provided</h3>
+      <p style="margin-bottom: 1.5rem;">
+        To make workflow as seamless as possible for UI/UX designers and frontend developers, the extractor outputs the dominant colors in the two most widely used web formats:
+      </p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">HEX Codes (e.g., #3B82F6):</strong> The standard format for web design, perfect for dropping directly into CSS files, Figma, Adobe Photoshop, or Illustrator.</li>
+        <li><strong style="color: var(--text-main);">RGB Values (e.g., 59, 130, 246):</strong> Useful when you need to manipulate the color's opacity in CSS (via `rgba()`) or use it in dynamic JavaScript animations.</li>
+      </ul>
+      
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Tips for the Best Results</h3>
+      <p>
+        For the most accurate and pleasing palettes, try uploading images with distinct color contrasts, such as landscapes, modern art, or professional photography. If an image has a massive amount of white space or a solid black background, those neutral colors will naturally register as the most dominant. To capture the accents, try cropping the image to focus tightly on the colorful subject before uploading.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
