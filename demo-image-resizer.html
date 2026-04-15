@@ -301,6 +301,38 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Image Resizer & Cropper</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the Image Resizer & Cropper?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Image Resizer & Cropper is a free, professional-grade visual utility that allows you to instantly alter the dimensions, aspect ratio, and file format of your pictures. Whether you are a web developer trying to generate exact hero banner dimensions, a designer prepping assets for social media, or just someone trying to shrink a massive photo for an email attachment, this tool gives you pixel-perfect control without requiring heavy desktop software like Adobe Photoshop.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding the Resize Modes</h3>
+      <p style="margin-bottom: 1rem;">To ensure your images look exactly how you want them to, the tool features three distinct algorithmic resizing modes:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Fit Area (Contain):</strong> This scales the image down so the entire picture fits inside your target dimensions without cropping anything out. It preserves the original aspect ratio. If the image doesn't perfectly match the new shape, it will add solid padding to the edges (which you can customize using the Pad Color picker).</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Crop / Fill (Cover):</strong> This is the most popular mode for creating thumbnails and profile pictures. It scales the image to completely fill your target dimensions, automatically cropping off any excess edges while keeping the center intact. It guarantees no blank borders and no stretching.</li>
+        <li><strong style="color: var(--text-main);">Stretch:</strong> This forces the image to map exactly to your inputted width and height, completely ignoring the original aspect ratio. Use this cautiously, as it will physically distort and squash the image if the new proportions differ heavily from the original.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Format Conversion & Optimization</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Modern web performance relies heavily on optimized images. Alongside resizing, this tool acts as a format converter. You can easily switch a transparent PNG into a solid JPEG, or upgrade older image formats into the next-generation <strong>WebP</strong> format. By utilizing the built-in Quality slider (available for JPEG and WebP exports), you can dramatically compress the final file size, ensuring your website loads lightning fast.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Strict Client-Side Privacy</h3>
+      <p>
+        Most free online image resizers force you to upload your files to their cloud servers, where they sit in a temporary folder (or worse, get scraped for data). We built this tool with a strict privacy-first architecture. Utilizing the HTML5 Canvas API, your image is read and manipulated entirely within your browser's local memory. Your personal photos, sensitive UI mockups, and confidential documents are <strong>never uploaded or transmitted over the internet</strong>.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top:1rem; margin-bottom:1rem;">
