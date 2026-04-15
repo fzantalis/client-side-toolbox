@@ -207,6 +207,43 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the JSON to ERD Diagram Generator</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the JSON to ERD Diagram Generator?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The JSON to ERD Diagram Generator is a free, client-side database architecture tool designed for software engineers, database administrators, and technical architects. It instantly translates raw JSON text into a visual Entity-Relationship Diagram (ERD). Instead of manually drawing boxes and connecting lines in heavy diagramming software, you can simply paste your JSON payload. The tool automatically maps out your database tables, identifies column data types, and draws relationship lines representing how your entities interact.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Visualize JSON Data?</h3>
+      <p style="margin-bottom: 1rem;">Reading through thousands of lines of raw, nested JSON is tedious and makes it nearly impossible to understand the overall architecture of an application. Visualizing this data as an ERD helps you:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Understand API Responses:</strong> Quickly grasp the structure of complex REST or GraphQL API payloads by seeing how nested objects relate to the parent data.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Migrate NoSQL to SQL:</strong> If you are moving data from a document database (like MongoDB) to a relational database (like PostgreSQL), this tool helps you flatten nested documents into distinct, relatable tables.</li>
+        <li><strong style="color: var(--text-main);">Generate Documentation:</strong> Create instant, accurate visual documentation of your database schema for onboarding new developers or presenting to stakeholders.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Smart Schema Detection</h3>
+      <p style="margin-bottom: 1.5rem;">
+        This tool features a highly adaptable parsing engine with multiple input modes. If you paste a <strong>Data array</strong> (a standard JSON response), it will scan the data, infer whether fields are integers, strings, or dates, and automatically map nested arrays as <code>1:N</code> (One-to-Many) relationships. Alternatively, you can use the <strong>JSON Schema</strong> mode to explicitly define your architecture, manually flagging Primary Keys (PK) and Foreign Keys (FK) to generate highly precise, professional-grade relationship mappings.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Interactive Canvas & SVG Export</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Once your diagram is generated, you can use the interactive canvas to pan and zoom around complex schemas. When you are ready to share your architecture, simply click the <strong>Export SVG</strong> button. This generates a high-resolution, infinitely scalable vector graphic that can be embedded directly into markdown files, dropped into Figma, or uploaded to your team's Confluence wiki without losing any text clarity.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Private & Secure</h3>
+      <p>
+        Database schemas are highly proprietary blueprints of your business logic. Because this tool runs entirely locally within your browser using JavaScript, your JSON data is never uploaded to a remote server. You get lightning-fast rendering speeds with the absolute guarantee that your software architecture remains strictly confidential.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
