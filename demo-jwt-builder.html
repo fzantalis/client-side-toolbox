@@ -395,6 +395,43 @@
     </div>
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the JWT Builder & Decoder</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is a JSON Web Token (JWT)?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        JSON Web Tokens (JWT) are an open, industry-standard (RFC 7519) method for representing claims securely between two parties. They are the backbone of modern web authentication and authorization systems. A JWT is essentially a compact, URL-safe string that carries information—such as a user's ID or permissions—that can be verified and trusted because it is digitally signed. This JWT Builder & Decoder allows you to craft these tokens from scratch, decode existing ones, and verify their signatures using HMAC algorithms.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Anatomy of a JWT</h3>
+      <p style="margin-bottom: 1rem;">A JSON Web Token consists of three distinct parts separated by dots (<code>.</code>), which you can see color-coded in our display:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Header (Red):</strong> Typically contains the type of token (JWT) and the signing algorithm being used, such as HS256 (HMAC SHA-256).</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Payload (Yellow):</strong> Contains the "claims." These are statements about an entity (typically, the user) and additional data like expiration times (<code>exp</code>) or issuer details (<code>iss</code>).</li>
+        <li><strong style="color: var(--text-main);">Signature (Green):</strong> To create the signature part you have to take the encoded header, the encoded payload, a secret, and the algorithm specified in the header to sign that. The signature is used to verify that the sender of the JWT is who it says it is and to ensure that the message wasn't changed along the way.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Testing and Debugging Claims</h3>
+      <p style="margin-bottom: 1.5rem;">
+        This tool is a powerful sandbox for developers to test their implementation of JWT-based authentication. Use our <strong>Claim Shortcuts</strong> to quickly add standard registered claims like <code>iat</code> (Issued At) or <code>jti</code> (unique ID). Our integrated <strong>Expiry Calculator</strong> helps you set precise <code>exp</code> timestamps, while the decoded view provides a real-time relative countdown to ensure your tokens behave as expected in production environments.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy-First Token Management</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Security and secrets are the most sensitive parts of your application’s infrastructure. Most online JWT tools send your payload and your "Signing Secret" to a remote server for processing, which is a massive security vulnerability. 
+      </p>
+      <p>
+        Our JWT Builder uses the <strong>Web Crypto API</strong> to perform all cryptographic signing and hashing locally within your browser. Whether you are generating a random 256-bit secret or pasting a live production key to verify a token, your data stays in your RAM and is never transmitted over the internet.
+      </p>
+    </div>
+  </section>
+
   <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
