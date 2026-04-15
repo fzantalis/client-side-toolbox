@@ -376,6 +376,49 @@
 
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About P2P File Transfer & WebRTC</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is Peer-to-Peer (P2P) Sharing?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Traditional file sharing works by uploading your file to a cloud server (like Google Drive or Dropbox) and then having the recipient download it from that same server. P2P sharing removes the middleman. By using <strong>WebRTC (Web Real-Time Communication)</strong>, this tool creates a direct, encrypted tunnel between two browsers. Your files stream directly from your hard drive to theirs, meaning higher speeds, no storage limits, and absolute privacy.
+      </p>
+
+      
+
+[Image of P2P vs Client-Server network architecture]
+
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Use WebRTC for Transfers?</h3>
+      <p style="margin-bottom: 1rem;">WebRTC is a powerful browser technology that enables professional-grade communication without plugins. For file transfers, it offers unique advantages:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">No File Size Limits:</strong> Since the file never sits on a server, you aren't limited by cloud storage quotas. You can send a 10GB video file just as easily as a small PDF, provided both parties stay online.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">End-to-End Encryption:</strong> The data channel is encrypted using DTLS (Datagram Transport Layer Security), ensuring that even if someone intercepted the traffic, they couldn't read the content.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Direct Local Speed:</strong> If both devices are on the same local Wi-Fi network, the transfer happens at the speed of your router, bypassing the bottleneck of your internet upload speed entirely.</li>
+        <li><strong style="color: var(--text-main);">Browser-to-Browser:</strong> No software installation is required. It works on Chrome, Firefox, Safari, and Edge across Windows, macOS, Android, and iOS.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Connection Process Explained</h3>
+      <p style="margin-bottom: 1.5rem;">
+        To establish a direct connection without a central server knowing who you are, browsers perform a "handshake" using Session Description Protocol (SDP) codes:
+      </p>
+      <ol style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">The Offer:</strong> The Sender generates a code containing their network capabilities and cryptographic keys.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">The Answer:</strong> The Receiver processes that offer and generates a matching "Answer" code to agree on the connection parameters.</li>
+        <li><strong style="color: var(--text-main);">The Tunnel:</strong> Once both codes are exchanged, the browsers find the shortest path to each other and open the data pipe.</li>
+      </ol>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy & Zero-Logging</h3>
+      <p>
+        The Client-Side Toolbox does not run a "signalling server" to automatically connect users because that would involve tracking your IP address. By requiring you to manually exchange the codes (via chat, email, or QR code), we ensure that <strong>zero information</strong> about your transfer is ever logged. We don't know who is sending what, how large the files are, or when the transfer happens. It is the ultimate tool for confidential document sharing.
+      </p>
+    </div>
+  </section>
+
   <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
