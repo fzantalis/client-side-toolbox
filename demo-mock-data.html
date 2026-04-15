@@ -77,6 +77,49 @@
         <pre id="output-area" class="code-output">Click generate to see data...</pre>
       </div>
     </div>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Mock Data Generator</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is a Mock Data Generator?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Mock Data Generator is a free, high-speed utility designed for developers, QA engineers, and data analysts who need realistic datasets for testing and prototyping. In the software development lifecycle, using real production data for testing is often impossible due to privacy regulations (like GDPR) or security concerns. This tool allows you to define a custom schema and instantly generate thousands of rows of "fake" but realistic information—such as names, emails, UUIDs, and addresses—directly in your browser.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Use Realistic Test Data?</h3>
+      <p style="margin-bottom: 1rem;">Testing with strings like "Test1" or "Asdf" is rarely sufficient. Realistic mock data is essential for:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">UI/UX Layout Testing:</strong> Ensuring that long names, international addresses, or varying job titles don't break your frontend components or table layouts.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Database Seeding:</strong> Populating your local development database with enough records to simulate a production environment, helping you optimize queries and indexing.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">API Prototyping:</strong> Building frontend applications before the backend API is ready by mimicking expected response structures in JSON format.</li>
+        <li><strong style="color: var(--text-main);">Performance Benchmarking:</strong> Generating up to 100,000 records to test how your application handles large-scale data processing and pagination.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Supported Data Types</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Powered by the industry-standard <strong>Faker.js</strong> engine, our generator supports a wide array of localized data types. You can mix and match fields for identifying information (UUIDs, Names), contact details (Email, Phone), locations (City, Country, Street Address), and even financial or temporal data (Prices, ISO Dates, Booleans).
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Exporting to JSON and CSV</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Depending on your technical requirements, you can export your generated data in two universal formats:
+        <br><br>
+        <strong>JSON:</strong> Ideal for web developers and NoSQL database seeding. The output is a structured array of objects, perfect for modern JavaScript applications.
+        <br>
+        <strong>CSV:</strong> Perfect for data analysts and relational database imports (SQL). This format creates a standard comma-separated file with a header row, compatible with Microsoft Excel, Google Sheets, and PostgreSQL/MySQL import tools.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy & Security</h3>
+      <p>
+        Data privacy is at the core of our philosophy. Because this is a <strong>client-side tool</strong>, the entire generation process happens locally in your browser's memory using a Web Worker. No schema definitions or generated records are ever sent to our servers. Your test configurations remain completely private, and the data is wiped from your RAM as soon as you close the tab.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
