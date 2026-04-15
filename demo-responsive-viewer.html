@@ -308,6 +308,64 @@
 
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Responsive Website Viewer</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is Responsive Web Design?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Responsive Web Design (RWD) is an approach to web development that makes web pages render well on a variety of devices and window or screen sizes. In today's digital landscape, users access websites from an enormous range of devices—from small-screen smartphones to ultra-wide 4K monitors. Our Responsive Website Viewer is a free developer tool that simulates these various viewports, allowing you to test how your layout, images, and navigation menus adapt to different resolutions without needing physical access to every device.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Test Your Website's Responsiveness?</h3>
+      <p style="margin-bottom: 1rem;">A non-responsive website can lead to a poor user experience, high bounce rates, and lower search engine rankings. This tool helps you solve several critical UI/UX challenges:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Breakpoint Verification:</strong> Ensure your CSS media queries are triggering at the correct widths, moving sidebar content below the main text or switching to a "hamburger" menu on mobile.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Visual Consistency:</strong> Identify "overflow" issues where elements might be wider than the screen, causing awkward horizontal scrolling on mobile devices.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Rotation Testing:</strong> Instantly flip between Portrait and Landscape modes to verify that your site remains usable when a tablet or phone user rotates their device.</li>
+        <li><strong style="color: var(--text-main);">Scale-to-Fit Convenience:</strong> Our smart scaling system allows you to view giant desktop resolutions (like 1920x1080) within your current browser window by scaling the preview down while maintaining the internal pixel-perfect resolution.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Device Viewport Presets</h3>
+      <p style="margin-bottom: 1rem;">We have included the most common resolutions used in 2026 to ensure your testing is accurate:</p>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+            <th style="padding: 0.5rem; color: var(--text-main);">Category</th>
+            <th style="padding: 0.5rem; color: var(--text-main);">Popular Devices</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>Mobile</strong></td>
+            <td style="padding: 0.5rem;">iPhone 14/15 Pro, Galaxy S22/S23, Pixel 7/8</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>Tablet</strong></td>
+            <td style="padding: 0.5rem;">iPad Air, iPad Pro 11", iPad Pro 12.9", Galaxy Tab</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem;"><strong>Desktop</strong></td>
+            <td style="padding: 0.5rem;">MacBook Air, 1080p Monitors, 2K/1440p Displays</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy & Technical Limitations</h3>
+      <p style="margin-bottom: 1.5rem;">
+        This tool uses an <code>&lt;iframe&gt;</code> to render the target website. Because of this, it is <strong>100% client-side</strong>—no data about the websites you test is sent to our servers. However, please note that some modern websites use a security header called <code>X-Frame-Options: DENY</code> or <code>SAMEORIGIN</code>. This prevents their site from being embedded in other pages to protect against "clickjacking" attacks. 
+      </p>
+      <p>
+        If a site refuses to load in the viewer, it is likely due to these security settings. This viewer is most effective for developers testing their own sites in a local or staging environment where such headers can be managed or for sites that allow cross-origin embedding.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top:1rem; margin-bottom:1rem;">
