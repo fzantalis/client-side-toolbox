@@ -49,6 +49,42 @@
       <div class="panel-header"><h3>Differences</h3><button onclick="compare()" class="btn-primary">Compare</button></div>
       <pre id="diff-out" style="min-height: 200px;">Click compare to see results...</pre>
     </div>
+
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Text Diff Checker</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is the Text Diff Checker?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Text Diff Checker is a free online comparison utility that allows you to instantly find the exact differences between two pieces of text. Whether you are reviewing software code, auditing contract revisions, or proofreading an essay, manually reading two documents side-by-side to spot tiny changes is tedious and error-prone. This tool automates the process by performing a line-by-line comparison, immediately highlighting insertions and deletions in an easy-to-read, unified format.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Who Uses an Online Diff Tool?</h3>
+      <p style="margin-bottom: 1rem;">While the concept originates from the Unix <code>diff</code> command used by programmers, a visual text comparison tool is invaluable for a variety of professions:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Software Developers:</strong> Quickly check modifications made to source code, JSON files, or configuration scripts before pushing commits to version control systems like Git.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Lawyers & Paralegals:</strong> Compare two versions of a legal contract or Terms of Service document to ensure no hidden clauses were altered or removed by the opposing party.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Writers & Editors:</strong> Review article drafts to see exactly what an editor or co-author changed, added, or removed from the original manuscript.</li>
+        <li><strong style="color: var(--text-main);">Data Analysts:</strong> Verify that large lists, server logs, or extracted data strings match up perfectly without missing any lines.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How to Read the Comparison Output</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Using the tool is straightforward: paste your original (older) text into the left panel, and your modified (newer) text into the right panel. Once you click "Compare", the tool merges the two texts into a single output window. Lines that remain unchanged are displayed in standard text. 
+        <br><br>
+        Edits are visually color-coded for quick scanning: <strong><span style="color: #b91c1c; background-color: #fee2e2; padding: 0.1rem 0.3rem; border-radius: 4px; text-decoration: line-through;">Red text with a strikethrough</span></strong> represents content that existed in the original text but was deleted in the modified version. <strong><span style="color: #166534; background-color: #dcfce7; padding: 0.1rem 0.3rem; border-radius: 4px;">Green text</span></strong> represents entirely new content that was inserted into the modified version.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Secure & Client-Side Processing</h3>
+      <p>
+        Pasting proprietary source code, confidential legal agreements, or unreleased writing into a random online tool can be a massive security risk. This diff checker is built with total privacy in mind. The comparison algorithm is written in JavaScript and executes entirely within your web browser. Your text is never transmitted over the internet, saved to a database, or analyzed by a third party. Once the page is loaded, you can safely disconnect from Wi-Fi and continue comparing documents completely offline.
+      </p>
+    </div>
+  </section>
+    
   <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
