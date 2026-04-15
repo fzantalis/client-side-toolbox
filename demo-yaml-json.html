@@ -76,6 +76,50 @@
       </div>
     </main>
 
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the YAML & JSON Converter</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What are YAML and JSON?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        <strong>JSON</strong> (JavaScript Object Notation) and <strong>YAML</strong> (YAML Ain't Markup Language) are the two most popular data serialization formats used by developers today. While JSON is the standard for data exchange between web browsers and servers, YAML has become the preferred choice for configuration files in tools like Docker, Kubernetes, and GitHub Actions. This tool allows you to bridge the gap between these formats instantly.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Key Differences & Use Cases</h3>
+      <p style="margin-bottom: 1rem;">Choosing between YAML and JSON usually depends on whether the data is intended for humans or machines:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Readability:</strong> YAML is designed to be human-friendly. it uses indentation instead of braces <code>{}</code> and brackets <code>[]</code>, making it much easier for developers to read and edit manually.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Strictness:</strong> JSON is extremely strict about syntax (e.g., quotes around keys, no trailing commas). This makes it very easy for machines to parse quickly but harder for humans to write without errors.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Comments:</strong> YAML supports comments (using <code>#</code>), which is essential for documenting configuration files. Standard JSON does not support comments, which can be a limitation for complex settings.</li>
+        <li><strong style="color: var(--text-main);">Features:</strong> YAML supports advanced features like anchors and aliases, allowing you to reference the same data multiple times without duplication.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Common Workflows</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Developers often use this converter for:
+        <br><br>
+        <strong>Cloud Configuration:</strong> Converting Kubernetes manifests or Docker Compose files into JSON for programmatic analysis.
+        <br>
+        <strong>API Integration:</strong> Taking a JSON response from a REST API and converting it to YAML to better visualize the nested data structure.
+        <br>
+        <strong>Debugging:</strong> Validating that a YAML file is structurally sound by seeing if it parses into valid JSON.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Security</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Configuration files often contain sensitive data like environment variables, internal IP addresses, or metadata. Sending this information to a remote server for "beautification" or conversion is a security risk.
+      </p>
+      <p>
+        This YAML ↔ JSON Converter is a <strong>100% Client-Side Utility</strong>. The conversion logic is handled by the <code>js-yaml</code> library running directly in your browser. Your data is never uploaded, never logged, and never seen by our servers. You can safely convert proprietary configuration files with total confidence in your privacy.
+      </p>
+    </div>
+  </section>
+
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
