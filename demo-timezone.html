@@ -174,6 +174,47 @@
       </div>
 
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Timezone Meeting Overlap Tool</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is Timezone Overlap?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Timezone overlap refers to the shared "business hours" between two or more geographical locations. As remote work and global collaboration become the standard, finding a window where a team in London, a developer in Athens, and a manager in New York are all awake and working is a major logistical challenge. Our Timezone Meeting Overlap tool visualizes these windows instantly, identifying the specific hours that fall within a standard <strong>8:00 AM to 6:00 PM</strong> working day for all participants.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Use a Visual Meeting Planner?</h3>
+      <p style="margin-bottom: 1rem;">Calculating time differences manually is prone to error, especially with the complexities of daylight saving time. This tool simplifies global scheduling by:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Automatic Detection:</strong> Your browser's local time is automatically used as the anchor, meaning you only need to know your colleagues' locations to start planning.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Smart Highlighting:</strong> Instead of looking at a clock, you look for the "Green Zone." This indicates hours where everyone is within their professional working window, reducing the need for early-morning or late-night calls.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Comprehensive 24-Hour View:</strong> By seeing the full day cycle, you can identify "secondary" options where at least two out of three participants are within working hours.</li>
+        <li><strong style="color: var(--text-main);">Global Coverage:</strong> Support for major cities across North America, Europe, Asia, and Oceania ensures you can plan for any international team configuration.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Science of Coordination</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The tool utilizes the <code>Intl.DateTimeFormat</code> API, which is the gold standard for handling timezones in modern browsers. It takes into account the current date to ensure that offsets are accurate based on local seasonal shifts. This ensures that whether you are coordinating a sprint planning session or a quick sync, the times displayed are the exact legal times for those regions at this precise moment.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Privacy & Client-Side Logic</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Your team's location and schedule are your business. Many online meeting planners track your IP or require you to save schedules to their servers, creating a map of your team's locations.
+      </p>
+      <p>
+        This tool is a <strong>100% Client-Side Utility</strong>. No data about your selected timezones, your local time, or your meeting preferences is ever sent to our servers. All calculations are performed instantly within your browser. You can even use this tool offline to plan your travel or international calls without exposing your location data to third parties.
+      </p>
+    </div>
+  </section>
+    
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
