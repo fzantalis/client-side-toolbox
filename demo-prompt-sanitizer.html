@@ -63,6 +63,44 @@
         <textarea id="output-text" class="textarea-panel" readonly placeholder="Sanitized text will appear here..."></textarea>
       </div>
     </div>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Zero-Trust Prompt Sanitizer</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is a Prompt Sanitizer?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The Zero-Trust Prompt Sanitizer is a specialized privacy utility designed for developers and IT professionals who interact with Large Language Models (LLMs) like ChatGPT, Claude, or Gemini. As these models process and potentially store your prompts for training, pasting raw code, server logs, or environment files carries a high risk of "leakage." This tool automatically identifies and redacts sensitive patterns—such as AWS keys, Stripe secrets, and personal email addresses—ensuring you can get coding help without exposing your infrastructure's "keys to the kingdom."
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why Zero-Trust Matters for AI Prompts</h3>
+      <p style="margin-bottom: 1rem;">Corporate security teams are increasingly concerned about AI data leakage. Sanitizing your text is essential for:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Compliance (GDPR/HIPAA):</strong> Automatically stripping out Email addresses, IP addresses, and UUIDs ensures that no Personally Identifiable Information (PII) is transmitted to third-party AI servers.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Preventing Credential Leaks:</strong> Hardcoded API tokens (GitHub, Slack, AWS) are often accidentally included in code snippets. Our regex-based engine catches these specific entropy-heavy strings and replaces them with safe placeholders.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Cleaner Debugging:</strong> By redacting specific identifiers like MAC addresses or JWTs, you keep the LLM focused on the logic of your code rather than the specific (and sensitive) values contained within it.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How the Sanitization Engine Works</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The sanitizer uses a robust set of Regular Expressions (Regex) optimized for modern cloud infrastructure. It scans your input in real-time, looking for the specific prefixes and character lengths associated with major providers. For example, AWS keys are identified by their unique <code>AKIA</code> prefix, while Stripe keys are caught by the <code>sk_live</code> or <code>sk_test</code> patterns. You can toggle specific rules on or off depending on the context of your data.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">100% Client-Side Privacy</h3>
+      <p style="margin-bottom: 1.5rem;">
+        It would be a paradox to send your secrets to a server just to "sanitize" them. That is why this tool is <strong>Zero-Trust</strong>. 
+      </p>
+      <p>
+        Every redaction happens locally within your browser's RAM. No text is ever uploaded to a server, and no logs of your "raw" input are kept. Once you close the tab, both the raw and the sanitized text vanish. This allows you to work with highly sensitive production logs with the confidence that your data remains entirely within your local environment.
+      </p>
+    </div>
+  </section>
+    
     
     <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
       <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
