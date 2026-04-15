@@ -292,6 +292,49 @@
 
   </main>
 
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Regex Tester & Debugger</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is Regex (Regular Expressions)?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Regular Expressions, commonly known as <strong>Regex</strong>, are powerful sequences of characters that define a search pattern. They are used by developers and data analysts for string matching, text replacement, and data validation. Whether you're extracting email addresses from a giant log file or validating a password format in a web form, Regex is the industry-standard tool for the job.
+      </p>
+
+      
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Mastering the Logic</h3>
+      <p style="margin-bottom: 1rem;">Regex can feel like a secret language, but it follows a strict logical structure. Our tester helps you visualize this logic through several key features:</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Live Highlighting:</strong> As you type your expression, the "Test String" area highlights matches in real-time. This instant feedback is crucial for debugging complex patterns like lookaheads or nested quantifiers.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Capture Groups:</strong> Expressions often use parentheses <code>(...)</code> to group parts of a match. Our tool breaks these down in the "Matches" panel, showing you exactly what was captured in each group (e.g., $1, $2), which is essential for text transformation tasks.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Flag Controls:</strong> Toggle standard flags like <strong>Global (g)</strong> to find all occurrences, <strong>Case-Insensitive (i)</strong>, or <strong>Multiline (m)</strong> to see how they change the behavior of your search pattern.</li>
+        <li><strong style="color: var(--text-main);">Interactive Cheat Sheet:</strong> Not sure if you need <code>\w</code> or <code>\s</code>? Our built-in cheat sheet provides a quick reference. Click any item to instantly insert the syntax into your pattern.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Common Use Cases</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Developers use this Regex Tester for a variety of daily tasks, including:
+        <br><br>
+        <strong>Validation:</strong> Ensuring user input follows a specific format (e.g., <code>^[a-z0-9_-]{3,16}$</code> for usernames).
+        <br>
+        <strong>Scraping:</strong> Pulling specific data points out of unstructured HTML or JSON blobs.
+        <br>
+        <strong>Cleaning:</strong> Removing unwanted whitespace, HTML tags, or formatting from raw text.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Security & Privacy</h3>
+      <p>
+        Regex testing often involves sensitive data, such as private logs or user databases. Many online testers send your patterns and test strings to a server for processing. 
+        <br><br>
+        This tool is a <strong>100% Client-Side Utility</strong>. The regular expression engine used is the one native to your browser. Your data never leaves your computer, making it perfectly safe for testing sensitive strings without the risk of exposure to third-party servers.
+      </p>
+    </div>
+  </section>
+  
   <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top: 1rem; margin-bottom: 1rem;">
