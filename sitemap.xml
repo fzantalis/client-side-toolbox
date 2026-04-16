@@ -4,13 +4,15 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
-
 <url>
   <loc>https://zantalis.net/</loc>
   <lastmod>2026-04-01T07:28:27+00:00</lastmod>
   <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/index.html</loc>
+  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://zantalis.net/demo-json.html</loc>
@@ -63,6 +65,11 @@
   <priority>0.80</priority>
 </url>
 <url>
+  <loc>https://zantalis.net/demo-outlier-spotter.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://zantalis.net/demo-webp.html</loc>
   <lastmod>2026-04-01T07:28:27+00:00</lastmod>
   <priority>0.80</priority>
@@ -98,6 +105,21 @@
   <priority>0.80</priority>
 </url>
 <url>
+  <loc>https://zantalis.net/demo-image-resizer.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-teleprompter.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-responsive-viewer.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://zantalis.net/demo-hourly-wage.html</loc>
   <lastmod>2026-04-01T07:28:27+00:00</lastmod>
   <priority>0.80</priority>
@@ -110,6 +132,16 @@
 <url>
   <loc>https://zantalis.net/demo-tip.html</loc>
   <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-compound-interest.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-mortgage.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
@@ -135,6 +167,16 @@
 <url>
   <loc>https://zantalis.net/demo-p2p.html</loc>
   <lastmod>2026-04-01T07:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-pomodoro.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-triangle.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
@@ -198,6 +240,16 @@
   <priority>0.80</priority>
 </url>
 <url>
+  <loc>https://zantalis.net/demo-base-converter.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-unix-converter.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://zantalis.net/privacy.html</loc>
   <lastmod>2026-04-01T07:28:27+00:00</lastmod>
   <priority>0.80</priority>
@@ -208,10 +260,9 @@
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://zantalis.net/index.html</loc>
-  <lastmod>2026-04-01T07:28:27+00:00</lastmod>
-  <priority>0.64</priority>
+  <loc>https://zantalis.net/about.html</loc>
+  <lastmod>2026-04-16T14:35:00+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
-
 
 </urlset>
