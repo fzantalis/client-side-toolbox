@@ -185,19 +185,7 @@
 </div>
 
 <script>
-/* ============================================================
-   ESCAPE SEQUENCE DECODER
-   After the tokenizer strips quotes, arguments like \r \t \n
-   arrive as the two-character sequences backslash+letter.
-   This function converts them to the actual control characters.
 
-   BUG FIX for tr -d "\r":
-     Old code called expandTr() directly on the raw token "\r"
-     (backslash + r), so it looked for the letter backslash and
-     letter r — matching nothing useful.
-     Now decodeEscapes() runs first, turning "\r" → CR (0x0D),
-     so expandTr() and the delete filter work on the real byte.
-   ============================================================ */
 function decodeEscapes(s) {
   return s.replace(/\\([rtnv\\0]|x[0-9a-fA-F]{2})/g, (_, c) => {
     if (c==='r')  return '\r';
@@ -621,13 +609,7 @@ function evalExpr(expr,ctx){
   return expr;
 }
 
-/* ============================================================
-   tr — FIXED
-   decodeEscapes() runs on both set arguments before expandTr(),
-   so "\r" (backslash+r from tokenizer) becomes real CR (0x0D).
-   The previous bug: expandTr() saw "\" and "r" as literal
-   characters, so -d "\r" deleted the letter r, not carriage return.
-   ============================================================ */
+
 function doTr(toks,lines){
   const del=toks.includes('-d');
   const sets=toks.filter(t=>!t.startsWith('-')&&t!=='tr'&&t!=='file');
