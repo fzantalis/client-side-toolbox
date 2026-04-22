@@ -3,306 +3,108 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Linux Shell Tools | grep, cat, sed, awk – Client-Side</title>
-  <meta name="title" content="Linux Shell Tools | grep, cat, sed, awk – Client-Side">
-  <meta name="description" content="Run grep, cat, sed, awk, sort, uniq, cut, wc and more directly in your browser. Upload a local text file and pipe commands together — 100% client-side, nothing leaves your machine.">
-  <meta name="keywords" content="grep online, awk online, sed online, linux tools browser, client-side shell, text processing tools, cat head tail wc">
-  <meta name="author" content="fzantalis">
-
-  <link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="canonical" href="https://zantalis.net/demo-linux-shell.html">
-
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://zantalis.net/demo-linux-shell.html">
-  <meta property="og:title" content="Linux Shell Tools | grep, cat, sed, awk – Client-Side">
-  <meta property="og:description" content="Run grep, cat, sed, awk, sort, uniq, cut, wc and more directly in your browser. 100% client-side — your data never leaves your machine.">
-
+  <title>Linux Shell Tools | grep, cat, sed, awk, find – Client-Side</title>
+  <meta name="description" content="Run grep, cat, sed, awk, sort, uniq, cut, wc, find and more directly in your browser. Upload a file or folder — 100% client-side, nothing leaves your machine.">
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
   <style>
-    /* ---- File drop zone ---- */
-    .file-drop {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      padding: 1.5rem 1rem;
-      text-align: center;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      transition: border-color 0.2s, background 0.2s;
-      background: var(--bg);
-    }
-    .file-drop:hover { border-color: var(--primary); background: rgba(59,130,246,0.04); }
-    .file-drop.dragover { border-color: var(--primary); background: rgba(59,130,246,0.07); }
-    .file-drop i { font-size: 2rem; color: var(--primary); }
-    .file-drop strong { color: var(--text-main); font-size: 0.95rem; }
-
-    /* ---- File info strip ---- */
-    .file-info-bar {
-      display: none;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.6rem 1rem;
-      background: rgba(16,185,129,0.08);
-      border: 1px solid rgba(16,185,129,0.25);
-      border-radius: 8px;
-      font-size: 0.85rem;
-      color: var(--text-main);
-    }
-    .file-info-bar.visible { display: flex; }
-    .file-info-bar i { color: #10b981; font-size: 1.1rem; }
-    .file-info-bar .file-name { font-family: 'Fira Code', monospace; font-weight: 500; }
-    .file-info-bar .file-meta { color: var(--text-muted); margin-left: auto; font-size: 0.78rem; }
-
-    /* ---- Command row ---- */
-    .cmd-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .cmd-row input[type="text"] {
-      flex: 1;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.65rem 1rem;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.95rem;
-      color: var(--text-main);
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .cmd-row input[type="text"]:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--ring);
-    }
-    .cmd-row input[type="text"]::placeholder { color: var(--text-muted); }
-
-    /* ---- Quick command chips ---- */
-    .chips-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      align-items: center;
-    }
-    .chips-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-right: 0.25rem;
-      white-space: nowrap;
-    }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.2rem 0.6rem;
-      border-radius: 99px;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      font-family: 'Fira Code', monospace;
-      font-size: 0.76rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .chip:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(59,130,246,0.06);
-    }
-
-    /* ---- Status badge row ---- */
-    .cmd-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      min-height: 1.5rem;
-      font-size: 0.85rem;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-    .badge-success { background: rgba(16,185,129,0.12); color: #10b981; }
-    .badge-error   { background: rgba(239,68,68,0.12);  color: #ef4444; }
-    .badge-info    { background: rgba(59,130,241,0.12); color: var(--primary); }
-    .badge-warn    { background: rgba(245,158,11,0.12); color: #f59e0b; }
-
-    /* ---- Output panel ---- */
-    .output-wrap {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-    .output-scroll {
-      flex: 1;
-      overflow-y: auto;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.85rem;
-      line-height: 1.7;
-      padding: 1rem 1.25rem;
-      color: var(--text-main);
-      white-space: pre-wrap;
-      word-break: break-all;
-      background: var(--card-bg);
-    }
-    .output-line {
-      display: flex;
-      gap: 0;
-    }
-    .ln {
-      color: var(--text-muted);
-      user-select: none;
-      min-width: 3rem;
-      text-align: right;
-      padding-right: 1rem;
-      font-size: 0.78rem;
-      padding-top: 1px;
-      flex-shrink: 0;
-      border-right: 1px solid var(--border);
-      margin-right: 0.75rem;
-    }
-    .line-text { flex: 1; min-width: 0; }
-    .hl { background: rgba(250,204,21,0.35); border-radius: 2px; }
-    .out-err { color: #ef4444; }
-    .out-meta { color: var(--text-muted); font-style: italic; }
-
-    /* ---- Tool reference ---- */
-    .ref-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 0.4rem;
-    }
-    .ref-item {
-      display: flex;
-      gap: 0.6rem;
-      align-items: baseline;
-      padding: 0.35rem 0.5rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.1s;
-      font-size: 0.82rem;
-    }
-    .ref-item:hover { background: var(--bg); }
-    .ref-code {
-      font-family: 'Fira Code', monospace;
-      color: var(--primary);
-      font-size: 0.79rem;
-      min-width: 5rem;
-      white-space: nowrap;
-    }
-    .ref-desc { color: var(--text-muted); }
-
-    .section-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
-    }
-    .section-toggle i.toggle-icon { transition: transform 0.2s; }
-    .section-toggle.collapsed i.toggle-icon { transform: rotate(-90deg); }
-    .collapsible { overflow: hidden; transition: max-height 0.3s ease; max-height: 1200px; }
-    .collapsible.hidden { max-height: 0; }
-
-    /* ---- Main layout: left controls + right output ---- */
-    .shell-workspace {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-    @media (min-width: 900px) {
-      .shell-workspace {
-        grid-template-columns: 380px 1fr;
-        align-items: start;
-      }
-    }
-
-    .controls-col {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .output-panel {
-      display: flex;
-      flex-direction: column;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      min-height: 520px;
-    }
-
-    #fileInput { display: none; }
+    .source-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);}
+    .source-tab{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.1rem;font-size:0.85rem;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s;background:none;border-top:none;border-left:none;border-right:none;}
+    .source-tab:hover{color:var(--text-main);}.source-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+    .file-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;border:2px dashed var(--border);border-radius:10px;padding:1.5rem 1rem;text-align:center;cursor:pointer;color:var(--text-muted);font-size:0.9rem;transition:border-color 0.2s,background 0.2s;background:var(--bg);}
+    .file-drop:hover{border-color:var(--primary);background:rgba(59,130,246,0.04);}.file-drop.dragover{border-color:var(--primary);background:rgba(59,130,246,0.07);}
+    .file-drop i{font-size:2rem;color:var(--primary);}.file-drop strong{color:var(--text-main);font-size:0.95rem;}
+    .source-info-bar{display:none;align-items:center;gap:0.75rem;padding:0.6rem 1rem;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:8px;font-size:0.85rem;color:var(--text-main);}
+    .source-info-bar.visible{display:flex;}.source-info-bar i{color:#10b981;font-size:1.1rem;flex-shrink:0;}
+    .src-name{font-family:'Fira Code',monospace;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .src-meta{color:var(--text-muted);margin-left:auto;font-size:0.78rem;white-space:nowrap;flex-shrink:0;}
+    .file-tree{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--bg);display:none;}
+    .file-tree.visible{display:block;}
+    .tree-item{display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0.75rem;font-size:0.8rem;font-family:'Fira Code',monospace;color:var(--text-muted);cursor:pointer;transition:background 0.1s;border-bottom:1px solid var(--border);}
+    .tree-item:last-child{border-bottom:none;}.tree-item:hover{background:rgba(59,130,246,0.05);color:var(--text-main);}.tree-item.selected{background:rgba(59,130,246,0.1);color:var(--primary);}
+    .tree-item i{font-size:0.9rem;flex-shrink:0;}.tree-path{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.tree-size{margin-left:auto;color:var(--text-muted);font-size:0.72rem;flex-shrink:0;}
+    .cmd-row{display:flex;gap:0.5rem;}
+    .cmd-row input[type="text"]{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.65rem 1rem;font-family:'Fira Code',monospace;font-size:0.95rem;color:var(--text-main);transition:border-color 0.2s,box-shadow 0.2s;}
+    .cmd-row input[type="text"]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--ring);}.cmd-row input[type="text"]::placeholder{color:var(--text-muted);}
+    .chips-row{display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;}
+    .chips-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-right:0.25rem;white-space:nowrap;}
+    .chip{display:inline-flex;align-items:center;padding:0.2rem 0.6rem;border-radius:99px;border:1px solid var(--border);background:var(--card-bg);font-family:'Fira Code',monospace;font-size:0.76rem;color:var(--text-muted);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+    .chip:hover{border-color:var(--primary);color:var(--primary);background:rgba(59,130,246,0.06);}
+    .cmd-status{display:flex;align-items:center;gap:0.5rem;min-height:1.5rem;font-size:0.85rem;}
+    .badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.78rem;font-weight:600;}
+    .badge-success{background:rgba(16,185,129,0.12);color:#10b981;}.badge-error{background:rgba(239,68,68,0.12);color:#ef4444;}
+    .badge-info{background:rgba(59,130,241,0.12);color:var(--primary);}.badge-warn{background:rgba(245,158,11,0.12);color:#f59e0b;}
+    .output-panel{display:flex;flex-direction:column;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);min-height:520px;}
+    .output-scroll{flex:1;overflow-y:auto;font-family:'Fira Code',monospace;font-size:0.85rem;line-height:1.7;padding:1rem 1.25rem;color:var(--text-main);white-space:pre-wrap;word-break:break-all;background:var(--card-bg);}
+    .output-line{display:flex;gap:0;}
+    .ln{color:var(--text-muted);user-select:none;min-width:3rem;text-align:right;padding-right:1rem;font-size:0.78rem;padding-top:1px;flex-shrink:0;border-right:1px solid var(--border);margin-right:0.75rem;}
+    .line-text{flex:1;min-width:0;}.hl{background:rgba(250,204,21,0.35);border-radius:2px;}
+    .out-err{color:#ef4444;}.out-meta{color:var(--text-muted);font-style:italic;}
+    .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0.4rem;}
+    .ref-item{display:flex;gap:0.6rem;align-items:baseline;padding:0.35rem 0.5rem;border-radius:6px;cursor:pointer;transition:background 0.1s;font-size:0.82rem;}
+    .ref-item:hover{background:var(--bg);}.ref-code{font-family:'Fira Code',monospace;color:var(--primary);font-size:0.79rem;min-width:5rem;white-space:nowrap;}.ref-desc{color:var(--text-muted);}
+    .section-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+    .section-toggle i.toggle-icon{transition:transform 0.2s;}.section-toggle.collapsed i.toggle-icon{transform:rotate(-90deg);}
+    .collapsible{overflow:hidden;transition:max-height 0.3s ease;max-height:1600px;}.collapsible.hidden{max-height:0;}
+    .shell-workspace{display:grid;grid-template-columns:1fr;gap:1.5rem;}
+    @media(min-width:900px){.shell-workspace{grid-template-columns:380px 1fr;align-items:start;}}
+    .controls-col{display:flex;flex-direction:column;gap:1rem;}
+    #fileInput,#folderInput{display:none;}
+    code.il{font-family:'Fira Code',monospace;font-size:0.9em;background:var(--bg);padding:0.1em 0.4em;border-radius:4px;border:1px solid var(--border);}
   </style>
 </head>
 <body>
 <div class="container">
-
-  <a href="index.html" class="breadcrumb">
-    <i class="ph ph-arrow-left"></i> Back to Toolbox
-  </a>
-
+  <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
   <header class="tool-header">
     <div class="card-icon"><i class="ph ph-terminal"></i></div>
     <div class="tool-header-text">
       <h1>Linux Shell Tools</h1>
-      <p>Run <code style="font-family:'Fira Code',monospace;font-size:0.9em;background:var(--bg);padding:0.1em 0.4em;border-radius:4px;border:1px solid var(--border)">grep</code>,
-         <code style="font-family:'Fira Code',monospace;font-size:0.9em;background:var(--bg);padding:0.1em 0.4em;border-radius:4px;border:1px solid var(--border)">sed</code>,
-         <code style="font-family:'Fira Code',monospace;font-size:0.9em;background:var(--bg);padding:0.1em 0.4em;border-radius:4px;border:1px solid var(--border)">awk</code>,
-         <code style="font-family:'Fira Code',monospace;font-size:0.9em;background:var(--bg);padding:0.1em 0.4em;border-radius:4px;border:1px solid var(--border)">sort</code> and more directly in your browser. Upload a file, pipe commands, get results — 100% client-side.</p>
+      <p>Run <code class="il">grep</code> <code class="il">sed</code> <code class="il">awk</code> <code class="il">find</code> and more directly in your browser. Load a single file or an entire folder — 100% client-side.</p>
     </div>
   </header>
-
   <main style="display:flex;flex-direction:column;gap:1.5rem;">
-
     <div class="shell-workspace">
-
-      <!-- LEFT: Controls -->
       <div class="controls-col">
-
-        <!-- File upload -->
+        <!-- Source panel -->
         <div class="panel">
           <div class="panel-header">
-            <h3>Input File</h3>
+            <h3>Source</h3>
             <div class="panel-actions">
-              <button class="btn-secondary" id="clearFileBtn"><i class="ph ph-x"></i> Remove</button>
+              <button class="btn-secondary" id="clearSourceBtn"><i class="ph ph-x"></i> Remove</button>
             </div>
+          </div>
+          <div class="source-tabs">
+            <button class="source-tab active" id="tabFile" onclick="switchTab('file')"><i class="ph ph-file-text"></i> Single File</button>
+            <button class="source-tab" id="tabFolder" onclick="switchTab('folder')"><i class="ph ph-folder-open"></i> Folder</button>
           </div>
           <div class="panel-body" style="gap:0.75rem;">
-            <div class="file-drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
-              <i class="ph ph-upload-simple"></i>
-              <strong>Drop file here or click to upload</strong>
-              <span>Any plain-text file — logs, CSV, code, config…</span>
+            <div id="fileModeUI">
+              <div class="file-drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <i class="ph ph-upload-simple"></i>
+                <strong>Drop file here or click to upload</strong>
+                <span>Any plain-text file — logs, CSV, code, config…</span>
+              </div>
+            </div>
+            <div id="folderModeUI" style="display:none;">
+              <div class="file-drop" id="folderDropZone" onclick="document.getElementById('folderInput').click()">
+                <i class="ph ph-folder-open"></i>
+                <strong>Click to choose a folder</strong>
+                <span>All files indexed — use <code style="font-family:'Fira Code',monospace">find .</code> to browse, click a file to open it</span>
+              </div>
             </div>
             <input type="file" id="fileInput" accept="*/*">
-            <div class="file-info-bar" id="fileInfoBar">
-              <i class="ph ph-file-text"></i>
-              <span class="file-name" id="fileNameSpan"></span>
-              <span class="file-meta" id="fileMetaSpan"></span>
+            <input type="file" id="folderInput" webkitdirectory multiple>
+            <div class="source-info-bar" id="sourceInfoBar">
+              <i class="ph ph-check-circle"></i>
+              <span class="src-name" id="srcName"></span>
+              <span class="src-meta" id="srcMeta"></span>
             </div>
+            <div class="file-tree" id="fileTree"></div>
           </div>
         </div>
-
-        <!-- Command -->
+        <!-- Command panel -->
         <div class="panel">
           <div class="panel-header">
             <h3>Command</h3>
@@ -313,21 +115,16 @@
           </div>
           <div class="panel-body" style="gap:0.75rem;">
             <div class="cmd-row">
-              <input type="text" id="cmdInput"
-                placeholder='grep -n "error" file  |  sort  |  uniq -c' autocomplete="off" spellcheck="false">
+              <input type="text" id="cmdInput" placeholder='grep -n "error" file  |  sort  |  uniq -c' autocomplete="off" spellcheck="false">
             </div>
             <div class="cmd-status" id="cmdStatus"></div>
             <div style="border-top:1px solid var(--border);padding-top:0.75rem;">
-              <div class="chips-row" id="chipsRow">
-                <span class="chips-label">quick:</span>
-              </div>
+              <div class="chips-row" id="chipsRow"><span class="chips-label">quick:</span></div>
             </div>
           </div>
         </div>
-
       </div>
-
-      <!-- RIGHT: Output -->
+      <!-- Output -->
       <div class="output-panel">
         <div class="panel-header">
           <h3>Output</h3>
@@ -337,66 +134,46 @@
             <button class="btn-secondary" id="clearOutputBtn"><i class="ph ph-eraser"></i> Clear</button>
           </div>
         </div>
-        <div class="output-scroll" id="outputArea">
-          <span class="out-meta">Output will appear here once you load a file and run a command.</span>
-        </div>
+        <div class="output-scroll" id="outputArea"><span class="out-meta">Output will appear here once you load a file and run a command.</span></div>
       </div>
-
     </div>
-
-    <!-- Tool Reference -->
+    <!-- Reference -->
     <div class="panel" style="width:100%;box-sizing:border-box;">
       <div class="panel-header section-toggle" id="refToggle">
         <h3>Command Reference <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">— click any example to insert</span></h3>
         <i class="ph ph-caret-down toggle-icon"></i>
       </div>
       <div class="collapsible" id="refBody">
-        <div class="panel-body" style="padding-top:0.75rem;">
-          <div class="ref-grid" id="refGrid"></div>
-        </div>
+        <div class="panel-body" style="padding-top:0.75rem;"><div class="ref-grid" id="refGrid"></div></div>
       </div>
     </div>
-
   </main>
 
-  <!-- About section -->
   <section class="tool-section" style="margin-top:4rem;">
-    <div class="section-header">
-      <i class="ph ph-article"></i>
-      <h2>About Linux Shell Tools</h2>
-    </div>
+    <div class="section-header"><i class="ph ph-article"></i><h2>About Linux Shell Tools</h2></div>
     <div class="card" style="display:block;line-height:1.7;padding:2rem;">
       <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Your portable Linux toolkit — no install required</h3>
-      <p style="margin-bottom:1.5rem;">
-        Whether you're stuck on Windows, using a locked-down machine, or just want a quick way to process a text file without opening a terminal, this tool brings the most essential Unix text-processing utilities directly into your browser.
-      </p>
-
+      <p style="margin-bottom:1.5rem;">Whether you're on Windows, a locked-down machine, or just want to quickly process a text file without opening a terminal, this tool brings the most essential Unix text-processing utilities directly into your browser.</p>
       <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Supported Commands</h3>
       <ul style="margin-bottom:1.5rem;padding-left:1.5rem;color:var(--text-muted);">
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">cat / head / tail:</strong> View all or a portion of the file. Use <code style="font-family:'Fira Code',monospace">head -n 50</code> or <code style="font-family:'Fira Code',monospace">tail -n 20</code> to limit output.</li>
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">grep:</strong> Filter lines by pattern. Supports <code style="font-family:'Fira Code',monospace">-i</code> (case-insensitive), <code style="font-family:'Fira Code',monospace">-n</code> (line numbers), <code style="font-family:'Fira Code',monospace">-v</code> (invert), <code style="font-family:'Fira Code',monospace">-c</code> (count), and full regular expressions.</li>
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">sed:</strong> Stream editor supporting <code style="font-family:'Fira Code',monospace">s/pattern/replacement/flags</code> substitution with any delimiter.</li>
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">awk:</strong> Field-based processing. Supports <code style="font-family:'Fira Code',monospace">-F</code> delimiter, <code style="font-family:'Fira Code',monospace">BEGIN/END</code> blocks, conditionals, accumulators, and print statements.</li>
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">sort / uniq:</strong> Sort with <code style="font-family:'Fira Code',monospace">-r</code>, <code style="font-family:'Fira Code',monospace">-n</code>, <code style="font-family:'Fira Code',monospace">-k</code>. Deduplicate with <code style="font-family:'Fira Code',monospace">uniq -c</code> or <code style="font-family:'Fira Code',monospace">uniq -d</code>.</li>
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">cut:</strong> Extract columns with <code style="font-family:'Fira Code',monospace">-d","  -f1,3</code>.</li>
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">wc / nl / tr / rev:</strong> Count lines/words/bytes, number lines, translate characters, or reverse each line.</li>
-        <li><strong style="color:var(--text-main);">Pipes:</strong> Chain any commands with <code style="font-family:'Fira Code',monospace">|</code> just like a real shell. Example: <code style="font-family:'Fira Code',monospace">grep -i "error" file | sort | uniq -c | sort -rn</code></li>
+        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">find:</strong> Search the loaded folder by name, extension, or type. Supports <code class="il">-name</code> <code class="il">-iname</code> <code class="il">-type f/d</code> <code class="il">-maxdepth</code> <code class="il">-not -path</code>. Works in the Folder tab.</li>
+        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">cat / head / tail:</strong> View all or part of the active file.</li>
+        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">grep:</strong> Filter lines. Supports <code class="il">-i -n -v -c</code> and full regular expressions.</li>
+        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">sed:</strong> Stream substitution — <code class="il">s/pattern/replacement/flags</code> with any delimiter.</li>
+        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">awk:</strong> Field processing with <code class="il">-F</code>, <code class="il">BEGIN/END</code> blocks, conditionals, and accumulators.</li>
+        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">sort / uniq / cut / wc / tr / nl / rev:</strong> Full suite with proper escape-sequence support (<code class="il">\r</code> <code class="il">\t</code> <code class="il">\n</code> correctly decoded).</li>
+        <li><strong style="color:var(--text-main);">Pipes:</strong> Chain any commands with <code class="il">|</code>. Example: <code class="il">grep -i "error" file | sort | uniq -c | sort -rn</code></li>
       </ul>
-
       <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Security &amp; Privacy</h3>
-      <p>
-        This is a <strong>100% Client-Side Utility</strong>. Your file is read directly by your browser using the <code style="font-family:'Fira Code',monospace">FileReader</code> API and never transmitted anywhere. No server receives your data. You can safely use this tool with sensitive log files, private configurations, or proprietary data.
-      </p>
+      <p>This is a <strong>100% Client-Side Utility</strong>. Files are read via the browser's <code class="il">FileReader</code> API and never transmitted anywhere. Safe for sensitive logs, private configs, or proprietary data.</p>
     </div>
   </section>
 
   <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.9rem;">
     <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
     <div style="margin-top:1rem;margin-bottom:1rem;">
-      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer"
-         style="color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;font-weight:500;transition:color 0.2s;">
-        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i>
-        View Source on GitHub
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;font-weight:500;">
+        <i class="ph ph-github-logo" style="font-size:1.25rem;"></i> View Source on GitHub
       </a>
     </div>
     <div style="display:flex;justify-content:center;gap:1rem;margin-top:0.5rem;">
@@ -405,512 +182,495 @@
       <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
     </div>
   </footer>
-
 </div>
 
 <script>
-/* =====================================================================
-   REFERENCE ITEMS — click to insert into cmd input
-   ===================================================================== */
-const REF = [
-  ['cat file',                    'Print entire file'],
-  ['head -n 20 file',             'First 20 lines'],
-  ['tail -n 30 file',             'Last 30 lines'],
-  ['wc -l file',                  'Count lines'],
-  ['wc -w file',                  'Count words'],
-  ['grep "pattern" file',         'Filter matching lines'],
-  ['grep -i "text" file',         'Case-insensitive grep'],
-  ['grep -n "TODO" file',         'Show line numbers'],
-  ['grep -v "^#" file',           'Exclude comment lines'],
-  ['grep -c "error" file',        'Count matching lines'],
-  ['cut -d"," -f1 file',          'First CSV column'],
-  ['cut -d"\\t" -f2,3 file',      'Tab-delimited cols 2-3'],
-  ['sed "s/foo/bar/g" file',      'Replace all occurrences'],
-  ['sed "s/  */ /g" file',        'Collapse whitespace'],
-  ['sed "/^$/d" file',            'Remove blank lines'],
-  ['sort file',                   'Sort alphabetically'],
-  ['sort -r file',                'Sort reversed'],
-  ['sort -n file',                'Sort numerically'],
-  ['sort -k2 file',               'Sort by 2nd field'],
-  ['sort -u file',                'Sort & deduplicate'],
-  ['uniq file',                   'Remove adjacent dupes'],
-  ['uniq -c file',                'Count occurrences'],
-  ['uniq -d file',                'Only duplicate lines'],
-  ['awk "{print $1}" file',       'Print first field'],
-  ['awk "{print NR, $0}" file',   'Prepend line numbers'],
-  ['awk "NR%2==0" file',          'Even-numbered lines'],
-  ['awk "NR>=10 && NR<=20" file', 'Lines 10–20'],
-  ['awk "{sum+=$1} END{print sum}" file', 'Sum first column'],
-  ['awk -F"," "{print $2}" file', 'CSV second column'],
-  ['nl file',                     'Number all lines'],
-  ['tr a-z A-Z file',             'Uppercase text'],
-  ['tr -d "\\r" file',            'Strip carriage returns'],
-  ['grep "error" file | sort | uniq -c | sort -rn', 'Top error types'],
-  ['grep -v "^#" file | grep "." | head -20', 'First 20 non-comment lines'],
-];
+/* ============================================================
+   ESCAPE SEQUENCE DECODER
+   After the tokenizer strips quotes, arguments like \r \t \n
+   arrive as the two-character sequences backslash+letter.
+   This function converts them to the actual control characters.
 
-const refGrid = document.getElementById('refGrid');
-REF.forEach(([cmd, desc]) => {
-  const el = document.createElement('div');
-  el.className = 'ref-item';
-  el.innerHTML = `<span class="ref-code">${escHtml(cmd.split(' ')[0])}</span><span class="ref-desc">${escHtml(desc)}</span>`;
-  el.title = cmd;
-  el.addEventListener('click', () => {
-    document.getElementById('cmdInput').value = cmd;
-    document.getElementById('cmdInput').focus();
+   BUG FIX for tr -d "\r":
+     Old code called expandTr() directly on the raw token "\r"
+     (backslash + r), so it looked for the letter backslash and
+     letter r — matching nothing useful.
+     Now decodeEscapes() runs first, turning "\r" → CR (0x0D),
+     so expandTr() and the delete filter work on the real byte.
+   ============================================================ */
+function decodeEscapes(s) {
+  return s.replace(/\\([rtnv\\0]|x[0-9a-fA-F]{2})/g, (_, c) => {
+    if (c==='r')  return '\r';
+    if (c==='t')  return '\t';
+    if (c==='n')  return '\n';
+    if (c==='v')  return '\v';
+    if (c==='\\') return '\\';
+    if (c==='0')  return '\0';
+    if (c.startsWith('x')) return String.fromCharCode(parseInt(c.slice(1),16));
+    return c;
   });
+}
+
+/* ============================================================ STATE */
+let fileLines  = [];
+let fileName   = '';
+let activeMode = 'file';
+const folderFiles = new Map();
+let folderName = '';
+
+/* ============================================================ TABS */
+function switchTab(mode) {
+  activeMode = mode;
+  document.getElementById('tabFile').classList.toggle('active', mode==='file');
+  document.getElementById('tabFolder').classList.toggle('active', mode==='folder');
+  document.getElementById('fileModeUI').style.display   = mode==='file'   ? '' : 'none';
+  document.getElementById('folderModeUI').style.display = mode==='folder' ? '' : 'none';
+  document.getElementById('fileTree').classList.toggle('visible', mode==='folder' && folderFiles.size>0);
+}
+
+/* ============================================================ SINGLE FILE */
+const dropZone  = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e=>{ e.preventDefault(); dropZone.classList.remove('dragover'); if(e.dataTransfer.files[0]) loadSingleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e=>{ if(e.target.files[0]) loadSingleFile(e.target.files[0]); });
+
+function loadSingleFile(f) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    fileLines = ev.target.result.split('\n');
+    if (fileLines[fileLines.length-1]==='') fileLines.pop();
+    fileName = f.name;
+    showSourceInfo('ph-file-text', f.name, fileLines.length.toLocaleString()+' lines · '+formatBytes(f.size));
+    setStatus('success', fileLines.length.toLocaleString()+' lines loaded — '+f.name);
+    renderLines(fileLines, null);
+    setLineCount(fileLines.length);
+  };
+  reader.onerror = ()=>setStatus('error','Could not read file.');
+  reader.readAsText(f);
+}
+
+/* ============================================================ FOLDER */
+const folderInput = document.getElementById('folderInput');
+document.getElementById('folderDropZone').addEventListener('click', ()=>folderInput.click());
+
+folderInput.addEventListener('change', e=>{
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  folderFiles.clear();
+  folderName = files[0].webkitRelativePath.split('/')[0] || 'folder';
+  const promises = files.map(f => new Promise(resolve => {
+    const rel = f.webkitRelativePath || f.name;
+    if (f.size > 5*1024*1024) { folderFiles.set(rel,{content:null,size:f.size,binary:true}); return resolve(); }
+    const reader = new FileReader();
+    reader.onload  = ev => { folderFiles.set(rel,{content:ev.target.result,size:f.size,binary:false}); resolve(); };
+    reader.onerror = ()  => { folderFiles.set(rel,{content:null,size:f.size,binary:true}); resolve(); };
+    reader.readAsText(f);
+  }));
+  Promise.all(promises).then(()=>{
+    buildFileTree();
+    showSourceInfo('ph-folder-open', folderName, folderFiles.size+' files indexed');
+    setStatus('success', folderFiles.size+' files loaded from '+folderName+' — select a file or run find .');
+    setOutput('<span class="out-meta">Folder loaded. Select a file from the list, or run <b>find .</b> to browse.</span>');
+    setLineCount(null);
+  });
+});
+
+function buildFileTree() {
+  const tree = document.getElementById('fileTree');
+  tree.innerHTML = '';
+  [...folderFiles.keys()].sort().forEach(path => {
+    const info = folderFiles.get(path);
+    const el   = document.createElement('div');
+    el.className = 'tree-item';
+    const icon    = info.binary ? 'ph-file-x' : 'ph-file-text';
+    const parts   = path.split('/');
+    const display = parts.length>2 ? '\u2026/'+parts.slice(-2).join('/') : path;
+    el.innerHTML  = `<i class="ph ${icon}"></i><span class="tree-path" title="${escHtml(path)}">${escHtml(display)}</span><span class="tree-size">${formatBytes(info.size)}</span>`;
+    el.addEventListener('click', ()=>selectFolderFile(path,el));
+    tree.appendChild(el);
+  });
+  tree.classList.add('visible');
+}
+
+function selectFolderFile(path, el) {
+  document.querySelectorAll('.tree-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+  const info = folderFiles.get(path);
+  if (!info||info.binary||info.content===null) { setStatus('warn', path+' — binary/unreadable, cannot display as text.'); return; }
+  fileLines = info.content.split('\n');
+  if (fileLines[fileLines.length-1]==='') fileLines.pop();
+  fileName = path;
+  setStatus('success', fileLines.length.toLocaleString()+' lines — '+path);
+  renderLines(fileLines, null);
+  setLineCount(fileLines.length);
+}
+
+/* ============================================================ CLEAR */
+document.getElementById('clearSourceBtn').addEventListener('click', ()=>{
+  fileLines=[]; fileName=''; folderFiles.clear(); folderName='';
+  fileInput.value=''; folderInput.value='';
+  document.getElementById('sourceInfoBar').classList.remove('visible');
+  const tree=document.getElementById('fileTree'); tree.classList.remove('visible'); tree.innerHTML='';
+  setStatus('',''); setOutput('<span class="out-meta">No source loaded.</span>'); setLineCount(null);
+});
+
+/* ============================================================ REFERENCE */
+const REF = [
+  ['find . -type f',                          'List all files in folder'],
+  ['find . -name "*.log"',                    'Find by extension'],
+  ['find . -iname "*error*"',                 'Case-insensitive name match'],
+  ['find . -type f -maxdepth 2',              'Limit search depth'],
+  ['find . -name "*.js" -not -path "*node_modules*"','Exclude a path'],
+  ['cat file',                                'Print entire file'],
+  ['head -n 20 file',                         'First 20 lines'],
+  ['tail -n 30 file',                         'Last 30 lines'],
+  ['wc -l file',                              'Count lines'],
+  ['grep "pattern" file',                     'Filter matching lines'],
+  ['grep -i "text" file',                     'Case-insensitive grep'],
+  ['grep -n "TODO" file',                     'Show line numbers'],
+  ['grep -v "^#" file',                       'Exclude comment lines'],
+  ['grep -c "error" file',                    'Count matching lines'],
+  ['cut -d"," -f1 file',                      'First CSV column'],
+  ['cut -d"\\t" -f2,3 file',                  'Tab-delimited cols 2-3'],
+  ['sed "s/foo/bar/g" file',                  'Replace all occurrences'],
+  ['sed "s/  */ /g" file',                   'Collapse whitespace'],
+  ['sed "/^$/d" file',                        'Remove blank lines'],
+  ['sort file',                               'Sort alphabetically'],
+  ['sort -rn file',                           'Sort numerically, reversed'],
+  ['sort -k2 file',                           'Sort by 2nd field'],
+  ['sort -u file',                            'Sort & deduplicate'],
+  ['uniq -c file',                            'Count occurrences'],
+  ['uniq -d file',                            'Only duplicate lines'],
+  ['awk "{print $1}" file',                   'Print first field'],
+  ['awk "{print NR, $0}" file',               'Prepend line numbers'],
+  ['awk "NR>=10 && NR<=20" file',             'Lines 10-20'],
+  ['awk "{sum+=$1} END{print sum}" file',     'Sum first column'],
+  ['awk -F"," "{print $2}" file',             'CSV second column'],
+  ['tr -d "\\r" file',                        'Strip carriage returns (CRLF)'],
+  ['tr a-z A-Z file',                         'Uppercase text'],
+  ['nl file',                                 'Number all lines'],
+  ['grep "error" file | sort | uniq -c | sort -rn','Top error types'],
+  ['find . -name "*.csv" | head -5',          'First 5 CSV files found'],
+];
+const refGrid = document.getElementById('refGrid');
+REF.forEach(([cmd,desc])=>{
+  const el=document.createElement('div'); el.className='ref-item';
+  el.innerHTML=`<span class="ref-code">${escHtml(cmd.split(' ')[0])}</span><span class="ref-desc">${escHtml(desc)}</span>`;
+  el.title=cmd; el.addEventListener('click',()=>{ document.getElementById('cmdInput').value=cmd; document.getElementById('cmdInput').focus(); });
   refGrid.appendChild(el);
 });
 
-/* =====================================================================
-   QUICK CHIPS
-   ===================================================================== */
-const CHIPS = [
-  'cat file', 'head -20 file', 'tail -20 file', 'wc -l file',
-  'grep -n "error" file', 'grep -v "^#" file',
-  'sort -u file', 'uniq -c file',
-  'sed "s/foo/bar/g" file',
-  'awk "{print $1}" file',
-  'cut -d"," -f1 file',
+/* ============================================================ CHIPS */
+const CHIPS=[
+  ['cat file','cat'],['head -20 file','head'],['tail -20 file','tail'],['wc -l file','wc'],
+  ['grep -n "error" file','grep'],['grep -v "^#" file','grep -v'],['sort -u file','sort -u'],
+  ['uniq -c file','uniq -c'],['sed "s/foo/bar/g" file','sed'],['awk "{print $1}" file','awk'],
+  ['find . -type f','find'],['find . -name "*.log"','find *.log'],['tr -d "\\r" file','strip \\r'],
 ];
-const chipsRow = document.getElementById('chipsRow');
-CHIPS.forEach(cmd => {
-  const chip = document.createElement('span');
-  chip.className = 'chip';
-  chip.textContent = cmd.split(' ')[0] + (cmd.includes('-') ? ' …' : '');
-  chip.title = cmd;
-  chip.addEventListener('click', () => {
-    document.getElementById('cmdInput').value = cmd;
-    runCommand();
-  });
+const chipsRow=document.getElementById('chipsRow');
+CHIPS.forEach(([cmd,label])=>{
+  const chip=document.createElement('span'); chip.className='chip'; chip.textContent=label; chip.title=cmd;
+  chip.addEventListener('click',()=>{ document.getElementById('cmdInput').value=cmd; runCommand(); });
   chipsRow.appendChild(chip);
 });
 
-/* =====================================================================
-   REF TOGGLE
-   ===================================================================== */
-document.getElementById('refToggle').addEventListener('click', () => {
+document.getElementById('refToggle').addEventListener('click',()=>{
   document.getElementById('refToggle').classList.toggle('collapsed');
   document.getElementById('refBody').classList.toggle('hidden');
 });
 
-/* =====================================================================
-   FILE LOADING
-   ===================================================================== */
-let fileLines = [];
-let fileName  = '';
-
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('dragover');
-  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
-
-document.getElementById('clearFileBtn').addEventListener('click', () => {
-  fileLines = []; fileName = '';
-  fileInput.value = '';
-  document.getElementById('fileInfoBar').classList.remove('visible');
-  setStatus('', '');
-  setOutput('<span class="out-meta">No file loaded.</span>', null);
-  setLineCount(null);
-});
-
-function loadFile(f) {
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const text = ev.target.result;
-    fileLines = text.split('\n');
-    if (fileLines[fileLines.length - 1] === '') fileLines.pop();
-    fileName = f.name;
-
-    const bar = document.getElementById('fileInfoBar');
-    document.getElementById('fileNameSpan').textContent = f.name;
-    document.getElementById('fileMetaSpan').textContent =
-      fileLines.length.toLocaleString() + ' lines · ' + formatBytes(f.size);
-    bar.classList.add('visible');
-
-    setStatus('success', fileLines.length.toLocaleString() + ' lines loaded from ' + f.name);
-    renderLines(fileLines, null, true);
-    setLineCount(fileLines.length);
-  };
-  reader.onerror = () => setStatus('error', 'Could not read file.');
-  reader.readAsText(f);
-}
-
-function formatBytes(b) {
-  if (b < 1024) return b + ' B';
-  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-  return (b / 1048576).toFixed(1) + ' MB';
-}
-
-/* =====================================================================
-   COMMAND EXECUTION
-   ===================================================================== */
-document.getElementById('cmdInput').addEventListener('keydown', e => { if (e.key === 'Enter') runCommand(); });
-document.getElementById('runBtn').addEventListener('click', runCommand);
-document.getElementById('clearCmdBtn').addEventListener('click', () => {
-  document.getElementById('cmdInput').value = '';
-  document.getElementById('cmdStatus').innerHTML = '';
-});
-document.getElementById('clearOutputBtn').addEventListener('click', () => {
-  setOutput('<span class="out-meta">Output cleared.</span>', null);
-  setLineCount(null);
-});
-document.getElementById('copyOutputBtn').addEventListener('click', () => {
-  const text = document.getElementById('outputArea').innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('copyOutputBtn');
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
-    btn.classList.add('success-state');
-    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('success-state'); }, 1500);
+/* ============================================================ RUN */
+document.getElementById('cmdInput').addEventListener('keydown',e=>{ if(e.key==='Enter') runCommand(); });
+document.getElementById('runBtn').addEventListener('click',runCommand);
+document.getElementById('clearCmdBtn').addEventListener('click',()=>{ document.getElementById('cmdInput').value=''; document.getElementById('cmdStatus').innerHTML=''; });
+document.getElementById('clearOutputBtn').addEventListener('click',()=>{ setOutput('<span class="out-meta">Output cleared.</span>'); setLineCount(null); });
+document.getElementById('copyOutputBtn').addEventListener('click',()=>{
+  navigator.clipboard.writeText(document.getElementById('outputArea').innerText).then(()=>{
+    const btn=document.getElementById('copyOutputBtn'); const orig=btn.innerHTML;
+    btn.innerHTML='<i class="ph ph-check"></i> Copied!'; btn.classList.add('success-state');
+    setTimeout(()=>{ btn.innerHTML=orig; btn.classList.remove('success-state'); },1500);
   });
 });
 
 function runCommand() {
-  const raw = document.getElementById('cmdInput').value.trim();
+  const raw=document.getElementById('cmdInput').value.trim();
   if (!raw) return;
-  if (!fileLines.length) {
-    setStatus('error', 'No file loaded — drop a file first.');
-    return;
-  }
-  const pipes = raw.split('|').map(s => s.trim()).filter(Boolean);
-  let lines = [...fileLines];
-  let hlPat = null;
-  for (const cmd of pipes) {
-    const res = execute(cmd, lines);
-    if (res.error) {
-      setStatus('error', res.error + '  (in: ' + cmd + ')');
-      setOutput('<span class="out-err">Error: ' + escHtml(res.error) + '\n  in command: ' + escHtml(cmd) + '</span>', null);
-      setLineCount(null);
-      return;
+  const pipes=raw.split('|').map(s=>s.trim()).filter(Boolean);
+  const firstTool=tokenize(pipes[0])[0]||'';
+
+  if (firstTool==='find') {
+    let res=doFind(tokenize(pipes[0]));
+    if (res.error) { setStatus('error',res.error); setOutput('<span class="out-err">Error: '+escHtml(res.error)+'</span>'); return; }
+    let lines=res.lines;
+    for (let i=1;i<pipes.length;i++) {
+      const r=execute(pipes[i],lines);
+      if (r.error) { setStatus('error',r.error); setOutput('<span class="out-err">Error: '+escHtml(r.error)+'</span>'); return; }
+      lines=r.lines;
     }
-    lines = res.lines;
-    if (res.hl) hlPat = res.hl;
+    setStatus('success',lines.length.toLocaleString()+' results');
+    renderLines(lines,null); setLineCount(lines.length); return;
   }
-  setStatus('success', lines.length.toLocaleString() + ' lines in output');
-  renderLines(lines, hlPat, false);
-  setLineCount(lines.length);
+
+  if (!fileLines.length) { setStatus('error','No file loaded — drop a file or select one from the folder.'); return; }
+  let lines=[...fileLines]; let hlPat=null;
+  for (const cmd of pipes) {
+    const r=execute(cmd,lines);
+    if (r.error) { setStatus('error',r.error+'  (in: '+cmd+')'); setOutput('<span class="out-err">Error: '+escHtml(r.error)+'\n  in: '+escHtml(cmd)+'</span>'); setLineCount(null); return; }
+    lines=r.lines; if (r.hl) hlPat=r.hl;
+  }
+  setStatus('success',lines.length.toLocaleString()+' lines in output');
+  renderLines(lines,hlPat); setLineCount(lines.length);
 }
 
-/* =====================================================================
-   COMMAND IMPLEMENTATIONS
-   ===================================================================== */
-function execute(cmd, lines) {
-  const toks = tokenize(cmd);
-  const tool = (toks[0] || '').replace(/^[./]*/, '');
-
-  if (tool === 'cat')  return { lines };
-  if (tool === 'head') return { lines: lines.slice(0, getN(toks, '-n', 10)) };
-  if (tool === 'tail') return { lines: lines.slice(-getN(toks, '-n', 10)) };
-  if (tool === 'wc')   return doWc(toks, lines);
-  if (tool === 'grep') return doGrep(toks, lines);
-  if (tool === 'cut')  return doCut(toks, lines);
-  if (tool === 'sort') return doSort(toks, lines);
-  if (tool === 'uniq') return doUniq(toks, lines);
-  if (tool === 'sed')  return doSed(toks, lines);
-  if (tool === 'awk')  return doAwk(toks, lines);
-  if (tool === 'tr')   return doTr(toks, lines);
-  if (tool === 'nl')   return { lines: lines.map((l, i) => String(i + 1).padStart(6) + '\t' + l) };
-  if (tool === 'rev')  return { lines: lines.map(l => l.split('').reverse().join('')) };
-  if (tool === 'echo') return { lines: [toks.slice(1).join(' ')] };
-  if (tool === 'tee')  return { lines };
-
-  return { error: 'Unknown command: ' + tool + '. Supported: cat head tail wc grep cut sort uniq sed awk tr nl rev echo' };
+/* ============================================================ FIND */
+function doFind(toks) {
+  if (!folderFiles.size) return { error:'find: no folder loaded — switch to the Folder tab first.' };
+  let nameGlob=null,inameGlob=null,typeFilter=null,maxDepth=Infinity,notPath=null;
+  let i=1;
+  if (toks[i]&&!toks[i].startsWith('-')) i++;
+  while (i<toks.length) {
+    const t=toks[i];
+    if      (t==='-name'&&toks[i+1])     { nameGlob=toks[i+1]; i+=2; }
+    else if (t==='-iname'&&toks[i+1])    { inameGlob=toks[i+1]; i+=2; }
+    else if (t==='-type'&&toks[i+1])     { typeFilter=toks[i+1]; i+=2; }
+    else if (t==='-maxdepth'&&toks[i+1]) { maxDepth=parseInt(toks[i+1])||1; i+=2; }
+    else if ((t==='-not'||t==='!')&&toks[i+1]==='-path'&&toks[i+2]) { notPath=toks[i+2]; i+=3; }
+    else { i++; }
+  }
+  const allPaths=[...folderFiles.keys()];
+  const dirs=new Set();
+  allPaths.forEach(p=>{ const pts=p.split('/'); for(let d=1;d<pts.length;d++) dirs.add(pts.slice(0,d).join('/')); });
+  const entries=[...[...dirs].map(d=>({path:d,type:'d'})),...allPaths.map(p=>({path:p,type:'f'}))].sort((a,b)=>a.path.localeCompare(b.path));
+  const results=[];
+  entries.forEach(({path,type})=>{
+    const depth=(path.match(/\//g)||[]).length;
+    if (depth>=maxDepth) return;
+    if (typeFilter==='f'&&type!=='f') return;
+    if (typeFilter==='d'&&type!=='d') return;
+    if (notPath&&globMatch(path,notPath)) return;
+    const base=path.split('/').pop();
+    if (nameGlob&&!globMatch(base,nameGlob)) return;
+    if (inameGlob&&!globMatch(base.toLowerCase(),inameGlob.toLowerCase())) return;
+    results.push('./'+path);
+  });
+  return { lines:results };
+}
+function globMatch(str,pattern) {
+  const re='^'+pattern.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$';
+  return new RegExp(re).test(str);
 }
 
+/* ============================================================ DISPATCH */
+function execute(cmd,lines) {
+  const toks=tokenize(cmd); const tool=(toks[0]||'').replace(/^[./]*/,'');
+  if (tool==='cat')  return {lines};
+  if (tool==='head') return {lines:lines.slice(0,getN(toks,10))};
+  if (tool==='tail') return {lines:lines.slice(-getN(toks,10))};
+  if (tool==='wc')   return doWc(toks,lines);
+  if (tool==='grep') return doGrep(toks,lines);
+  if (tool==='cut')  return doCut(toks,lines);
+  if (tool==='sort') return doSort(toks,lines);
+  if (tool==='uniq') return doUniq(toks,lines);
+  if (tool==='sed')  return doSed(toks,lines);
+  if (tool==='awk')  return doAwk(toks,lines);
+  if (tool==='tr')   return doTr(toks,lines);
+  if (tool==='nl')   return {lines:lines.map((l,i)=>String(i+1).padStart(6)+'\t'+l)};
+  if (tool==='rev')  return {lines:lines.map(l=>l.split('').reverse().join(''))};
+  if (tool==='echo') return {lines:[toks.slice(1).join(' ')]};
+  if (tool==='tee')  return {lines};
+  if (tool==='find') return doFind(toks);
+  return {error:'Unknown command: '+tool+'. Supported: cat head tail wc grep cut sort uniq sed awk tr nl rev echo find'};
+}
+
+/* ============================================================ TOKENIZER */
 function tokenize(s) {
-  const out = []; let cur = ''; let inq = null;
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i];
-    if ((c === '"' || c === "'") && !inq) { inq = c; }
-    else if (c === inq) { inq = null; }
-    else if (c === ' ' && !inq) { if (cur) { out.push(cur); cur = ''; } }
-    else { cur += c; }
+  const out=[]; let cur=''; let inq=null;
+  for (let i=0;i<s.length;i++) {
+    const c=s[i];
+    if ((c==='"'||c==="'")&&!inq) { inq=c; }
+    else if (c===inq) { inq=null; }
+    else if (c===' '&&!inq) { if(cur){out.push(cur);cur='';} }
+    else { cur+=c; }
   }
   if (cur) out.push(cur);
   return out;
 }
 
-function getN(toks, flag, def) {
-  const i = toks.indexOf(flag);
-  if (i >= 0 && toks[i + 1]) return parseInt(toks[i + 1]) || def;
-  const t = toks.find(t => t.startsWith(flag) && t.length > flag.length);
-  if (t) return parseInt(t.slice(flag.length)) || def;
-  // also handle e.g. head -20
-  const num = toks.find(t => /^-\d+$/.test(t));
-  if (num) return parseInt(num.slice(1)) || def;
+/* ============================================================ TOOLS */
+function getN(toks,def) {
+  const ni=toks.indexOf('-n'); if(ni>=0&&toks[ni+1]&&/^\d+$/.test(toks[ni+1])) return parseInt(toks[ni+1]);
+  const cn=toks.find(t=>/^-n\d+$/.test(t)); if(cn) return parseInt(cn.slice(2));
+  const bn=toks.find(t=>/^-\d+$/.test(t));  if(bn) return parseInt(bn.slice(1));
   return def;
 }
-
-function doWc(toks, lines) {
-  const f = toks[1] || '';
-  if (f === '-l' || !f || f === 'file') return { lines: [String(lines.length) + ' lines'] };
-  if (f === '-w') return { lines: [lines.join(' ').trim().split(/\s+/).filter(Boolean).length + ' words'] };
-  if (f === '-c') return { lines: [String(lines.join('\n').length) + ' bytes'] };
-  const wc = lines.join(' ').trim().split(/\s+/).filter(Boolean).length;
-  return { lines: [lines.length + ' lines  ' + wc + ' words  ' + lines.join('\n').length + ' bytes'] };
+function doWc(toks,lines) {
+  const f=toks[1]||'';
+  if(f==='-l'||!f||f==='file') return {lines:[String(lines.length)+' lines']};
+  if(f==='-w') return {lines:[lines.join(' ').trim().split(/\s+/).filter(Boolean).length+' words']};
+  if(f==='-c') return {lines:[String(lines.join('\n').length)+' bytes']};
+  const w=lines.join(' ').trim().split(/\s+/).filter(Boolean).length;
+  return {lines:[lines.length+' lines  '+w+' words  '+lines.join('\n').length+' bytes']};
 }
-
-function doGrep(toks, lines) {
-  let flagSet = new Set(); let pat = ''; let i = 1;
-  while (i < toks.length) {
-    const t = toks[i];
-    if (/^-[invEcl]+$/.test(t)) { [...t.slice(1)].forEach(c => flagSet.add(c)); i++; }
-    else if (!pat && t !== 'file') { pat = t; i++; }
-    else { i++; }
+function doGrep(toks,lines) {
+  let fs=new Set(); let pat=''; let i=1;
+  while(i<toks.length) {
+    if(/^-[invEclr]+$/.test(toks[i])){[...toks[i].slice(1)].forEach(c=>fs.add(c));i++;}
+    else if(!pat&&toks[i]!=='file'){pat=toks[i];i++;}
+    else{i++;}
   }
-  if (!pat) return { error: 'grep: no pattern given' };
-  let re;
-  try { re = new RegExp(pat, flagSet.has('i') ? 'gi' : 'g'); }
-  catch (e) { return { error: 'grep: invalid regex — ' + e.message }; }
-  if (flagSet.has('c')) {
-    let n = 0;
-    lines.forEach(l => { re.lastIndex = 0; if (re.test(l)) n++; });
-    return { lines: [String(n)] };
+  if(!pat) return {error:'grep: no pattern given'};
+  let re; try{re=new RegExp(pat,fs.has('i')?'gi':'g');}catch(e){return{error:'grep: invalid regex — '+e.message};}
+  if(fs.has('c')){let n=0;lines.forEach(l=>{re.lastIndex=0;if(re.test(l))n++;});return{lines:[String(n)]};}
+  const res=[];
+  lines.forEach((l,idx)=>{re.lastIndex=0;const m=re.test(l);re.lastIndex=0;if(fs.has('v')?!m:m)res.push(fs.has('n')?(idx+1)+':'+l:l);});
+  return{lines:res,hl:fs.has('v')?null:pat};
+}
+function doCut(toks,lines) {
+  let delim='\t'; let fields=[]; let i=1;
+  while(i<toks.length){
+    if(toks[i]==='-d'&&toks[i+1]){delim=decodeEscapes(toks[i+1]);i+=2;}
+    else if(toks[i].startsWith('-d')&&toks[i].length>2){delim=decodeEscapes(toks[i].slice(2));i++;}
+    else if(toks[i]==='-f'&&toks[i+1]){fields=parseFields(toks[i+1]);i+=2;}
+    else if(toks[i].startsWith('-f')&&toks[i].length>2){fields=parseFields(toks[i].slice(2));i++;}
+    else{i++;}
   }
-  const res = [];
-  lines.forEach((l, idx) => {
-    re.lastIndex = 0;
-    const m = re.test(l); re.lastIndex = 0;
-    const keep = flagSet.has('v') ? !m : m;
-    if (keep) res.push(flagSet.has('n') ? (idx + 1) + ':' + l : l);
-  });
-  return { lines: res, hl: flagSet.has('v') ? null : pat };
+  if(!fields.length) return{lines};
+  return{lines:lines.map(l=>{const p=l.split(delim);return fields.map(f=>p[f-1]??'').join(delim);})};
 }
-
-function doCut(toks, lines) {
-  let delim = '\t'; let fields = []; let i = 1;
-  while (i < toks.length) {
-    if (toks[i] === '-d' && toks[i + 1]) { delim = toks[i + 1]; i += 2; }
-    else if (toks[i].startsWith('-d') && toks[i].length > 2) { delim = toks[i].slice(2); i++; }
-    else if (toks[i] === '-f' && toks[i + 1]) { fields = parseFields(toks[i + 1]); i += 2; }
-    else if (toks[i].startsWith('-f') && toks[i].length > 2) { fields = parseFields(toks[i].slice(2)); i++; }
-    else { i++; }
-  }
-  if (!fields.length) return { lines };
-  return { lines: lines.map(l => { const p = l.split(delim); return fields.map(f => p[f - 1] ?? '').join(delim); }) };
+function parseFields(s){const out=[];s.split(',').forEach(p=>{if(p.includes('-')){const[a,b]=p.split('-').map(Number);for(let i=a;i<=b;i++)out.push(i);}else out.push(Number(p));});return out;}
+function doSort(toks,lines) {
+  const af=toks.filter(t=>/^-[a-zA-Z]+$/.test(t)).join('');
+  const rev=af.includes('r'),num=af.includes('n'),uniq=toks.includes('-u')||toks.includes('--unique');
+  let key=null;
+  const ki=toks.indexOf('-k');if(ki>=0&&toks[ki+1])key=parseInt(toks[ki+1])-1;
+  const kc=toks.find(t=>t.startsWith('-k')&&t.length>2);if(kc)key=parseInt(kc.slice(2))-1;
+  let res=[...lines];
+  res.sort((a,b)=>{let va=key!=null?(a.split(/\s+/)[key]||a):a,vb=key!=null?(b.split(/\s+/)[key]||b):b;return num?(parseFloat(va)||0)-(parseFloat(vb)||0):va.localeCompare(vb);});
+  if(rev)res.reverse(); if(uniq)res=[...new Set(res)];
+  return{lines:res};
 }
-function parseFields(s) {
-  const out = [];
-  s.split(',').forEach(p => {
-    if (p.includes('-')) { const [a, b] = p.split('-').map(Number); for (let i = a; i <= b; i++) out.push(i); }
-    else { out.push(Number(p)); }
-  });
-  return out;
+function doUniq(toks,lines) {
+  const count=toks.includes('-c'),dup=toks.includes('-d'),unique=toks.includes('-u');
+  const res=[]; let prev=null,cnt=1;
+  const flush=(l,c)=>{if(dup&&c===1)return;if(unique&&c>1)return;res.push(count?String(c).padStart(7)+' '+l:l);};
+  lines.forEach(l=>{if(prev===null){prev=l;cnt=1;}else if(l===prev){cnt++;}else{flush(prev,cnt);prev=l;cnt=1;}});
+  if(prev!==null)flush(prev,cnt); return{lines:res};
 }
-
-function doSort(toks, lines) {
-  const rev  = toks.includes('-r');
-  const uniq = toks.includes('-u') || toks.includes('--unique');
-  const num  = toks.includes('-n');
-  let key = null;
-  const ki = toks.indexOf('-k');
-  if (ki >= 0 && toks[ki + 1]) key = parseInt(toks[ki + 1]) - 1;
-  const kc = toks.find(t => t.startsWith('-k') && t.length > 2);
-  if (kc) key = parseInt(kc.slice(2)) - 1;
-  let res = [...lines];
-  res.sort((a, b) => {
-    let va = key != null ? (a.split(/\s+/)[key] || a) : a;
-    let vb = key != null ? (b.split(/\s+/)[key] || b) : b;
-    if (num) return (parseFloat(va) || 0) - (parseFloat(vb) || 0);
-    return va.localeCompare(vb);
-  });
-  if (rev) res.reverse();
-  if (uniq) res = [...new Set(res)];
-  return { lines: res };
+function doSed(toks,lines) {
+  const expr=toks.find(t=>!t.startsWith('-')&&t!=='sed'&&t!=='file');
+  if(!expr)return{error:'sed: no expression given'};
+  const m=expr.match(/^s([^a-zA-Z0-9\\])((?:[^\\]|\\.)*?)\1((?:[^\\]|\\.)*?)\1([gim]*)$/);
+  if(!m)return{error:'sed: only s/pat/repl/flags supported (any delimiter)'};
+  const[,,pat,repl,flags]=m; let re;
+  try{re=new RegExp(pat,flags||'g');}catch(e){return{error:'sed regex: '+e.message};}
+  const jsRepl=repl.replace(/\\([0-9])/g,'$$$1'); const hasG=flags.includes('g');
+  return{lines:lines.map(l=>hasG?l.replace(re,jsRepl):l.replace(new RegExp(pat,flags.replace('g','')),jsRepl))};
 }
-
-function doUniq(toks, lines) {
-  const count  = toks.includes('-c');
-  const dup    = toks.includes('-d');
-  const unique = toks.includes('-u');
-  const res = []; let prev = null; let cnt = 1;
-  const flush = (l, c) => {
-    if (dup && c === 1) return;
-    if (unique && c > 1) return;
-    res.push(count ? String(c).padStart(7) + ' ' + l : l);
-  };
-  lines.forEach(l => {
-    if (prev === null) { prev = l; cnt = 1; }
-    else if (l === prev) { cnt++; }
-    else { flush(prev, cnt); prev = l; cnt = 1; }
-  });
-  if (prev !== null) flush(prev, cnt);
-  return { lines: res };
+function doAwk(toks,lines) {
+  const prog=toks.find(t=>!t.startsWith('-')&&t!=='awk'&&t!=='file');
+  if(!prog)return{error:'awk: no program given'};
+  let sep=null;
+  const fi=toks.indexOf('-F');if(fi>=0&&toks[fi+1])sep=decodeEscapes(toks[fi+1]);
+  const sf=toks.find(t=>t.startsWith('-F')&&t.length>2);if(sf)sep=decodeEscapes(sf.slice(2));
+  try{return{lines:awkRun(prog,lines,sep)};}catch(e){return{error:'awk: '+e.message};}
 }
-
-function doSed(toks, lines) {
-  const expr = toks.find(t => !t.startsWith('-') && t !== 'sed' && t !== 'file');
-  if (!expr) return { error: 'sed: no expression given' };
-  const m = expr.match(/^s([^a-zA-Z0-9\\])((?:[^\\]|\\.)*?)\1((?:[^\\]|\\.)*?)\1([gim]*)$/);
-  if (!m) return { error: 'sed: only s/pat/repl/flags supported (any delimiter)' };
-  const [, , pat, repl, flags] = m;
-  let re;
-  try { re = new RegExp(pat, flags || 'g'); } catch (e) { return { error: 'sed regex: ' + e.message }; }
-  const jsRepl = repl.replace(/\\([0-9])/g, '$$$1');
-  const hasG = flags.includes('g');
-  return { lines: lines.map(l => hasG ? l.replace(re, jsRepl) : l.replace(new RegExp(pat, flags.replace('g', '')), jsRepl)) };
-}
-
-function doAwk(toks, lines) {
-  const prog = toks.find(t => !t.startsWith('-') && t !== 'awk' && t !== 'file');
-  if (!prog) return { error: 'awk: no program given' };
-  let sep = null;
-  if (toks.includes('-F') && toks[toks.indexOf('-F') + 1]) sep = toks[toks.indexOf('-F') + 1];
-  const sf = toks.find(t => t.startsWith('-F') && t.length > 2);
-  if (sf) sep = sf.slice(2);
-  try { return { lines: awkRun(prog, lines, sep) }; }
-  catch (e) { return { error: 'awk: ' + e.message }; }
-}
-
-function awkRun(prog, lines, FS) {
-  const out = [];
-  const ctx = { NR: 0, NF: 0, FS: FS || ' ', OFS: ' ' };
-  let p = prog.trim();
-  const beginM = p.match(/BEGIN\s*\{([\s\S]*?)\}/);
-  const endM   = p.match(/END\s*\{([\s\S]*?)\}/);
-  if (beginM) p = p.replace(beginM[0], '').trim();
-  if (endM)   p = p.replace(endM[0], '').trim();
-  const rules = [];
-  const ruleRe = /^(?:([^{]+?)\s*)?\{([\s\S]*?)\}/g;
-  let rm;
-  while ((rm = ruleRe.exec(p)) !== null) rules.push({ cond: rm[1]?.trim() || null, body: rm[2].trim() });
-  if (!rules.length && p.trim()) rules.push({ cond: null, body: p.trim() });
-  if (beginM) evalAwk(beginM[1], ctx, out);
-  lines.forEach(line => {
+function awkRun(prog,lines,FS){
+  const out=[],ctx={NR:0,NF:0,FS:FS||' ',OFS:' '};
+  let p=prog.trim();
+  const bM=p.match(/BEGIN\s*\{([\s\S]*?)\}/),eM=p.match(/END\s*\{([\s\S]*?)\}/);
+  if(bM)p=p.replace(bM[0],'').trim();if(eM)p=p.replace(eM[0],'').trim();
+  const rules=[],rRe=/^(?:([^{]+?)\s*)?\{([\s\S]*?)\}/g;let rm;
+  while((rm=rRe.exec(p))!==null)rules.push({cond:rm[1]?.trim()||null,body:rm[2].trim()});
+  if(!rules.length&&p.trim())rules.push({cond:null,body:p.trim()});
+  if(bM)evalAwk(bM[1],ctx,out);
+  lines.forEach(line=>{
     ctx.NR++;
-    const f = FS && FS !== ' ' ? line.split(new RegExp(FS)) : line.trim().split(/\s+/).filter(s => s !== '');
-    ctx.NF = f.length; ctx[0] = line;
-    f.forEach((v, i) => ctx[i + 1] = v);
-    for (const r of rules) {
-      let run = true;
-      if (r.cond) {
-        if (r.cond.startsWith('/')) run = new RegExp(r.cond.slice(1, -1)).test(line);
-        else run = !!evalExpr(r.cond, ctx);
-      }
-      if (run) evalAwk(r.body, ctx, out);
-    }
+    const f=FS&&FS!==' '?line.split(new RegExp(FS)):line.trim().split(/\s+/).filter(s=>s!=='');
+    ctx.NF=f.length;ctx[0]=line;f.forEach((v,i)=>ctx[i+1]=v);
+    for(const r of rules){let run=true;if(r.cond){if(r.cond.startsWith('/'))run=new RegExp(r.cond.slice(1,-1)).test(line);else run=!!evalExpr(r.cond,ctx);}if(run)evalAwk(r.body,ctx,out);}
   });
-  if (endM) evalAwk(endM[1], ctx, out);
-  return out;
+  if(eM)evalAwk(eM[1],ctx,out);return out;
 }
-
-function evalAwk(body, ctx, out) {
-  const stmts = body.split(';').map(s => s.trim()).filter(Boolean);
-  for (const stmt of stmts) {
-    const pm = stmt.match(/^print\s*(.*)/);
-    if (pm) {
-      const args = pm[1].trim();
-      if (!args) { out.push(ctx[0] ?? ''); continue; }
-      const parts = args.split(',').map(a => String(evalExpr(a.trim(), ctx)));
-      out.push(parts.join(ctx.OFS ?? ' ')); continue;
-    }
-    const am = stmt.match(/^(\w+)\s*(\+?=)\s*(.+)/);
-    if (am) { ctx[am[1]] = am[2] === '+=' ? (parseFloat(ctx[am[1]]) || 0) + (parseFloat(evalExpr(am[3], ctx)) || 0) : evalExpr(am[3], ctx); }
-  }
+function evalAwk(body,ctx,out){
+  body.split(';').map(s=>s.trim()).filter(Boolean).forEach(stmt=>{
+    const pm=stmt.match(/^print\s*(.*)/);
+    if(pm){const a=pm[1].trim();if(!a){out.push(ctx[0]??'');return;}out.push(a.split(',').map(x=>String(evalExpr(x.trim(),ctx))).join(ctx.OFS??' '));return;}
+    const am=stmt.match(/^(\w+)\s*(\+?=)\s*(.+)/);
+    if(am)ctx[am[1]]=am[2]==='+='?(parseFloat(ctx[am[1]])||0)+(parseFloat(evalExpr(am[3],ctx))||0):evalExpr(am[3],ctx);
+  });
 }
-
-function evalExpr(expr, ctx) {
-  expr = expr.trim();
-  const cmp = expr.match(/^(.+?)\s*(==|!=|>=|<=|>|<|~)\s*(.+)$/);
-  if (cmp) {
-    const l = evalExpr(cmp[1], ctx), r = evalExpr(cmp[3], ctx);
-    if (cmp[2] === '==') return String(l) === String(r) ? 1 : 0;
-    if (cmp[2] === '!=') return String(l) !== String(r) ? 1 : 0;
-    if (cmp[2] === '~')  return new RegExp(String(r).replace(/^\//, '').replace(/\/$/, '')).test(String(l)) ? 1 : 0;
-    const nl = parseFloat(l) || 0, nr = parseFloat(r) || 0;
-    if (cmp[2] === '>') return nl > nr ? 1 : 0;
-    if (cmp[2] === '<') return nl < nr ? 1 : 0;
-    if (cmp[2] === '>=') return nl >= nr ? 1 : 0;
-    if (cmp[2] === '<=') return nl <= nr ? 1 : 0;
+function evalExpr(expr,ctx){
+  expr=expr.trim();
+  const cmp=expr.match(/^(.+?)\s*(==|!=|>=|<=|>|<|~)\s*(.+)$/);
+  if(cmp){const l=evalExpr(cmp[1],ctx),r=evalExpr(cmp[3],ctx);
+    if(cmp[2]==='==')return String(l)===String(r)?1:0;if(cmp[2]==='!=')return String(l)!==String(r)?1:0;
+    if(cmp[2]==='~')return new RegExp(String(r).replace(/^\//,'').replace(/\/$/,'')).test(String(l))?1:0;
+    const nl=parseFloat(l)||0,nr=parseFloat(r)||0;
+    if(cmp[2]==='>')return nl>nr?1:0;if(cmp[2]==='<')return nl<nr?1:0;
+    if(cmp[2]==='>='  )return nl>=nr?1:0;if(cmp[2]==='<=')return nl<=nr?1:0;
   }
-  const mod = expr.match(/^(.+?)\s*%\s*(.+)$/);
-  if (mod) return (parseFloat(evalExpr(mod[1], ctx)) || 0) % (parseFloat(evalExpr(mod[2], ctx)) || 1);
-  const add = expr.match(/^(.+?)\s*([+\-])\s*(\S.*)$/);
-  if (add) { const a = parseFloat(evalExpr(add[1], ctx)) || 0, b = parseFloat(evalExpr(add[3], ctx)) || 0; return add[2] === '+' ? a + b : a - b; }
-  if (/^\$(\d+)$/.test(expr)) return ctx[parseInt(expr.slice(1))] ?? '';
-  if (expr === 'NR') return ctx.NR;
-  if (expr === 'NF') return ctx.NF;
-  if (expr === '$0') return ctx[0] ?? '';
-  if (expr in ctx) return ctx[expr] ?? 0;
-  if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'"))) return expr.slice(1, -1);
-  if (!isNaN(expr)) return parseFloat(expr);
+  const mod=expr.match(/^(.+?)\s*%\s*(.+)$/);if(mod)return(parseFloat(evalExpr(mod[1],ctx))||0)%(parseFloat(evalExpr(mod[2],ctx))||1);
+  const add=expr.match(/^(.+?)\s*([+\-])\s*(\S.*)$/);if(add){const a=parseFloat(evalExpr(add[1],ctx))||0,b=parseFloat(evalExpr(add[3],ctx))||0;return add[2]==='+'?a+b:a-b;}
+  if(/^\$(\d+)$/.test(expr))return ctx[parseInt(expr.slice(1))]??'';
+  if(expr==='NR')return ctx.NR;if(expr==='NF')return ctx.NF;if(expr==='$0')return ctx[0]??'';
+  if(expr in ctx)return ctx[expr]??0;
+  if((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'")))return expr.slice(1,-1);
+  if(!isNaN(expr))return parseFloat(expr);
   return expr;
 }
 
-function doTr(toks, lines) {
-  const del = toks.includes('-d');
-  const sets = toks.filter(t => !t.startsWith('-') && t !== 'tr' && t !== 'file');
-  if (del && sets[0]) { const s = expandTr(sets[0]); return { lines: lines.map(l => l.split('').filter(c => !s.includes(c)).join('')) }; }
-  if (sets.length >= 2) {
-    const s = expandTr(sets[0]), d = expandTr(sets[1]);
-    return { lines: lines.map(l => l.split('').map(c => { const i = s.indexOf(c); return i >= 0 ? (d[i] ?? d[d.length - 1] ?? c) : c; }).join('')) };
-  }
-  return { lines };
+/* ============================================================
+   tr — FIXED
+   decodeEscapes() runs on both set arguments before expandTr(),
+   so "\r" (backslash+r from tokenizer) becomes real CR (0x0D).
+   The previous bug: expandTr() saw "\" and "r" as literal
+   characters, so -d "\r" deleted the letter r, not carriage return.
+   ============================================================ */
+function doTr(toks,lines){
+  const del=toks.includes('-d');
+  const sets=toks.filter(t=>!t.startsWith('-')&&t!=='tr'&&t!=='file');
+  if(del&&sets[0]){const s=expandTr(decodeEscapes(sets[0]));return{lines:lines.map(l=>l.split('').filter(c=>!s.includes(c)).join(''))};}
+  if(sets.length>=2){const s=expandTr(decodeEscapes(sets[0])),d=expandTr(decodeEscapes(sets[1]));return{lines:lines.map(l=>l.split('').map(c=>{const i=s.indexOf(c);return i>=0?(d[i]??d[d.length-1]??c):c;}).join(''))};}
+  return{lines};
 }
-function expandTr(s) {
-  let r = '';
-  for (let i = 0; i < s.length; i++) {
-    if (s[i + 1] === '-' && s[i + 2]) { const a = s.charCodeAt(i), b = s.charCodeAt(i + 2); for (let c = a; c <= b; c++) r += String.fromCharCode(c); i += 2; }
-    else r += s[i];
+function expandTr(s){
+  let r='';
+  for(let i=0;i<s.length;i++){
+    if(s[i+1]==='-'&&s[i+2]!==undefined){const a=s.charCodeAt(i),b=s.charCodeAt(i+2);for(let c=a;c<=b;c++)r+=String.fromCharCode(c);i+=2;}
+    else r+=s[i];
   }
   return r;
 }
 
-/* =====================================================================
-   RENDER HELPERS
-   ===================================================================== */
-function renderLines(lines, hlPat, skipTruncWarning) {
-  const MAX = 5000;
-  const shown = lines.slice(0, MAX);
-  let html = '';
-  shown.forEach((l, i) => {
-    let text = escHtml(l);
-    if (hlPat) {
-      try {
-        const re = new RegExp('(' + hlPat.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        text = text.replace(re, '<mark class="hl">$1</mark>');
-      } catch (_) {}
-    }
-    html += `<div class="output-line"><span class="ln">${i + 1}</span><span class="line-text">${text}</span></div>`;
+/* ============================================================ HELPERS */
+function renderLines(lines,hlPat){
+  const MAX=5000,shown=lines.slice(0,MAX);let html='';
+  shown.forEach((l,i)=>{
+    let text=escHtml(l);
+    if(hlPat){try{const re=new RegExp('('+hlPat.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');text=text.replace(re,'<mark class="hl">$1</mark>');}catch(_){}}
+    html+=`<div class="output-line"><span class="ln">${i+1}</span><span class="line-text">${text}</span></div>`;
   });
-  if (!skipTruncWarning && lines.length > MAX) {
-    html += `<div class="output-line"><span class="ln"></span><span class="line-text out-meta">… ${(lines.length - MAX).toLocaleString()} more lines (truncated for display)</span></div>`;
-  }
-  if (!html) html = '<span class="out-meta">No output — command returned 0 lines.</span>';
-  document.getElementById('outputArea').innerHTML = html;
+  if(lines.length>MAX)html+=`<div class="output-line"><span class="ln"></span><span class="line-text out-meta">\u2026 ${(lines.length-MAX).toLocaleString()} more lines (truncated)</span></div>`;
+  if(!html)html='<span class="out-meta">No output — command returned 0 lines.</span>';
+  document.getElementById('outputArea').innerHTML=html;
 }
-
-function setOutput(html, _) {
-  document.getElementById('outputArea').innerHTML = html;
+function setOutput(html){document.getElementById('outputArea').innerHTML=html;}
+function setStatus(type,msg){
+  const el=document.getElementById('cmdStatus');if(!msg){el.innerHTML='';return;}
+  const icons={success:'ph-check-circle',error:'ph-warning-circle',warn:'ph-warning',info:'ph-info'};
+  const cls={success:'badge-success',error:'badge-error',warn:'badge-warn',info:'badge-info'};
+  el.innerHTML=`<span class="badge ${cls[type]||'badge-info'}"><i class="ph ${icons[type]||'ph-info'}"></i> ${escHtml(msg)}</span>`;
 }
-
-function setStatus(type, msg) {
-  const el = document.getElementById('cmdStatus');
-  if (!msg) { el.innerHTML = ''; return; }
-  const icons = { success: 'ph-check-circle', error: 'ph-warning-circle', warn: 'ph-warning', info: 'ph-info' };
-  const cls   = { success: 'badge-success', error: 'badge-error', warn: 'badge-warn', info: 'badge-info' };
-  el.innerHTML = `<span class="badge ${cls[type] || 'badge-info'}"><i class="ph ${icons[type] || 'ph-info'}"></i> ${escHtml(msg)}</span>`;
+function setLineCount(n){const el=document.getElementById('lineCountBadge');if(n===null){el.style.display='none';return;}el.textContent=n.toLocaleString()+' line'+(n!==1?'s':'');el.style.display='';}
+function showSourceInfo(icon,name,meta){
+  const bar=document.getElementById('sourceInfoBar');bar.querySelector('i').className='ph '+icon;
+  document.getElementById('srcName').textContent=name;document.getElementById('srcMeta').textContent=meta;bar.classList.add('visible');
 }
-
-function setLineCount(n) {
-  const el = document.getElementById('lineCountBadge');
-  if (n === null) { el.style.display = 'none'; return; }
-  el.textContent = n.toLocaleString() + ' line' + (n !== 1 ? 's' : '');
-  el.style.display = '';
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+function formatBytes(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB';}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
-
 <script src="theme-toggle.js"></script>
 <script src="script.js"></script>
 </body>
