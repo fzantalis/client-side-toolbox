@@ -35,6 +35,20 @@
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; }
 
+    /* Fix to prevent panels from scrolling/clipping */
+    .panel {
+      height: auto !important;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: visible !important;
+    }
+    .panel-body {
+      flex: 1;
+      overflow: visible !important;
+      padding-bottom: 2rem !important; /* Extra breathing room at the bottom */
+    }
+
     /* Input Base Styles */
     .form-control {
       width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border);
@@ -158,9 +172,9 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 0;">
             <label>Time Spent Sleeping</label>
-            <div class="input-row">
+            <div class="input-row" style="margin-bottom: 0;">
               <div class="input-box">
                 <input type="number" id="in-sleep-t" class="form-control" value="10" step="any" min="0">
               </div>
