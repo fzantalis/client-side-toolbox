@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>NeoPixel Power Planner | Free Electronics Tool</title>
+  <meta name="title" content="NeoPixel Power Planner | Free Electronics Tool">
+  <meta name="description" content="Calculate max current, wattage, and power supply requirements for WS2812B addressable LED strips safely. A free client-side tool.">
+  <meta name="keywords" content="neopixel calculator, ws2812b power, led strip current, addressable led planner, electronics tool, client-side, browser-based tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-neopixel-power.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-neopixel-power.html">
+  <meta property="og:title" content="NeoPixel Power Planner | Free Electronics Tool">
+  <meta property="og:description" content="Calculate max current, wattage, and power supply requirements for WS2812B addressable LED strips safely. A free client-side tool.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-neopixel-power.html">
+  <meta property="twitter:title" content="NeoPixel Power Planner | Free Electronics Tool">
+  <meta property="twitter:description" content="Calculate max current, wattage, and power supply requirements for WS2812B addressable LED strips safely. A free client-side tool.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <style>
+    /* Cleanly hide native number input arrows */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    input[type="number"], input[type="range"] { width: 100%; }
+    .form-control { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 0.95rem; }
+    .form-control:focus { outline: none; border-color: var(--primary); }
+
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .result-card { background: var(--bg); border: 1px solid var(--border); padding: 1.25rem; border-radius: 8px; text-align: center; }
+    .result-card span { display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 0.25rem; }
+    .result-card strong { font-size: 1.75rem; color: var(--primary); font-family: 'Fira Code', monospace; }
+
+    /* Power Gauge */
+    .gauge-container { background: var(--bg); height: 24px; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 0.5rem; position: relative; }
+    .gauge-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s, background 0.3s; }
+    .gauge-fill.warning { background: #f59e0b; }
+    .gauge-fill.danger { background: #ef4444; }
+
+    .warning-box { margin-top: 1rem; padding: 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: flex-start; gap: 0.75rem; background: var(--bg); border: 1px solid var(--border); line-height: 1.5;}
+    .warn-yellow { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+    .warn-red { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+    
+    [data-theme="dark"] .warn-yellow { background: rgba(245, 158, 11, 0.1); color: #fcd34d; }
+    [data-theme="dark"] .warn-red { background: rgba(239, 68, 68, 0.1); color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-lightbulb"></i></div>
+      <div class="tool-header-text">
+        <h1>NeoPixel Power Planner</h1>
+        <p>Calculate current requirements to prevent burning out your microcontroller.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header"><h3>Strip Configuration</h3></div>
+        <div class="panel-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Number of LEDs</label>
+            <input type="number" id="in-leds" class="form-control" value="60" min="1">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>LED Type</label>
+            <select id="in-type" class="form-control">
+              <option value="0.06">WS2812B (5V) - Standard</option>
+              <option value="0.02">WS2815 (12V) - Standard</option>
+              <option value="0.08">SK6812 (5V) - RGBW</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Max Software Brightness (<span id="lbl-bright">100</span>%)</label>
+            <input type="range" id="in-bright" min="1" max="100" value="100" style="margin-top: 0.5rem;">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Power Requirements</h3></div>
+        <div class="panel-body">
+          
+          <div class="result-grid">
+            <div class="result-card">
+              <span>Max Current</span>
+              <strong id="out-amps">3.6 A</strong>
+            </div>
+            <div class="result-card">
+              <span>Power Consumption</span>
+              <strong id="out-watts">18.0 W</strong>
+            </div>
+          </div>
+
+          <label style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Current Load Gauge</label>
+          <div class="gauge-container">
+            <div class="gauge-fill" id="gauge"></div>
+          </div>
+
+          <div id="warning-msg" class="warning-box">
+            <i class="ph ph-check-circle" style="font-size: 1.5rem; color: #10b981;"></i> 
+            <div>Safe to power with standard 5V power supply.</div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+      <div class="section-header">
+        <i class="ph ph-article"></i>
+        <h2>About Addressable LED Power</h2>
+      </div>
+      
+      <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The #1 Beginner Mistake</h3>
+        <p style="margin-bottom: 1.5rem;">
+          The most common reason an Arduino or ESP32 project starts smoking is attempting to power too many NeoPixels directly from the microcontroller's 5V pin. While a microcontroller can provide the <em>data</em> signal for thousands of LEDs, its onboard voltage regulator can usually only provide enough <em>power</em> for about 10-15 LEDs at full brightness.
+        </p>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How the Math Works</h3>
+        <p style="margin-bottom: 1.5rem;">
+          A standard 5V WS2812B NeoPixel contains three separate microscopic LEDs inside it: Red, Green, and Blue. When set to maximum brightness, each color draws about 20mA of current. Therefore, when a single pixel is set to display pure White (all three colors at max), it draws a total of <strong>60mA (0.06 Amps)</strong>.
+        </p>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Best Practices for Large Builds</h3>
+        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Separate the Power:</strong> Always wire the power lines of your LED strip directly to a dedicated heavy-duty 5V wall adapter. Only wire the Data and Ground pins to your microcontroller.</li>
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Add a Capacitor:</strong> Place a large capacitor (1000 µF, 6.3V or higher) across the + and - terminals of your power supply to smooth out sudden power spikes when the LEDs turn on.</li>
+          <li><strong style="color: var(--text-main);">Power Injection:</strong> For strips drawing more than 10 Amps (or longer than 5 meters), the copper traces inside the strip aren't thick enough to carry the current to the end, resulting in yellow/dim LEDs at the tail. You must run a secondary thick wire alongside the strip and "inject" power into the end (and middle) of the strip.</li>
+        </ul>
+      </div>
+    </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    const inputs = {
+      leds: document.getElementById('in-leds'),
+      type: document.getElementById('in-type'),
+      bright: document.getElementById('in-bright')
+    };
+
+    const outputs = {
+      amps: document.getElementById('out-amps'),
+      watts: document.getElementById('out-watts'),
+      lblBright: document.getElementById('lbl-bright'),
+      gauge: document.getElementById('gauge'),
+      warnMsg: document.getElementById('warning-msg')
+    };
+
+    function calculate() {
+      const numLeds = parseInt(inputs.leds.value) || 0;
+      const ampsPerLed = parseFloat(inputs.type.value);
+      const brightness = parseInt(inputs.bright.value) / 100;
+      const voltage = inputs.type.value == "0.02" ? 12 : 5;
+
+      outputs.lblBright.innerText = inputs.bright.value;
+
+      let totalAmps = numLeds * ampsPerLed * brightness;
+      let totalWatts = totalAmps * voltage;
+
+      outputs.amps.innerText = totalAmps.toFixed(2) + " A";
+      outputs.watts.innerText = totalWatts.toFixed(1) + " W";
+
+      let fillPct = (totalAmps / 20) * 100;
+      if (fillPct > 100) fillPct = 100;
+      outputs.gauge.style.width = fillPct + "%";
+
+      outputs.gauge.className = "gauge-fill";
+      outputs.warnMsg.className = "warning-box";
+
+      if (totalAmps > 10) {
+        outputs.gauge.classList.add('danger');
+        outputs.warnMsg.classList.add('warn-red');
+        outputs.warnMsg.innerHTML = `<i class="ph ph-warning-octagon" style="font-size: 1.5rem; margin-top: 2px;"></i> <div><strong>DANGER: High Current.</strong> Requires dedicated heavy-duty power supply. You MUST inject power at both ends of the strip to prevent traces from melting.</div>`;
+      } 
+      else if (totalAmps > 2) {
+        outputs.gauge.classList.add('warning');
+        outputs.warnMsg.classList.add('warn-yellow');
+        outputs.warnMsg.innerHTML = `<i class="ph ph-warning" style="font-size: 1.5rem; margin-top: 2px;"></i> <div><strong>WARNING: Do NOT power from board.</strong> Do not run this through your Arduino or ESP32 5V pin. Connect LEDs directly to a dedicated external power supply.</div>`;
+      } 
+      else {
+        outputs.warnMsg.innerHTML = `<i class="ph ph-check-circle" style="font-size: 1.5rem; color: #10b981; margin-top: 2px;"></i> <div><strong>Safe for board power.</strong> This current level can usually be handled directly by your microcontroller's USB connection or a small wall adapter.</div>`;
+      }
+    }
+
+    Object.values(inputs).forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    calculate();
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
