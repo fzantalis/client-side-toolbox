@@ -41,31 +41,33 @@
       color: var(--text-muted); font-family: 'Fira Code', monospace; font-size: 0.9rem; pointer-events: none;
     }
 
-    /* Bulletproof CSS Schematic (Strict Absolute Positioning) */
+    /* Bulletproof CSS Schematic (Strict Absolute Positioning + Spaced out perfectly) */
     .circuit-container {
       display: flex; justify-content: center; align-items: center;
-      padding: 2.5rem 1rem; background: var(--bg); border-radius: 12px;
+      padding: 2rem 1rem; background: var(--bg); border-radius: 12px;
       border: 1px solid var(--border); margin-bottom: 1.5rem;
-      overflow-x: auto;
+      min-height: 400px; /* Guarantees a large default canvas */
+      overflow: visible;
     }
+    
     .schematic {
-      position: relative; width: 240px; height: 320px;
+      position: relative; width: 240px; height: 380px; /* Taller box prevents clipping */
       margin: 0 auto; flex-shrink: 0;
     }
     
     /* Wires */
     .wire { position: absolute; background: var(--text-main); }
     .wire-v { width: 4px; left: 60px; transform: translateX(-50%); }
-    .wire-h { height: 4px; top: 160px; left: 60px; width: 50px; transform: translateY(-50%); }
+    .wire-h { height: 4px; top: 190px; left: 60px; width: 50px; transform: translateY(-50%); }
     
-    #w-top { top: 30px; height: 50px; }
-    #w-mid { top: 140px; height: 40px; }
-    #w-bot { top: 240px; height: 50px; }
+    #w-top { top: 40px; height: 60px; }
+    #w-mid { top: 160px; height: 60px; }
+    #w-bot { top: 280px; height: 60px; }
     
     /* Node Connection */
     .node { 
       position: absolute; width: 12px; height: 12px; background: var(--primary); 
-      border-radius: 50%; top: 160px; left: 60px; transform: translate(-50%, -50%); z-index: 3;
+      border-radius: 50%; top: 190px; left: 60px; transform: translate(-50%, -50%); z-index: 3;
     }
     
     /* Resistors */
@@ -74,22 +76,22 @@
       background: var(--card-bg); border: 2px solid var(--text-main); z-index: 2;
       background-image: repeating-linear-gradient(-45deg, transparent, transparent 4px, var(--text-main) 4px, var(--text-main) 8px);
     }
-    #r1-sym { top: 80px; }
-    #r2-sym { top: 180px; }
+    #r1-sym { top: 100px; }
+    #r2-sym { top: 220px; }
     
     /* Text Labels */
     .label { position: absolute; font-family: 'Fira Code', monospace; font-size: 0.9rem; font-weight: 600; white-space: nowrap; transform: translateY(-50%); }
-    .label-vin { top: 15px; left: 60px; transform: translate(-50%, -50%); color: var(--accent); font-size: 1.1rem; }
-    .label-r1 { top: 110px; left: 90px; color: var(--text-muted); }
-    .label-r2 { top: 210px; left: 90px; color: var(--text-muted); }
+    .label-vin { top: 20px; left: 60px; transform: translate(-50%, -50%); color: var(--accent); font-size: 1.1rem; }
+    .label-r1 { top: 130px; left: 90px; color: var(--text-muted); }
+    .label-r2 { top: 250px; left: 90px; color: var(--text-muted); }
     
     .label-vout { 
-      top: 160px; left: 115px; 
+      top: 190px; left: 115px; 
       color: var(--primary); font-size: 1.25rem; background: var(--bg); 
       padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--primary);
     }
     
-    .label-gnd { top: 290px; left: 60px; transform: translate(-50%, 0); display: flex; flex-direction: column; align-items: center; gap: 2px;}
+    .label-gnd { top: 340px; left: 60px; transform: translate(-50%, 0); display: flex; flex-direction: column; align-items: center; gap: 2px;}
     .gnd-line { height: 2px; background: var(--text-main); }
 
     /* Results */
