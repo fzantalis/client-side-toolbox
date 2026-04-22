@@ -35,18 +35,25 @@
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; }
 
-    /* Fix to prevent panels from scrolling/clipping */
+    /* LAYOUT OVERRIDES: Forces the main container to stretch and prevents overlap */
+    main.workspace {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+      gap: 1.5rem !important;
+      height: auto !important;
+      min-height: fit-content !important;
+      margin-bottom: 3rem !important;
+    }
     .panel {
       height: auto !important;
-      min-height: 100%;
+      min-height: 100% !important;
       display: flex;
       flex-direction: column;
-      overflow: visible !important;
     }
     .panel-body {
       flex: 1;
-      overflow: visible !important;
-      padding-bottom: 2rem !important; /* Extra breathing room at the bottom */
+      display: flex;
+      flex-direction: column;
     }
 
     /* Input Base Styles */
@@ -73,7 +80,7 @@
     .result-card span { display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 0.25rem; }
     .result-card strong { font-size: 1.75rem; color: var(--primary); font-family: 'Fira Code', monospace; }
 
-    .chart-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; }
+    .chart-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;}
     .donut-container {
       display: flex; justify-content: center; align-items: center;
       position: relative; width: 140px; height: 140px; border-radius: 50%;
@@ -236,7 +243,7 @@
 
     </main>
 
-    <section class="tool-section" style="margin-top: 4rem;">
+    <section class="tool-section">
       <div class="section-header">
         <i class="ph ph-article"></i>
         <h2>About Deep Sleep and Battery Life</h2>
@@ -307,14 +314,11 @@
     }
 
     function calculate() {
-      // 1. Get Base Values
       const batt_mAh = parseFloat(els.batt.value) || 0;
       
-      // Convert currents to mA
       const i_active = (parseFloat(els.actI.value) || 0) * parseFloat(els.uActI.value);
       const i_sleep = (parseFloat(els.slpI.value) || 0) * parseFloat(els.uSlpI.value);
       
-      // Convert times to seconds
       const t_active_s = (parseFloat(els.actT.value) || 0) * parseFloat(els.uActT.value);
       const t_sleep_s = (parseFloat(els.slpT.value) || 0) * parseFloat(els.uSlpT.value);
 
@@ -324,31 +328,25 @@
         return;
       }
 
-      // 2. Average Current Math (mAs over total cycle)
       const cycle_t = t_active_s + t_sleep_s;
-      const energy_active = i_active * t_active_s; // mA * seconds
-      const energy_sleep = i_sleep * t_sleep_s;    // mA * seconds
+      const energy_active = i_active * t_active_s; 
+      const energy_sleep = i_sleep * t_sleep_s;   
       const total_energy = energy_active + energy_sleep;
       
       const avg_mA = total_energy / cycle_t;
-
-      // 3. Life Math
       const life_hours = batt_mAh / avg_mA;
       
-      // 4. Update UI Texts
       els.outLife.innerText = formatLife(life_hours);
       
       if(avg_mA < 1) els.outAvg.innerText = (avg_mA * 1000).toFixed(1) + " µA";
       else els.outAvg.innerText = avg_mA.toFixed(2) + " mA";
 
-      // 5. Warning Logic (If life > 2 years)
       if ((life_hours / 24 / 365.25) > 2) {
         els.warnMsg.style.display = "flex";
       } else {
         els.warnMsg.style.display = "none";
       }
 
-      // 6. Donut Chart Math
       let pct_active = 0;
       let pct_sleep = 0;
       if (total_energy > 0) {
@@ -358,12 +356,9 @@
 
       els.lblAct.innerText = `Active (${pct_active.toFixed(1)}%)`;
       els.lblSlp.innerText = `Sleep (${pct_sleep.toFixed(1)}%)`;
-
-      // Update Conic Gradient (Primary = Active, Accent = Sleep)
       els.donut.style.background = `conic-gradient(var(--primary) 0% ${pct_active}%, var(--accent) ${pct_active}% 100%)`;
     }
 
-    // Attach Listeners
     Object.keys(els).forEach(key => {
       if(els[key].tagName === 'INPUT' || els[key].tagName === 'SELECT') {
         els[key].addEventListener('input', calculate);
@@ -371,7 +366,6 @@
       }
     });
 
-    // Initial Calc
     calculate();
   </script>
   <script src="theme-toggle.js"></script>
