@@ -13,18 +13,6 @@
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://zantalis.net/demo-voltage-divider.html">
 
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://zantalis.net/demo-voltage-divider.html">
-  <meta property="og:title" content="Voltage Divider Calculator | Free Electronics Tool">
-  <meta property="og:description" content="Calculate the output voltage of a resistor divider circuit instantly. Features an interactive, real-time visual schematic. A free client-side tool.">
-  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
-
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://zantalis.net/demo-voltage-divider.html">
-  <meta property="twitter:title" content="Voltage Divider Calculator | Free Electronics Tool">
-  <meta property="twitter:description" content="Calculate the output voltage of a resistor divider circuit instantly. Features an interactive, real-time visual schematic. A free client-side tool.">
-  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
-  
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -50,19 +38,23 @@
       font-family: 'Fira Code', monospace; font-size: 0.9rem; pointer-events: none;
     }
 
-    /* CSS Circuit Schematic */
+    /* CSS Circuit Schematic - Refactored for Zero Overlap */
     .circuit-container {
       display: flex; flex-direction: column; align-items: center;
-      padding: 2rem; background: var(--bg); border-radius: 12px;
+      padding: 2rem 1rem; background: var(--bg); border-radius: 12px;
       border: 1px solid var(--border); margin-bottom: 1.5rem;
+      overflow-x: auto;
     }
     .schematic {
-      position: relative; width: 160px; height: 260px;
+      position: relative; width: 140px; height: 260px;
       display: flex; flex-direction: column; align-items: center;
+      margin: 0 auto;
     }
     .wire-v { width: 4px; background: var(--text-main); flex-grow: 1; z-index: 1; }
-    .wire-h { position: absolute; height: 4px; background: var(--text-main); width: 60px; right: -60px; top: 50%; transform: translateY(-50%); z-index: 1;}
+    
+    /* Vout node and horizontal wire pinned exactly from the center */
     .node { position: absolute; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; top: 50%; transform: translate(-50%, -50%); left: 50%; z-index: 2;}
+    .wire-h { position: absolute; height: 4px; background: var(--text-main); width: 50px; left: 50%; top: 50%; transform: translateY(-50%); z-index: 1;}
     
     .resistor-symbol {
       width: 30px; height: 60px; background: transparent;
@@ -72,9 +64,18 @@
     
     .label { position: absolute; font-family: 'Fira Code', monospace; font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
     .label-vin { top: -25px; left: 50%; transform: translateX(-50%); color: var(--accent); font-size: 1rem;}
-    .label-r1 { top: 20%; right: 30px; color: var(--text-muted); }
-    .label-r2 { bottom: 20%; right: 30px; color: var(--text-muted); }
-    .label-vout { top: 50%; right: -130px; transform: translateY(-50%); color: var(--primary); font-size: 1.25rem; background: var(--bg); padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--primary);}
+    
+    /* Pinned explicitly to the right of the vertical wire */
+    .label-r1 { top: 20%; left: calc(50% + 25px); color: var(--text-muted); }
+    .label-r2 { bottom: 20%; left: calc(50% + 25px); color: var(--text-muted); }
+    
+    /* Pinned explicitly to the right of the horizontal wire */
+    .label-vout { 
+      top: 50%; left: calc(50% + 60px); transform: translateY(-50%); 
+      color: var(--primary); font-size: 1.25rem; background: var(--bg); 
+      padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--primary);
+    }
+    
     .label-gnd { bottom: -20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px;}
     .gnd-line { height: 2px; background: var(--text-main); }
 
@@ -162,7 +163,7 @@
               
               <div class="node"></div>
               <div class="wire-h"></div>
-              <div class="label label-vout" id="lbl-vout">2.50V</div>
+              <div class="label label-vout" id="lbl-vout">2.50 V</div>
 
               <div class="wire-v"></div>
               <div class="resistor-symbol"></div>
@@ -187,47 +188,7 @@
 
     </main>
 
-    <section class="tool-section" style="margin-top: 4rem;">
-    <div class="section-header">
-      <i class="ph ph-article"></i>
-      <h2>About Voltage Dividers</h2>
     </div>
-    
-    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
-      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is a Voltage Divider?</h3>
-      <p style="margin-bottom: 1.5rem;">
-        A voltage divider is a simple passive linear circuit that produces an output voltage (Vout) that is a fraction of its input voltage (Vin). It is one of the most fundamental circuits in electronics, commonly used to step down voltages to safe levels for microcontrollers (like reading a 5V sensor on a 3.3V Arduino or ESP32 pin), or to establish reference voltages.
-      </p>
-
-      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Formula</h3>
-      <p style="margin-bottom: 1.5rem;">
-        The output voltage is determined by the ratio of the two resistors. The mathematical formula is: <br><br>
-        <code style="font-size: 1.1rem; padding: 0.5rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: inline-block;">Vout = Vin × (R2 / (R1 + R2))</code>
-      </p>
-
-      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Important Design Considerations</h3>
-      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
-        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Do not use for power supplies:</strong> Voltage dividers are meant for signals and references, not for drawing power. If you connect a load (like a motor or an LED) to Vout, the resistance of the load alters the circuit, causing the voltage to drop significantly.</li>
-        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Impedance:</strong> For reading sensors with an ADC (Analog-to-Digital Converter), try to keep the total resistance of the divider relatively low (typically under 10kΩ) so the ADC capacitor can charge fast enough, unless you are buffering it with an op-amp.</li>
-      </ul>
-    </div>
-  </section>
-    
-    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
-      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
-      <div style="margin-top: 1rem; margin-bottom: 1rem;">
-      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
-        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
-        View Source on GitHub
-      </a>
-    </div>
-      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
-        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
-        <span>&bull;</span>
-        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
-      </div>
-    </footer>
-  </div>
   
   <script>
     const els = {
@@ -258,11 +219,8 @@
         vout = vin * (r2Ohms / (r1Ohms + r2Ohms));
       }
 
-      // Update Result text
       const voutFormatted = vout.toFixed(2) + ' V';
       els.out.innerText = voutFormatted;
-
-      // Update Schematic Labels
       els.lblVin.innerText = vin + 'V';
       els.lblVout.innerText = voutFormatted;
       
@@ -278,7 +236,5 @@
 
     calculate();
   </script>
-  <script src="theme-toggle.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
