@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>RC Filter Calculator | Low-Pass & High-Pass Tool</title>
+  <meta name="title" content="RC Filter Calculator | Low-Pass & High-Pass Tool">
+  <meta name="description" content="Calculate the cutoff frequency of passive RC filters. Features a dynamic SVG Bode plot for both Low-Pass and High-Pass configurations.">
+  <meta name="keywords" content="rc filter calculator, low pass filter, high pass filter, cutoff frequency, bode plot, electronics tool, client-side, browser-based tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-rc-filter.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-rc-filter.html">
+  <meta property="og:title" content="RC Filter Calculator | Low-Pass & High-Pass Tool">
+  <meta property="og:description" content="Calculate the cutoff frequency of passive RC filters. Features a dynamic SVG Bode plot for both Low-Pass and High-Pass configurations.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-rc-filter.html">
+  <meta property="twitter:title" content="RC Filter Calculator | Low-Pass & High-Pass Tool">
+  <meta property="twitter:description" content="Calculate the cutoff frequency of passive RC filters. Features a dynamic SVG Bode plot for both Low-Pass and High-Pass configurations.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <style>
+    /* Fix for overlapping number inputs */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    .form-control {
+      width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--bg); color: var(--text-main);
+      font-family: inherit; font-size: 0.95rem; transition: all 0.2s ease;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+    .input-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+    .input-row > div:first-child { flex: 2; position: relative; display: flex; align-items: center; }
+    .input-row > div:last-child { flex: 1; }
+
+    /* Filter Toggle Tabs */
+    .filter-tabs { display: flex; background: var(--border); padding: 4px; border-radius: 8px; margin-bottom: 1.5rem; }
+    .tab-btn {
+      flex: 1; padding: 0.5rem; text-align: center; border-radius: 6px; cursor: pointer;
+      font-weight: 600; font-size: 0.9rem; color: var(--text-muted); transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--card-bg); color: var(--primary); box-shadow: var(--shadow-sm); }
+
+    /* Bode Plot Styles */
+    .plot-container {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; position: relative; display: flex; flex-direction: column; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    #bode-plot { width: 100%; max-width: 300px; height: 150px; overflow: visible; }
+    .grid-line { stroke: var(--border); stroke-width: 1; stroke-dasharray: 4 4; }
+    .axis-line { stroke: var(--text-main); stroke-width: 2; }
+    .curve-line { fill: none; stroke: var(--primary); stroke-width: 4; stroke-linejoin: round; transition: d 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .fill-area { fill: var(--primary); opacity: 0.1; transition: d 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    [data-theme="dark"] .fill-area { opacity: 0.2; }
+    .plot-label { font-family: 'Fira Code', monospace; font-size: 12px; fill: var(--text-muted); }
+    .fc-marker { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 4; }
+    .fc-text { font-family: 'Fira Code', monospace; font-size: 14px; font-weight: bold; fill: var(--accent); text-anchor: middle; }
+
+    .result-box {
+      text-align: center; padding: 1.5rem; background: var(--card-bg);
+      border: 1px solid var(--primary); border-radius: 12px; box-shadow: var(--shadow-sm);
+    }
+    .result-box span { display: block; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.5rem; }
+    .result-box strong { font-size: 2.5rem; color: var(--primary); font-family: 'Fira Code', monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-waves"></i></div>
+      <div class="tool-header-text">
+        <h1>RC Filter Calculator</h1>
+        <p>Determine the cutoff frequency (-3dB point) for passive Low-Pass and High-Pass circuits.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header"><h3>Filter Parameters</h3></div>
+        <div class="panel-body">
+          
+          <div class="filter-tabs">
+            <div class="tab-btn active" id="tab-lp" onclick="setFilter('lp')">Low-Pass Filter</div>
+            <div class="tab-btn" id="tab-hp" onclick="setFilter('hp')">High-Pass Filter</div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-r">Resistor (R)</label>
+            <div class="input-row">
+              <div>
+                <input type="number" id="input-r" class="form-control" value="1" step="any" min="0">
+              </div>
+              <div>
+                <select id="unit-r" class="form-control">
+                  <option value="1">Ω</option>
+                  <option value="1000" selected>kΩ</option>
+                  <option value="1000000">MΩ</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-c">Capacitor (C)</label>
+            <div class="input-row">
+              <div>
+                <input type="number" id="input-c" class="form-control" value="1" step="any" min="0">
+              </div>
+              <div>
+                <select id="unit-c" class="form-control">
+                  <option value="0.000000000001">pF</option>
+                  <option value="0.000000001">nF</option>
+                  <option value="0.000001" selected>µF</option>
+                  <option value="0.001">mF</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Frequency Response</h3></div>
+        <div class="panel-body">
+          
+          <div class="plot-container">
+            <svg id="bode-plot" viewBox="0 0 300 150">
+              <line x1="0" y1="30" x2="300" y2="30" class="grid-line" />
+              <line x1="0" y1="90" x2="300" y2="90" class="grid-line" />
+              <line x1="150" y1="0" x2="150" y2="150" class="fc-marker" />
+              
+              <path id="curve-fill" class="fill-area" d="" />
+              <path id="curve-path" class="curve-line" d="" />
+              
+              <text x="0" y="25" class="plot-label">0 dB</text>
+              <text x="0" y="85" class="plot-label">-3 dB</text>
+              <text x="150" y="140" class="fc-text" id="lbl-fc-plot">159.15 Hz</text>
+            </svg>
+          </div>
+
+          <div class="result-box">
+            <span>Cutoff Frequency (ƒc)</span>
+            <strong id="out-result">159.15 Hz</strong>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>Understanding RC Filters</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Concept</h3>
+      <p style="margin-bottom: 1.5rem;">
+        An RC circuit consists of a Resistor and a Capacitor. Because capacitors react differently to signals depending on their frequency (acting like a block to DC and a short circuit to high-frequency AC), we can use them to filter out unwanted noise from our signals.
+      </p>
+
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Low-Pass Filter:</strong> Allows low frequencies to pass through but blocks high frequencies. Excellent for removing high-frequency noise from analog sensor readings.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">High-Pass Filter:</strong> Allows high frequencies to pass and blocks low frequencies. Often used in audio circuits to remove DC offset or low rumble.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Math</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The crucial characteristic of a filter is its <strong>Cutoff Frequency (ƒc)</strong>, also known as the -3dB point. This is the exact frequency where the output signal loses half its power. It is calculated identically for both Low and High pass configurations:<br><br>
+        <code style="font-size: 1.1rem; padding: 0.5rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: inline-block;">ƒc = 1 / (2 × π × R × C)</code>
+      </p>
+    </div>
+  </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    let filterType = 'lp'; // lp or hp
+
+    const els = {
+      r: document.getElementById('input-r'),
+      ur: document.getElementById('unit-r'),
+      c: document.getElementById('input-c'),
+      uc: document.getElementById('unit-c'),
+      out: document.getElementById('out-result'),
+      plotLbl: document.getElementById('lbl-fc-plot'),
+      curve: document.getElementById('curve-path'),
+      fill: document.getElementById('curve-fill'),
+      tabLp: document.getElementById('tab-lp'),
+      tabHp: document.getElementById('tab-hp')
+    };
+
+    function setFilter(type) {
+      filterType = type;
+      if(type === 'lp') {
+        els.tabLp.classList.add('active');
+        els.tabHp.classList.remove('active');
+      } else {
+        els.tabHp.classList.add('active');
+        els.tabLp.classList.remove('active');
+      }
+      calculate();
+    }
+
+    function formatFrequency(hz) {
+      if (hz >= 1000000) return (hz / 1000000).toFixed(2) + ' MHz';
+      if (hz >= 1000) return (hz / 1000).toFixed(2) + ' kHz';
+      return hz.toFixed(2) + ' Hz';
+    }
+
+    function drawPlot() {
+      // SVG viewBox is 300x150. Cutoff is at X=150, Y=90 (-3dB)
+      // 0dB is at Y=30
+      
+      let dLine, dFill;
+
+      if(filterType === 'lp') {
+        // Flat until middle, then rolls off downwards
+        dLine = "M 0,30 Q 130,30 150,90 T 300,200";
+        dFill = dLine + " L 300,150 L 0,150 Z";
+      } else {
+        // Rolls up from bottom left, hits -3dB at middle, then flat
+        dLine = "M 0,200 Q 130,150 150,90 T 300,30";
+        dFill = dLine + " L 300,150 L 0,150 Z";
+      }
+
+      els.curve.setAttribute('d', dLine);
+      els.fill.setAttribute('d', dFill);
+    }
+
+    function calculate() {
+      const r = parseFloat(els.r.value) || 0;
+      const ur = parseFloat(els.ur.value) || 1;
+      const c = parseFloat(els.c.value) || 0;
+      const uc = parseFloat(els.uc.value) || 1;
+
+      const rOhms = r * ur;
+      const cFarads = c * uc;
+
+      if (rOhms > 0 && cFarads > 0) {
+        const fc = 1 / (2 * Math.PI * rOhms * cFarads);
+        const formatted = formatFrequency(fc);
+        els.out.innerText = formatted;
+        els.plotLbl.innerText = formatted;
+      } else {
+        els.out.innerText = "--";
+        els.plotLbl.innerText = "--";
+      }
+
+      drawPlot();
+    }
+
+    // Event Listeners
+    [els.r, els.ur, els.c, els.uc].forEach(input => {
+      input.addEventListener('input', calculate);
+      input.addEventListener('change', calculate);
+    });
+
+    // Init
+    calculate();
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
