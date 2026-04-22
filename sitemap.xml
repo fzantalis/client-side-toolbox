@@ -255,6 +255,46 @@
   <priority>0.80</priority>
 </url>
 <url>
+  <loc>https://zantalis.net/demo-555-timer.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-iot-battery.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-led-matrix.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-neopixel-power.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-ohms-law.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-rc-filter.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-resistor-calculator.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://zantalis.net/demo-voltage-divider.html</loc>
+  <lastmod>2026-04-22T15:59:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://zantalis.net/privacy.html</loc>
   <lastmod>2026-04-01T07:28:27+00:00</lastmod>
   <priority>0.80</priority>
@@ -269,5 +309,4 @@
   <lastmod>2026-04-16T14:35:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
-
 </urlset>
