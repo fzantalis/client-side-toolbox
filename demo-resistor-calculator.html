@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Resistor Color Code Calculator | Free Ohms to Colors Tool</title>
+  <meta name="title" content="Resistor Color Code Calculator | Free Ohms to Colors Tool">
+  <meta name="description" content="Calculate standard 4-band resistor color codes instantly. Enter the resistance in ohms to generate a beautiful, accurate CSS resistor graphic. A free client-side tool.">
+  <meta name="keywords" content="resistor color code, resistor calculator, ohms to colors, 4 band resistor, color code calculator, electronics tool, client-side, browser-based tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-resistor-calculator.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-resistor-calculator.html">
+  <meta property="og:title" content="Resistor Color Code Calculator | Free Ohms to Colors Tool">
+  <meta property="og:description" content="Calculate standard 4-band resistor color codes instantly. Enter the resistance in ohms to generate a beautiful, accurate CSS resistor graphic. A free client-side tool.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-resistor-calculator.html">
+  <meta property="twitter:title" content="Resistor Color Code Calculator | Free Ohms to Colors Tool">
+  <meta property="twitter:description" content="Calculate standard 4-band resistor color codes instantly. Enter the resistance in ohms to generate a beautiful, accurate CSS resistor graphic. A free client-side tool.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <style>
+    /* Custom Inputs */
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .input-row > div:first-child { flex: 2; }
+    .input-row > div:last-child { flex: 1; }
+
+    /* CSS Resistor Graphic */
+    .resistor-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 0 2rem;
+      overflow: hidden;
+    }
+    .resistor {
+      position: relative;
+      width: 220px;
+      height: 65px;
+      background: #e8d0a9; /* Classic beige/tan body */
+      border-radius: 18px;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 15px;
+      box-shadow: 
+        inset 0 -8px 12px rgba(0,0,0,0.15), 
+        inset 0 4px 8px rgba(255,255,255,0.4),
+        0 4px 6px rgba(0,0,0,0.05);
+      z-index: 2;
+    }
+    .resistor::before, .resistor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 80px;
+      height: 6px;
+      background: #94a3b8; /* Wire color */
+      transform: translateY(-50%);
+      z-index: -1;
+      box-shadow: inset 0 -2px 3px rgba(0,0,0,0.2);
+    }
+    .resistor::before { left: -75px; border-radius: 3px 0 0 3px; }
+    .resistor::after { right: -75px; border-radius: 0 3px 3px 0; }
+    
+    .band-group-main {
+      display: flex;
+      gap: 12px;
+      height: 100%;
+      margin-left: 10px;
+    }
+    .band-group-tol {
+      display: flex;
+      height: 100%;
+      margin-right: 10px;
+    }
+    .band {
+      width: 14px;
+      height: 100%;
+      opacity: 0.95;
+      box-shadow: 1px 0 2px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Color breakdown list */
+    .color-details-grid {
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    .color-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .color-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .color-dot {
+      width: 18px; 
+      height: 18px; 
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+    .band-title { font-size: 0.85rem; color: var(--text-muted); width: 80px;}
+    .color-name { font-weight: 600; font-size: 0.95rem; color: var(--text-main); }
+    .color-value { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-lightning"></i></div>
+      <div class="tool-header-text">
+        <h1>Resistor Color Code</h1>
+        <p>Convert ohms to color bands instantly with our interactive visual calculator.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header"><h3>Enter Resistance</h3></div>
+        <div class="panel-body">
+          
+          <div class="form-group">
+            <label for="resistor-value">Resistance Value</label>
+            <div class="input-row">
+              <input type="number" id="resistor-value" class="form-control" value="4.7" step="any" min="0">
+              <select id="resistor-unit" class="form-control">
+                <option value="1">Ω</option>
+                <option value="1000" selected>kΩ</option>
+                <option value="1000000">MΩ</option>
+                <option value="1000000000">GΩ</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="resistor-tolerance">Tolerance</label>
+            <select id="resistor-tolerance" class="form-control">
+              <option value="1">±1% (Brown)</option>
+              <option value="2">±2% (Red)</option>
+              <option value="0.5">±0.5% (Green)</option>
+              <option value="0.25">±0.25% (Blue)</option>
+              <option value="0.1">±0.1% (Violet)</option>
+              <option value="5" selected>±5% (Gold)</option>
+              <option value="10">±10% (Silver)</option>
+            </select>
+          </div>
+
+          <p id="error-message" class="error-text" style="display:none; padding: 1rem; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem;">
+            Value out of range for standard 4-band resistors.
+          </p>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Resistor Graphic</h3></div>
+        <div class="panel-body" style="padding-bottom: 2rem;">
+          
+          <div class="resistor-container">
+            <div class="resistor">
+              <div class="band-group-main">
+                <div class="band" id="band-1" style="background-color: #FFFF00;"></div>
+                <div class="band" id="band-2" style="background-color: #EE82EE;"></div>
+                <div class="band" id="band-3" style="background-color: #FF0000;"></div>
+              </div>
+              <div class="band-group-tol">
+                <div class="band" id="band-4" style="background-color: #FFD700;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="color-breakdown" class="color-details-grid">
+            </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the Resistor Color Code Calculator</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How to Read a 4-Band Resistor</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Through-hole resistors use painted color bands to indicate their resistance value and tolerance. This system was developed because printing tiny numbers on small, cylindrical components was difficult and prone to wearing off. The standard 4-band system is read as follows:
+      </p>
+
+      <ol style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Band 1 (1st Digit):</strong> Represents the first significant digit of the resistance value.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Band 2 (2nd Digit):</strong> Represents the second significant digit.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Band 3 (Multiplier):</strong> Tells you how many zeros to add to the first two digits (or what power of 10 to multiply them by).</li>
+        <li><strong style="color: var(--text-main);">Band 4 (Tolerance):</strong> Located slightly apart from the others, this band indicates the precision of the resistor (e.g., ±5% means the actual resistance can vary by 5% above or below the stated value).</li>
+      </ol>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why use this tool?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Calculating color codes manually requires memorizing a table of colors ranging from Black (0) to White (9), plus multipliers and tolerances. This client-side tool allows makers, electrical engineers, and students to simply type in their desired resistance (like "4.7 kΩ") and instantly see the correct color bands mapped onto a CSS-drawn resistor. No server calls are made, ensuring a lightning-fast experience.
+      </p>
+    </div>
+  </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    // Color dictionaries mapping numeric values to colors
+    const digitColors = {
+      0: { name: 'Black', hex: '#262626' },
+      1: { name: 'Brown', hex: '#8B4513' },
+      2: { name: 'Red', hex: '#EF4444' },
+      3: { name: 'Orange', hex: '#F97316' },
+      4: { name: 'Yellow', hex: '#EAB308' },
+      5: { name: 'Green', hex: '#22C55E' },
+      6: { name: 'Blue', hex: '#3B82F6' },
+      7: { name: 'Violet', hex: '#A855F7' },
+      8: { name: 'Gray', hex: '#6B7280' },
+      9: { name: 'White', hex: '#F8FAFC' }
+    };
+
+    const multiplierColors = {
+      '-2': { name: 'Silver', hex: '#CBD5E1' },
+      '-1': { name: 'Gold', hex: '#FBBF24' },
+      '0': { name: 'Black', hex: '#262626' },
+      '1': { name: 'Brown', hex: '#8B4513' },
+      '2': { name: 'Red', hex: '#EF4444' },
+      '3': { name: 'Orange', hex: '#F97316' },
+      '4': { name: 'Yellow', hex: '#EAB308' },
+      '5': { name: 'Green', hex: '#22C55E' },
+      '6': { name: 'Blue', hex: '#3B82F6' },
+      '7': { name: 'Violet', hex: '#A855F7' },
+      '8': { name: 'Gray', hex: '#6B7280' },
+      '9': { name: 'White', hex: '#F8FAFC' }
+    };
+
+    const toleranceColors = {
+      '1': { name: 'Brown', hex: '#8B4513' },
+      '2': { name: 'Red', hex: '#EF4444' },
+      '0.5': { name: 'Green', hex: '#22C55E' },
+      '0.25': { name: 'Blue', hex: '#3B82F6' },
+      '0.1': { name: 'Violet', hex: '#A855F7' },
+      '5': { name: 'Gold', hex: '#FBBF24' },
+      '10': { name: 'Silver', hex: '#CBD5E1' }
+    };
+
+    const els = {
+      value: document.getElementById('resistor-value'),
+      unit: document.getElementById('resistor-unit'),
+      tol: document.getElementById('resistor-tolerance'),
+      error: document.getElementById('error-message'),
+      band1: document.getElementById('band-1'),
+      band2: document.getElementById('band-2'),
+      band3: document.getElementById('band-3'),
+      band4: document.getElementById('band-4'),
+      breakdown: document.getElementById('color-breakdown')
+    };
+
+    function calculateResistor() {
+      const val = parseFloat(els.value.value);
+      const unit = parseFloat(els.unit.value);
+      const tolVal = els.tol.value;
+
+      if (isNaN(val) || val <= 0) {
+        els.error.style.display = 'block';
+        return;
+      }
+
+      let ohms = val * unit;
+      
+      // Calculate significant digits and multiplier
+      let exponent = Math.floor(Math.log10(ohms));
+      let base = ohms / Math.pow(10, exponent);
+      
+      let sigFigs = Math.round(base * 10);
+      let multiplierPower = exponent - 1;
+
+      // Handle rounding edge case (e.g., 99.9 -> 100)
+      if (sigFigs >= 100) {
+         sigFigs = Math.round(sigFigs / 10);
+         multiplierPower += 1;
+      }
+
+      let digit1 = Math.floor(sigFigs / 10);
+      let digit2 = sigFigs % 10;
+
+      // Bounds check for 4-band multiplier
+      if (multiplierPower < -2 || multiplierPower > 9 || isNaN(digit1) || isNaN(digit2)) {
+        els.error.style.display = 'block';
+        els.breakdown.innerHTML = '';
+        return;
+      }
+
+      els.error.style.display = 'none';
+
+      // Map to colors
+      const color1 = digitColors[digit1];
+      const color2 = digitColors[digit2];
+      const color3 = multiplierColors[multiplierPower];
+      const color4 = toleranceColors[tolVal];
+
+      // Update UI Graphic
+      els.band1.style.backgroundColor = color1.hex;
+      els.band2.style.backgroundColor = color2.hex;
+      els.band3.style.backgroundColor = color3.hex;
+      els.band4.style.backgroundColor = color4.hex;
+
+      // Format Multiplier Label beautifully
+      let multLabel = multiplierPower >= 0 ? `× 10^${multiplierPower} Ω` : (multiplierPower === -1 ? '× 0.1 Ω' : '× 0.01 Ω');
+
+      // Update Breakdown List
+      els.breakdown.innerHTML = `
+        <div class="color-row">
+          <div class="color-info">
+            <span class="color-dot" style="background-color: ${color1.hex}"></span>
+            <span class="band-title">1st Band</span>
+            <span class="color-name">${color1.name}</span>
+          </div>
+          <span class="color-value">Digit: ${digit1}</span>
+        </div>
+        <div class="color-row">
+          <div class="color-info">
+            <span class="color-dot" style="background-color: ${color2.hex}"></span>
+            <span class="band-title">2nd Band</span>
+            <span class="color-name">${color2.name}</span>
+          </div>
+          <span class="color-value">Digit: ${digit2}</span>
+        </div>
+        <div class="color-row">
+          <div class="color-info">
+            <span class="color-dot" style="background-color: ${color3.hex}"></span>
+            <span class="band-title">Multiplier</span>
+            <span class="color-name">${color3.name}</span>
+          </div>
+          <span class="color-value">${multLabel}</span>
+        </div>
+        <div class="color-row">
+          <div class="color-info">
+            <span class="color-dot" style="background-color: ${color4.hex}"></span>
+            <span class="band-title">Tolerance</span>
+            <span class="color-name">${color4.name}</span>
+          </div>
+          <span class="color-value">±${tolVal}%</span>
+        </div>
+      `;
+    }
+
+    // Attach Event Listeners
+    els.value.addEventListener('input', calculateResistor);
+    els.unit.addEventListener('change', calculateResistor);
+    els.tol.addEventListener('change', calculateResistor);
+
+    // Initial calculation on load
+    calculateResistor();
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
