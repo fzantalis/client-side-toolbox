@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>555 Timer Astable Calculator | Free Electronics Tool</title>
+  <meta name="title" content="555 Timer Astable Calculator | Free Electronics Tool">
+  <meta name="description" content="Calculate frequency, duty cycle, and pulse widths for a 555 timer in astable mode. Features an interactive, real-time waveform graph. A free client-side tool.">
+  <meta name="keywords" content="555 timer calculator, astable multivibrator, frequency calculator, duty cycle, electronics tools, client-side, browser-based tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-555-timer.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-555-timer.html">
+  <meta property="og:title" content="555 Timer Astable Calculator | Free Electronics Tool">
+  <meta property="og:description" content="Calculate frequency, duty cycle, and pulse widths for a 555 timer in astable mode. Features an interactive, real-time waveform graph. A free client-side tool.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-555-timer.html">
+  <meta property="twitter:title" content="555 Timer Astable Calculator | Free Electronics Tool">
+  <meta property="twitter:description" content="Calculate frequency, duty cycle, and pulse widths for a 555 timer in astable mode. Features an interactive, real-time waveform graph. A free client-side tool.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <style>
+    /* Custom Inputs */
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .input-suffix {
+      position: absolute;
+      right: 1rem;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    /* Output Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .metric-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .metric-value {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* Waveform Display */
+    .waveform-container {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #waveform-svg {
+      width: 100%;
+      height: 100px;
+    }
+    .wave-line {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 3;
+      stroke-linejoin: round;
+      transition: d 0.2s ease;
+    }
+    .wave-fill {
+      fill: var(--primary);
+      opacity: 0.1;
+      transition: d 0.2s ease;
+    }
+    
+    [data-theme="dark"] .wave-fill { opacity: 0.2; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-wave-sine"></i></div>
+      <div class="tool-header-text">
+        <h1>555 Timer Astable Calculator</h1>
+        <p>Design your oscillator circuit and visualize the output waveform in real-time.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header"><h3>Circuit Parameters</h3></div>
+        <div class="panel-body">
+          
+          <div class="form-group">
+            <label for="input-r1">Resistor 1 (R1)</label>
+            <div class="input-group">
+              <input type="number" id="input-r1" class="form-control" value="1" step="any" min="0">
+              <span class="input-suffix">kΩ</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-r2">Resistor 2 (R2)</label>
+            <div class="input-group">
+              <input type="number" id="input-r2" class="form-control" value="10" step="any" min="0.001">
+              <span class="input-suffix">kΩ</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-c">Capacitor (C1)</label>
+            <div class="input-group">
+              <input type="number" id="input-c" class="form-control" value="10" step="any" min="0.001">
+              <span class="input-suffix">µF</span>
+            </div>
+          </div>
+
+          <p id="error-message" class="error-text" style="display:none; padding: 1rem; border-radius: 8px; font-size: 0.9rem;">
+            R2 and C1 must be greater than zero.
+          </p>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Output Signals</h3></div>
+        <div class="panel-body">
+          
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-value" id="out-freq">--</div>
+              <div class="metric-label">Frequency</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="out-duty">--</div>
+              <div class="metric-label">Duty Cycle</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="out-high">--</div>
+              <div class="metric-label">Time High (t1)</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="out-low">--</div>
+              <div class="metric-label">Time Low (t2)</div>
+            </div>
+          </div>
+
+          <div class="waveform-container">
+            <svg id="waveform-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+              <path class="wave-fill" id="wave-fill-path" d="" />
+              <path class="wave-line" id="wave-line-path" d="" />
+            </svg>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the 555 Astable Multivibrator</h2>
+    </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">What is Astable Mode?</h3>
+      <p style="margin-bottom: 1.5rem;">
+        When configured in <strong>astable mode</strong>, the 555 timer IC acts as an oscillator (a continuous square wave generator). It has no stable state—it continuously toggles its output between HIGH and LOW without requiring any external trigger. This makes it perfect for flashing LEDs, generating clock pulses for digital circuits, or creating basic synthesizer tones.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Math Behind the Magic</h3>
+      <p style="margin-bottom: 1rem;">The characteristics of the output wave are completely controlled by the three external components you specify above: R1, R2, and C1.</p>
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Time High (t1):</strong> The time the output remains HIGH. <br><code>t1 = 0.693 × (R1 + R2) × C1</code></li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Time Low (t2):</strong> The time the output remains LOW. <br><code>t2 = 0.693 × R2 × C1</code></li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Period (T):</strong> Total time for one complete cycle. <br><code>T = t1 + t2</code></li>
+        <li><strong style="color: var(--text-main);">Frequency (f):</strong> How many cycles happen per second. <br><code>f = 1.44 / ((R1 + 2×R2) × C1)</code></li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Design Tips</h3>
+      <p style="margin-bottom: 1.5rem;">
+        In a standard 555 astable circuit, the duty cycle (the percentage of time the signal is HIGH) will always be greater than 50%. This is because capacitor charging goes through R1 + R2, while discharging only goes through R2. If you need a duty cycle of exactly 50% or less, you typically need to add a signal diode in parallel with R2 to bypass it during the charging phase.
+      </p>
+    </div>
+  </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    const els = {
+      r1: document.getElementById('input-r1'),
+      r2: document.getElementById('input-r2'),
+      c: document.getElementById('input-c'),
+      err: document.getElementById('error-message'),
+      freq: document.getElementById('out-freq'),
+      duty: document.getElementById('out-duty'),
+      high: document.getElementById('out-high'),
+      low: document.getElementById('out-low'),
+      waveLine: document.getElementById('wave-line-path'),
+      waveFill: document.getElementById('wave-fill-path')
+    };
+
+    function formatNumber(num, isFreq = false) {
+      if (num >= 1000000) return (num / 1000000).toFixed(2) + (isFreq ? ' MHz' : ' s');
+      if (num >= 1000) return (num / 1000).toFixed(2) + (isFreq ? ' kHz' : ' s');
+      if (num < 1 && !isFreq) return (num * 1000).toFixed(2) + ' µs';
+      return num.toFixed(2) + (isFreq ? ' Hz' : ' ms');
+    }
+
+    function drawWaveform(dutyCycle) {
+      const w = 200; // SVG viewBox width
+      const h = 100; // SVG viewBox height
+      const padY = 20; // Padding top/bottom
+      const yHigh = padY;
+      const yLow = h - padY;
+      
+      // Draw 2 complete cycles
+      const cycles = 2;
+      const cycleWidth = w / cycles;
+      const highWidth = cycleWidth * (dutyCycle / 100);
+      
+      let d = `M 0,${yLow} `; // Start bottom left
+
+      for(let i=0; i<cycles; i++) {
+        const startX = i * cycleWidth;
+        d += `L ${startX},${yHigh} `;                 // Rise
+        d += `L ${startX + highWidth},${yHigh} `;     // High flat
+        d += `L ${startX + highWidth},${yLow} `;      // Fall
+        d += `L ${startX + cycleWidth},${yLow} `;     // Low flat
+      }
+
+      els.waveLine.setAttribute('d', d);
+
+      // Create a closed path for the faint fill
+      const dFill = d + `L ${w},${h} L 0,${h} Z`;
+      els.waveFill.setAttribute('d', dFill);
+    }
+
+    function calculate() {
+      const r1 = parseFloat(els.r1.value);
+      const r2 = parseFloat(els.r2.value);
+      const c = parseFloat(els.c.value);
+
+      if (isNaN(r1) || isNaN(r2) || isNaN(c) || r2 <= 0 || c <= 0 || r1 < 0) {
+        els.err.style.display = 'block';
+        els.freq.innerText = '--';
+        els.duty.innerText = '--';
+        els.high.innerText = '--';
+        els.low.innerText = '--';
+        drawWaveform(50); // Default flat visual
+        return;
+      }
+
+      els.err.style.display = 'none';
+
+      // Math (assuming R in kOhms, C in uF -> yields ms)
+      const tHigh = 0.693 * (r1 + r2) * c;
+      const tLow = 0.693 * r2 * c;
+      const tPeriod = tHigh + tLow;
+      
+      // Convert ms period to Hz
+      const frequency = 1000 / tPeriod; 
+      const dutyCycle = (tHigh / tPeriod) * 100;
+
+      // Update DOM
+      els.high.innerText = formatNumber(tHigh);
+      els.low.innerText = formatNumber(tLow);
+      els.freq.innerText = formatNumber(frequency, true);
+      els.duty.innerText = dutyCycle.toFixed(1) + '%';
+
+      drawWaveform(dutyCycle);
+    }
+
+    // Attach Event Listeners
+    [els.r1, els.r2, els.c].forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    // Initial calculation on load
+    calculate();
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
