@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>LED Matrix Glyph Generator | Free Electronics Tool</title>
+  <meta name="title" content="LED Matrix Glyph Generator | Free Electronics Tool">
+  <meta name="description" content="Draw custom icons on an 8x8 grid and instantly generate the C++ byte arrays for Arduino OLEDs and LED matrices. A free client-side tool.">
+  <meta name="keywords" content="led matrix generator, oled glyph generator, arduino array, 8x8 matrix, electronics tool, client-side, browser-based tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-led-matrix.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-led-matrix.html">
+  <meta property="og:title" content="LED Matrix Glyph Generator | Free Electronics Tool">
+  <meta property="og:description" content="Draw custom icons on an 8x8 grid and instantly generate the C++ byte arrays for Arduino OLEDs and LED matrices. A free client-side tool.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-led-matrix.html">
+  <meta property="twitter:title" content="LED Matrix Glyph Generator | Free Electronics Tool">
+  <meta property="twitter:description" content="Draw custom icons on an 8x8 grid and instantly generate the C++ byte arrays for Arduino OLEDs and LED matrices. A free client-side tool.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <style>
+    .matrix-container { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+    .matrix-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; background: var(--border); padding: 4px; border-radius: 8px; width: fit-content; user-select: none; }
+    .pixel { width: 32px; height: 32px; background: var(--card-bg); border-radius: 4px; cursor: pointer; transition: background 0.1s; border: 1px solid rgba(0,0,0,0.05); }
+    .pixel.on { background: var(--primary); box-shadow: 0 0 8px rgba(59, 130, 246, 0.5); }
+    
+    .code-output { width: 100%; height: 220px; font-family: 'Fira Code', monospace; font-size: 0.9rem; padding: 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); resize: none; margin-bottom: 1rem; }
+    .code-output:focus { outline: none; border-color: var(--primary); }
+
+    .btn-group { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; }
+    .btn { padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); transition: all 0.2s; font-family: inherit;}
+    .btn:hover { background: var(--bg); border-color: var(--text-muted); }
+    .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-primary:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-grid-four"></i></div>
+      <div class="tool-header-text">
+        <h1>LED Matrix Glyph Generator</h1>
+        <p>Draw icons on the 8x8 canvas to generate C++ code for Arduino.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header"><h3>Draw Canvas</h3></div>
+        <div class="panel-body" style="align-items: center;">
+          <div class="matrix-container">
+            <div class="matrix-grid" id="pixel-grid">
+              </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn" onclick="clearGrid()">Clear</button>
+            <button class="btn" onclick="invertGrid()">Invert</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>C++ Byte Array</h3></div>
+        <div class="panel-body">
+          <textarea class="code-output" id="code-out" readonly></textarea>
+          <button class="btn btn-primary" onclick="copyCode()" style="width: 100%;">Copy to Clipboard</button>
+        </div>
+      </div>
+
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+      <div class="section-header">
+        <i class="ph ph-article"></i>
+        <h2>About LED Matrices and Byte Arrays</h2>
+      </div>
+      
+      <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why convert graphics to code?</h3>
+        <p style="margin-bottom: 1.5rem;">
+          Microcontrollers like the Arduino UNO or ESP32 don't have the memory or operating systems to load standard image files like PNGs or JPEGs to display on tiny OLED screens (like the popular SSD1306) or 8x8 LED matrices (like the MAX7219). Instead, graphics must be hardcoded directly into your C++ sketch.
+        </p>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How the Byte Array Works</h3>
+        <p style="margin-bottom: 1rem;">
+          In computer science, a "Byte" is made up of 8 "Bits". A bit is simply a 1 or a 0. Because our LED matrix is 8 pixels wide, one entire row of LEDs fits perfectly into a single Byte of data:
+        </p>
+        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">1 = LED ON</strong></li>
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">0 = LED OFF</strong></li>
+        </ul>
+        <p style="margin-bottom: 1.5rem;">
+          For example, the code <code>B10000001</code> tells the microcontroller to turn on the first and last pixel of that row, leaving the middle six off. By grouping 8 of these bytes together into an array, you can define a complete 8x8 custom character.
+        </p>
+      </div>
+    </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    const grid = document.getElementById('pixel-grid');
+    const out = document.getElementById('code-out');
+    let isDrawing = false;
+    let drawMode = true; 
+
+    for(let i=0; i<64; i++) {
+      const px = document.createElement('div');
+      px.className = 'pixel';
+      px.dataset.index = i;
+      
+      px.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        drawMode = !px.classList.contains('on');
+        togglePixel(px, drawMode);
+      });
+      px.addEventListener('mouseenter', (e) => {
+        if(isDrawing) togglePixel(px, drawMode);
+      });
+      
+      grid.appendChild(px);
+    }
+
+    document.addEventListener('mouseup', () => isDrawing = false);
+
+    function togglePixel(el, forceState) {
+      if(forceState) el.classList.add('on');
+      else el.classList.remove('on');
+      generateCode();
+    }
+
+    function clearGrid() {
+      document.querySelectorAll('.pixel').forEach(px => px.classList.remove('on'));
+      generateCode();
+    }
+
+    function invertGrid() {
+      document.querySelectorAll('.pixel').forEach(px => px.classList.toggle('on'));
+      generateCode();
+    }
+
+    function generateCode() {
+      const pixels = Array.from(document.querySelectorAll('.pixel'));
+      let bytes = [];
+      
+      for(let row=0; row<8; row++) {
+        let binaryStr = "";
+        for(let col=0; col<8; col++) {
+          const idx = (row * 8) + col;
+          binaryStr += pixels[idx].classList.contains('on') ? "1" : "0";
+        }
+        bytes.push("B" + binaryStr);
+      }
+
+      const code = `byte customChar[8] = {\n  ${bytes[0]},\n  ${bytes[1]},\n  ${bytes[2]},\n  ${bytes[3]},\n  ${bytes[4]},\n  ${bytes[5]},\n  ${bytes[6]},\n  ${bytes[7]}\n};`;
+      out.value = code;
+    }
+
+    function copyCode() {
+      out.select();
+      document.execCommand('copy');
+    }
+
+    generateCode();
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
