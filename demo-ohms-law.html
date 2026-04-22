@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>Ohm's Law & Power Calculator | Free Electronics Tool</title>
+  <meta name="title" content="Ohm's Law & Power Calculator | Free Electronics Tool">
+  <meta name="description" content="The ultimate Ohm's Law cheat sheet. Enter any two values (V, I, R, P) to instantly calculate the rest and see the active formulas. A free client-side tool.">
+  <meta name="keywords" content="ohms law calculator, power wheel, voltage current resistance power, electronics tool, client-side, browser-based tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-ohms-law.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-ohms-law.html">
+  <meta property="og:title" content="Ohm's Law & Power Calculator | Free Electronics Tool">
+  <meta property="og:description" content="The ultimate Ohm's Law cheat sheet. Enter any two values (V, I, R, P) to instantly calculate the rest and see the active formulas. A free client-side tool.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-ohms-law.html">
+  <meta property="twitter:title" content="Ohm's Law & Power Calculator | Free Electronics Tool">
+  <meta property="twitter:description" content="The ultimate Ohm's Law cheat sheet. Enter any two values (V, I, R, P) to instantly calculate the rest and see the active formulas. A free client-side tool.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <style>
+    /* Cleanly hide native number input arrows */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    .form-control { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 0.95rem; transition: all 0.2s ease; }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+    .input-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+    .input-box { flex: 2; position: relative; display: flex; }
+    .input-suffix { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-family: 'Fira Code', monospace; pointer-events: none; }
+
+    /* Formula Board Styles */
+    .formula-board { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .quadrant { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
+    .quadrant-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.75rem; }
+    .formula-item { font-family: 'Fira Code', monospace; padding: 0.5rem; border-radius: 6px; color: var(--text-muted); transition: all 0.3s ease; margin-bottom: 0.25rem; border: 1px solid transparent; }
+    
+    .formula-item.active { background: var(--card-bg); color: var(--primary); border-color: var(--primary); box-shadow: var(--shadow-sm); font-weight: 600; transform: scale(1.02); }
+
+    .btn-clear { width: 100%; padding: 0.75rem; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .btn-clear:hover { background: var(--bg); color: var(--text-main); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-math-operations"></i></div>
+      <div class="tool-header-text">
+        <h1>Ohm's Law Master</h1>
+        <p>Enter any two known values to instantly solve for the remaining two.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header"><h3>Input Values</h3></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Voltage (V)</label>
+            <div class="input-row"><div class="input-box"><input type="number" id="in-v" class="form-control calc-input" step="any"><span class="input-suffix">V</span></div></div>
+          </div>
+          <div class="form-group">
+            <label>Current (I)</label>
+            <div class="input-row"><div class="input-box"><input type="number" id="in-i" class="form-control calc-input" step="any"><span class="input-suffix">A</span></div></div>
+          </div>
+          <div class="form-group">
+            <label>Resistance (R)</label>
+            <div class="input-row"><div class="input-box"><input type="number" id="in-r" class="form-control calc-input" step="any"><span class="input-suffix">Ω</span></div></div>
+          </div>
+          <div class="form-group">
+            <label>Power (P)</label>
+            <div class="input-row"><div class="input-box"><input type="number" id="in-p" class="form-control calc-input" step="any"><span class="input-suffix">W</span></div></div>
+          </div>
+          <button class="btn-clear" onclick="clearInputs()">Clear All</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Active Formulas</h3></div>
+        <div class="panel-body">
+          <div class="formula-board">
+            <div class="quadrant" id="quad-v">
+              <div class="quadrant-title">Voltage (V)</div>
+              <div class="formula-item" id="f-v-ir">V = I × R</div>
+              <div class="formula-item" id="f-v-pi">V = P / I</div>
+              <div class="formula-item" id="f-v-pr">V = √(P × R)</div>
+            </div>
+            <div class="quadrant" id="quad-i">
+              <div class="quadrant-title">Current (I)</div>
+              <div class="formula-item" id="f-i-vr">I = V / R</div>
+              <div class="formula-item" id="f-i-pv">I = P / V</div>
+              <div class="formula-item" id="f-i-pr">I = √(P / R)</div>
+            </div>
+            <div class="quadrant" id="quad-r">
+              <div class="quadrant-title">Resistance (R)</div>
+              <div class="formula-item" id="f-r-vi">R = V / I</div>
+              <div class="formula-item" id="f-r-pv">R = V² / P</div>
+              <div class="formula-item" id="f-r-pi">R = P / I²</div>
+            </div>
+            <div class="quadrant" id="quad-p">
+              <div class="quadrant-title">Power (P)</div>
+              <div class="formula-item" id="f-p-vi">P = V × I</div>
+              <div class="formula-item" id="f-p-ir">P = I² × R</div>
+              <div class="formula-item" id="f-p-vr">P = V² / R</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+      <div class="section-header">
+        <i class="ph ph-article"></i>
+        <h2>About Ohm's Law and the Power Wheel</h2>
+      </div>
+      
+      <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Core of Electronics</h3>
+        <p style="margin-bottom: 1.5rem;">
+          Ohm's Law is the foundational mathematical relationship that governs all electrical circuits. It states that the current passing through a conductor between two points is directly proportional to the voltage across those two points. 
+        </p>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Four Variables</h3>
+        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Voltage (V):</strong> Measured in Volts, this is the electrical "pressure" pushing the electrons through the circuit.</li>
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Current (I):</strong> Measured in Amperes (Amps), this is the actual flow rate of the electrons.</li>
+          <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Resistance (R):</strong> Measured in Ohms (Ω), this is the restriction or friction opposing the flow of electrons.</li>
+          <li><strong style="color: var(--text-main);">Power (P):</strong> Measured in Watts (W), this is the rate at which electrical energy is transferred by the circuit (such as heat generated by a resistor or light from an LED).</li>
+        </ul>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How to Use This Tool</h3>
+        <p style="margin-bottom: 1.5rem;">
+          The "Power Wheel" combines Ohm's Law (V = I × R) and Joule's Law (P = V × I) into 12 algebraic variations. Because these four variables are mathematically locked together, you only ever need to know <strong>two</strong> of them to figure out the remaining two. Simply type your two known values into the calculator above, and it will instantly solve the rest while highlighting the exact formulas used to get the answer.
+        </p>
+      </div>
+    </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    const inputs = {
+      v: document.getElementById('in-v'),
+      i: document.getElementById('in-i'),
+      r: document.getElementById('in-r'),
+      p: document.getElementById('in-p')
+    };
+
+    function clearInputs() {
+      Object.values(inputs).forEach(input => { input.value = ''; input.style.borderColor = 'var(--border)'; });
+      document.querySelectorAll('.formula-item').forEach(el => el.classList.remove('active'));
+    }
+
+    function calculate() {
+      let v = parseFloat(inputs.v.value);
+      let i = parseFloat(inputs.i.value);
+      let r = parseFloat(inputs.r.value);
+      let p = parseFloat(inputs.p.value);
+
+      let knowns = 0;
+      if (!isNaN(v)) knowns++;
+      if (!isNaN(i)) knowns++;
+      if (!isNaN(r)) knowns++;
+      if (!isNaN(p)) knowns++;
+
+      document.querySelectorAll('.formula-item').forEach(el => el.classList.remove('active'));
+      Object.values(inputs).forEach(input => {
+         if(input.value) input.style.borderColor = 'var(--primary)';
+         else input.style.borderColor = 'var(--border)';
+      });
+
+      if (knowns < 2) return; 
+
+      if (!isNaN(v) && !isNaN(i)) {
+        inputs.r.value = (v / i).toFixed(4);
+        inputs.p.value = (v * i).toFixed(4);
+        document.getElementById('f-r-vi').classList.add('active');
+        document.getElementById('f-p-vi').classList.add('active');
+      } 
+      else if (!isNaN(v) && !isNaN(r)) {
+        inputs.i.value = (v / r).toFixed(4);
+        inputs.p.value = ((v * v) / r).toFixed(4);
+        document.getElementById('f-i-vr').classList.add('active');
+        document.getElementById('f-p-vr').classList.add('active');
+      }
+      else if (!isNaN(v) && !isNaN(p)) {
+        inputs.i.value = (p / v).toFixed(4);
+        inputs.r.value = ((v * v) / p).toFixed(4);
+        document.getElementById('f-i-pv').classList.add('active');
+        document.getElementById('f-r-pv').classList.add('active');
+      }
+      else if (!isNaN(i) && !isNaN(r)) {
+        inputs.v.value = (i * r).toFixed(4);
+        inputs.p.value = ((i * i) * r).toFixed(4);
+        document.getElementById('f-v-ir').classList.add('active');
+        document.getElementById('f-p-ir').classList.add('active');
+      }
+      else if (!isNaN(i) && !isNaN(p)) {
+        inputs.v.value = (p / i).toFixed(4);
+        inputs.r.value = (p / (i * i)).toFixed(4);
+        document.getElementById('f-v-pi').classList.add('active');
+        document.getElementById('f-r-pi').classList.add('active');
+      }
+      else if (!isNaN(r) && !isNaN(p)) {
+        inputs.v.value = Math.sqrt(p * r).toFixed(4);
+        inputs.i.value = Math.sqrt(p / r).toFixed(4);
+        document.getElementById('f-v-pr').classList.add('active');
+        document.getElementById('f-i-pr').classList.add('active');
+      }
+
+      Object.values(inputs).forEach(input => {
+         if(input.value) input.value = parseFloat(input.value);
+      });
+    }
+
+    Object.values(inputs).forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
