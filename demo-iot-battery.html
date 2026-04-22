@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msvalidate.01" content="4FBB430F498C4059110E4F72221B632B" />
+  
+  <title>IoT Battery Life Estimator | Deep Sleep Calculator</title>
+  <meta name="title" content="IoT Battery Life Estimator | Deep Sleep Calculator">
+  <meta name="description" content="Calculate the estimated battery life for your ESP32, Arduino, or IoT project. Analyze active current vs. deep sleep power consumption. A free client-side tool.">
+  <meta name="keywords" content="iot battery life calculator, esp32 power calculator, deep sleep calculator, arduino battery life, electronics tool, client-side, browser-based tool">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-iot-battery.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-iot-battery.html">
+  <meta property="og:title" content="IoT Battery Life Estimator | Deep Sleep Calculator">
+  <meta property="og:description" content="Calculate the estimated battery life for your ESP32, Arduino, or IoT project. Analyze active current vs. deep sleep power consumption. A free client-side tool.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-iot-battery.html">
+  <meta property="twitter:title" content="IoT Battery Life Estimator | Deep Sleep Calculator">
+  <meta property="twitter:description" content="Calculate the estimated battery life for your ESP32, Arduino, or IoT project. Analyze active current vs. deep sleep power consumption. A free client-side tool.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+  
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <style>
+    /* Cleanly hide native number input arrows */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    /* Input Base Styles */
+    .form-control {
+      width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--bg); color: var(--text-main);
+      font-family: inherit; font-size: 0.95rem; transition: all 0.2s ease;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+    
+    /* Robust Input Grid */
+    .input-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: stretch; }
+    .input-box { flex: 2; position: relative; display: flex; }
+    .select-box { flex: 1; display: flex; }
+    
+    .input-suffix {
+      position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-family: 'Fira Code', monospace; font-size: 0.9rem; pointer-events: none;
+    }
+
+    /* Results and Donut Chart */
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .result-card { background: var(--bg); border: 1px solid var(--border); padding: 1.25rem; border-radius: 8px; text-align: center; }
+    .result-card span { display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 0.25rem; }
+    .result-card strong { font-size: 1.75rem; color: var(--primary); font-family: 'Fira Code', monospace; }
+
+    .chart-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; }
+    .donut-container {
+      display: flex; justify-content: center; align-items: center;
+      position: relative; width: 140px; height: 140px; border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      background: conic-gradient(var(--primary) 0% 50%, var(--accent) 50% 100%);
+      transition: background 0.3s ease;
+    }
+    .donut-hole {
+      position: absolute; width: 90px; height: 90px;
+      background: var(--bg); border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .donut-icon { font-size: 2rem; color: var(--text-muted); }
+
+    .legend { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-main); font-weight: 500; }
+    .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+    
+    .warning-box { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: flex-start; gap: 0.75rem; background: var(--bg); border: 1px solid var(--border); line-height: 1.5; display: none;}
+    .warn-yellow { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+    [data-theme="dark"] .warn-yellow { background: rgba(245, 158, 11, 0.1); color: #fcd34d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="breadcrumb"><i class="ph ph-arrow-left"></i> Back to Toolbox</a>
+    <header class="tool-header">
+      <div class="card-icon"><i class="ph ph-battery-charging"></i></div>
+      <div class="tool-header-text">
+        <h1>IoT Battery Life Estimator</h1>
+        <p>Calculate the true lifespan of your deep-sleeping microcontrollers.</p>
+      </div>
+    </header>
+    <main class="workspace">
+      
+      <div class="panel">
+        <div class="panel-header"><h3>Power Profile</h3></div>
+        <div class="panel-body">
+          
+          <div class="form-group">
+            <label>Battery Capacity</label>
+            <div class="input-row">
+              <div class="input-box">
+                <input type="number" id="in-batt" class="form-control" value="2500" step="any" min="1">
+                <span class="input-suffix">mAh</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--border); margin: 0.5rem 0 1.5rem;"></div>
+
+          <div class="form-group">
+            <label>Active State Current</label>
+            <div class="input-row">
+              <div class="input-box">
+                <input type="number" id="in-active-i" class="form-control" value="80" step="any" min="0">
+              </div>
+              <div class="select-box">
+                <select id="unit-active-i" class="form-control">
+                  <option value="1">mA</option>
+                  <option value="1000">A</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Time Spent Active</label>
+            <div class="input-row">
+              <div class="input-box">
+                <input type="number" id="in-active-t" class="form-control" value="5" step="any" min="0">
+              </div>
+              <div class="select-box">
+                <select id="unit-active-t" class="form-control">
+                  <option value="1">sec</option>
+                  <option value="60">min</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--border); margin: 0.5rem 0 1.5rem;"></div>
+
+          <div class="form-group">
+            <label>Deep Sleep Current</label>
+            <div class="input-row">
+              <div class="input-box">
+                <input type="number" id="in-sleep-i" class="form-control" value="10" step="any" min="0">
+              </div>
+              <div class="select-box">
+                <select id="unit-sleep-i" class="form-control">
+                  <option value="0.001">µA</option>
+                  <option value="1" selected>mA</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Time Spent Sleeping</label>
+            <div class="input-row">
+              <div class="input-box">
+                <input type="number" id="in-sleep-t" class="form-control" value="10" step="any" min="0">
+              </div>
+              <div class="select-box">
+                <select id="unit-sleep-t" class="form-control">
+                  <option value="1">sec</option>
+                  <option value="60" selected>min</option>
+                  <option value="3600">hrs</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Estimation Results</h3></div>
+        <div class="panel-body">
+          
+          <div class="result-grid">
+            <div class="result-card">
+              <span>Estimated Life</span>
+              <strong id="out-life">--</strong>
+            </div>
+            <div class="result-card">
+              <span>Average Draw</span>
+              <strong id="out-avg">--</strong>
+            </div>
+          </div>
+
+          <div class="chart-panel">
+            <h4 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">Energy Consumption Breakdown</h4>
+            <div class="donut-container" id="donut">
+              <div class="donut-hole">
+                <i class="ph ph-lightning donut-icon"></i>
+              </div>
+            </div>
+            
+            <div class="legend">
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--primary);"></div>
+                <span id="lbl-pct-active">Active (0%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--accent);"></div>
+                <span id="lbl-pct-sleep">Sleep (0%)</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="warning-msg" class="warning-box warn-yellow">
+            <i class="ph ph-warning" style="font-size: 1.5rem; margin-top: 2px;"></i> 
+            <div><strong>Self-Discharge Warning:</strong> Your calculation exceeds 2 years. Most standard Lithium batteries will naturally self-discharge and degrade before reaching this lifespan, regardless of how little power the circuit uses.</div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+      <div class="section-header">
+        <i class="ph ph-article"></i>
+        <h2>About Deep Sleep and Battery Life</h2>
+      </div>
+      
+      <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The IoT Power Problem</h3>
+        <p style="margin-bottom: 1.5rem;">
+          Microcontrollers with radio modules (like the ESP8266 or ESP32 with Wi-Fi) consume a massive amount of power when transmitting data—often between 80mA and 250mA. If left running continuously on a standard 18650 lithium battery, they will die in a matter of days. To run a device for months or years on battery power, you must utilize "Deep Sleep."
+        </p>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">How Deep Sleep Works</h3>
+        <p style="margin-bottom: 1.5rem;">
+          In Deep Sleep, the microcontroller turns off its CPU, RAM, and Wi-Fi/Bluetooth radios. The only thing left running is a tiny, ultra-low-power timer (the RTC - Real Time Clock) waiting to wake the system back up. During this state, power consumption drops from hundreds of milliamps down to mere microamps (µA).
+        </p>
+
+        <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Why the Math Can Surprise You</h3>
+        <p style="margin-bottom: 1.5rem;">
+          Many makers buy expensive, ultra-low-power boards, only to find their battery still dies quickly. The Donut Chart above illustrates why: <strong>Your active time dominates your energy usage.</strong> If your board takes 10 seconds to connect to Wi-Fi and send a sensor reading, it doesn't matter if your sleep current is 10µA or 100µA—almost 95% of the battery is being burned during those 10 seconds of active Wi-Fi transmission. To improve battery life, focus on optimizing your code to connect and transmit faster!
+        </p>
+      </div>
+    </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+    const els = {
+      batt: document.getElementById('in-batt'),
+      actI: document.getElementById('in-active-i'),
+      uActI: document.getElementById('unit-active-i'),
+      actT: document.getElementById('in-active-t'),
+      uActT: document.getElementById('unit-active-t'),
+      slpI: document.getElementById('in-sleep-i'),
+      uSlpI: document.getElementById('unit-sleep-i'),
+      slpT: document.getElementById('in-sleep-t'),
+      uSlpT: document.getElementById('unit-sleep-t'),
+      
+      outLife: document.getElementById('out-life'),
+      outAvg: document.getElementById('out-avg'),
+      donut: document.getElementById('donut'),
+      lblAct: document.getElementById('lbl-pct-active'),
+      lblSlp: document.getElementById('lbl-pct-sleep'),
+      warnMsg: document.getElementById('warning-msg')
+    };
+
+    function formatLife(hours) {
+      if (hours < 24) return hours.toFixed(1) + " Hours";
+      const days = hours / 24;
+      if (days < 30) return days.toFixed(1) + " Days";
+      const months = days / 30.416;
+      if (months < 24) return months.toFixed(1) + " Months";
+      const years = days / 365.25;
+      return years.toFixed(2) + " Years";
+    }
+
+    function calculate() {
+      // 1. Get Base Values
+      const batt_mAh = parseFloat(els.batt.value) || 0;
+      
+      // Convert currents to mA
+      const i_active = (parseFloat(els.actI.value) || 0) * parseFloat(els.uActI.value);
+      const i_sleep = (parseFloat(els.slpI.value) || 0) * parseFloat(els.uSlpI.value);
+      
+      // Convert times to seconds
+      const t_active_s = (parseFloat(els.actT.value) || 0) * parseFloat(els.uActT.value);
+      const t_sleep_s = (parseFloat(els.slpT.value) || 0) * parseFloat(els.uSlpT.value);
+
+      if (batt_mAh <= 0 || (t_active_s + t_sleep_s) <= 0) {
+        els.outLife.innerText = "--";
+        els.outAvg.innerText = "--";
+        return;
+      }
+
+      // 2. Average Current Math (mAs over total cycle)
+      const cycle_t = t_active_s + t_sleep_s;
+      const energy_active = i_active * t_active_s; // mA * seconds
+      const energy_sleep = i_sleep * t_sleep_s;    // mA * seconds
+      const total_energy = energy_active + energy_sleep;
+      
+      const avg_mA = total_energy / cycle_t;
+
+      // 3. Life Math
+      const life_hours = batt_mAh / avg_mA;
+      
+      // 4. Update UI Texts
+      els.outLife.innerText = formatLife(life_hours);
+      
+      if(avg_mA < 1) els.outAvg.innerText = (avg_mA * 1000).toFixed(1) + " µA";
+      else els.outAvg.innerText = avg_mA.toFixed(2) + " mA";
+
+      // 5. Warning Logic (If life > 2 years)
+      if ((life_hours / 24 / 365.25) > 2) {
+        els.warnMsg.style.display = "flex";
+      } else {
+        els.warnMsg.style.display = "none";
+      }
+
+      // 6. Donut Chart Math
+      let pct_active = 0;
+      let pct_sleep = 0;
+      if (total_energy > 0) {
+        pct_active = (energy_active / total_energy) * 100;
+        pct_sleep = (energy_sleep / total_energy) * 100;
+      }
+
+      els.lblAct.innerText = `Active (${pct_active.toFixed(1)}%)`;
+      els.lblSlp.innerText = `Sleep (${pct_sleep.toFixed(1)}%)`;
+
+      // Update Conic Gradient (Primary = Active, Accent = Sleep)
+      els.donut.style.background = `conic-gradient(var(--primary) 0% ${pct_active}%, var(--accent) ${pct_active}% 100%)`;
+    }
+
+    // Attach Listeners
+    Object.keys(els).forEach(key => {
+      if(els[key].tagName === 'INPUT' || els[key].tagName === 'SELECT') {
+        els[key].addEventListener('input', calculate);
+        els[key].addEventListener('change', calculate);
+      }
+    });
+
+    // Initial Calc
+    calculate();
+  </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
