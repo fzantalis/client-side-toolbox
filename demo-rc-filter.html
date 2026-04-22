@@ -18,19 +18,23 @@
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   
   <style>
+    /* Cleanly hide native number input arrows */
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; }
 
+    /* Input Base Styles */
     .form-control {
       width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border);
       border-radius: 8px; background: var(--bg); color: var(--text-main);
       font-family: inherit; font-size: 0.95rem; transition: all 0.2s ease;
     }
     .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
-    .input-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
-    .input-row > div:first-child { flex: 2; position: relative; display: flex; align-items: center; }
-    .input-row > div:last-child { flex: 1; }
+    
+    /* Robust Input Grid */
+    .input-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: stretch; }
+    .input-box { flex: 2; position: relative; display: flex; }
+    .select-box { flex: 1; display: flex; }
 
     /* Filter Toggle Tabs */
     .filter-tabs { display: flex; background: var(--border); padding: 4px; border-radius: 8px; margin-bottom: 1.5rem; }
@@ -44,9 +48,9 @@
     .plot-container {
       background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
       padding: 1.5rem; position: relative; display: flex; flex-direction: column; align-items: center;
-      margin-bottom: 1.5rem; overflow: hidden; /* Added to fix spill out */
+      margin-bottom: 1.5rem; overflow: hidden; /* Prevents curve spill-out */
     }
-    #bode-plot { width: 100%; max-width: 300px; height: 150px; overflow: hidden; }
+    #bode-plot { width: 100%; max-width: 300px; height: 150px; pointer-events: none; }
     .grid-line { stroke: var(--border); stroke-width: 1; stroke-dasharray: 4 4; }
     .axis-line { stroke: var(--text-main); stroke-width: 2; }
     .curve-line { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linejoin: round; transition: d 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -56,6 +60,7 @@
     .fc-marker { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 4; }
     .fc-text { font-family: 'Fira Code', monospace; font-size: 13px; font-weight: bold; fill: var(--accent); text-anchor: middle; }
 
+    /* Results */
     .result-box {
       text-align: center; padding: 1.5rem; background: var(--card-bg);
       border: 1px solid var(--primary); border-radius: 12px; box-shadow: var(--shadow-sm);
@@ -88,10 +93,10 @@
           <div class="form-group">
             <label for="input-r">Resistor (R)</label>
             <div class="input-row">
-              <div>
+              <div class="input-box">
                 <input type="number" id="input-r" class="form-control" value="1" step="any" min="0">
               </div>
-              <div>
+              <div class="select-box">
                 <select id="unit-r" class="form-control">
                   <option value="1">Ω</option>
                   <option value="1000" selected>kΩ</option>
@@ -104,10 +109,10 @@
           <div class="form-group">
             <label for="input-c">Capacitor (C)</label>
             <div class="input-row">
-              <div>
+              <div class="input-box">
                 <input type="number" id="input-c" class="form-control" value="1" step="any" min="0">
               </div>
-              <div>
+              <div class="select-box">
                 <select id="unit-c" class="form-control">
                   <option value="0.000000000001">pF</option>
                   <option value="0.000000001">nF</option>
@@ -151,7 +156,47 @@
       </div>
 
     </main>
+
+    <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>Understanding RC Filters</h2>
     </div>
+    
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Concept</h3>
+      <p style="margin-bottom: 1.5rem;">
+        An RC circuit consists of a Resistor and a Capacitor. Because capacitors react differently to signals depending on their frequency (acting like a block to DC and a short circuit to high-frequency AC), we can use them to filter out unwanted noise from our signals.
+      </p>
+
+      <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">Low-Pass Filter:</strong> Allows low frequencies to pass through but blocks high frequencies. Excellent for removing high-frequency noise from analog sensor readings.</li>
+        <li style="margin-bottom: 0.5rem;"><strong style="color: var(--text-main);">High-Pass Filter:</strong> Allows high frequencies to pass and blocks low frequencies. Often used in audio circuits to remove DC offset or low rumble.</li>
+      </ul>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">The Math</h3>
+      <p style="margin-bottom: 1.5rem;">
+        The crucial characteristic of a filter is its <strong>Cutoff Frequency (ƒc)</strong>, also known as the -3dB point. This is the exact frequency where the output signal loses half its power. It is calculated identically for both Low and High pass configurations:<br><br>
+        <code style="font-size: 1.1rem; padding: 0.5rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: inline-block;">ƒc = 1 / (2 × π × R × C)</code>
+      </p>
+    </div>
+  </section>
+    
+    <footer style="text-align: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+      <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+      <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+        <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms of Service</a>
+      </div>
+    </footer>
+  </div>
   
   <script>
     let filterType = 'lp';
@@ -199,10 +244,10 @@
         let dB = 0;
         
         if(filterType === 'lp') {
-          // Low Pass Filter Formula: -10 * log10(1 + (f/fc)^2)
+          // Low Pass Formula
           dB = -10 * Math.log10(1 + f_ratio * f_ratio);
         } else {
-          // High Pass Filter Formula: 10 * log10((f/fc)^2 / (1 + (f/fc)^2))
+          // High Pass Formula
           dB = 10 * Math.log10((f_ratio * f_ratio) / (1 + f_ratio * f_ratio));
         }
         
@@ -240,11 +285,11 @@
         const formatted = formatFrequency(fc);
         els.out.innerText = formatted;
         
-        // Fixed: Use textContent for SVG text elements instead of innerText
-        els.plotLbl.textContent = formatted; 
+        // innerHTML is the most reliable way to update SVG text nodes across all browsers
+        els.plotLbl.innerHTML = formatted; 
       } else {
         els.out.innerText = "--";
-        els.plotLbl.textContent = "--";
+        els.plotLbl.innerHTML = "--";
       }
 
       drawPlot();
@@ -257,5 +302,7 @@
 
     calculate();
   </script>
+  <script src="theme-toggle.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
