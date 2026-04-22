@@ -67,7 +67,6 @@
   <main style="display:flex;flex-direction:column;gap:1.5rem;">
     <div class="shell-workspace">
       <div class="controls-col">
-        <!-- Source panel -->
         <div class="panel">
           <div class="panel-header">
             <h3>Source</h3>
@@ -104,7 +103,6 @@
             <div class="file-tree" id="fileTree"></div>
           </div>
         </div>
-        <!-- Command panel -->
         <div class="panel">
           <div class="panel-header">
             <h3>Command</h3>
@@ -124,7 +122,6 @@
           </div>
         </div>
       </div>
-      <!-- Output -->
       <div class="output-panel">
         <div class="panel-header">
           <h3>Output</h3>
@@ -137,7 +134,6 @@
         <div class="output-scroll" id="outputArea"><span class="out-meta">Output will appear here once you load a file and run a command.</span></div>
       </div>
     </div>
-    <!-- Reference -->
     <div class="panel" style="width:100%;box-sizing:border-box;">
       <div class="panel-header section-toggle" id="refToggle">
         <h3>Command Reference <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">— click any example to insert</span></h3>
@@ -185,7 +181,7 @@
 </div>
 
 <script>
-
+/* ============================================================ TOOL FUNCTIONS (PURE) */
 function decodeEscapes(s) {
   return s.replace(/\\([rtnv\\0]|x[0-9a-fA-F]{2})/g, (_, c) => {
     if (c==='r')  return '\r';
@@ -198,6 +194,321 @@ function decodeEscapes(s) {
     return c;
   });
 }
+
+function tokenize(s) {
+  const out=[]; let cur=''; let inq=null; let escape=false;
+  for (let i=0; i<s.length; i++) {
+    const c=s[i];
+    if (escape) {
+      cur+=c; escape=false;
+    } else if (c==='\\') {
+      escape=true; cur+=c; // Preserve backslash for underlying tools
+    } else if ((c==='"'||c==="'") && !inq) {
+      inq=c;
+    } else if (c===inq) {
+      inq=null;
+    } else if (c===' ' && !inq) {
+      if(cur){out.push(cur);cur='';}
+    } else {
+      cur+=c;
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function getN(toks,def) {
+  const ni=toks.indexOf('-n'); if(ni>=0&&toks[ni+1]&&/^\d+$/.test(toks[ni+1])) return parseInt(toks[ni+1]);
+  const cn=toks.find(t=>/^-n\d+$/.test(t)); if(cn) return parseInt(cn.slice(2));
+  const bn=toks.find(t=>/^-\d+$/.test(t));  if(bn) return parseInt(bn.slice(1));
+  return def;
+}
+
+function doWc(toks,lines) {
+  const f=toks[1]||'';
+  if(f==='-l'||!f||f==='file') return {lines:[String(lines.length)+' lines']};
+  if(f==='-w') return {lines:[lines.join(' ').trim().split(/\s+/).filter(Boolean).length+' words']};
+  if(f==='-c') return {lines:[String(lines.join('\n').length)+' bytes']};
+  const w=lines.join(' ').trim().split(/\s+/).filter(Boolean).length;
+  return {lines:[lines.length+' lines  '+w+' words  '+lines.join('\n').length+' bytes']};
+}
+
+function doGrep(toks,lines) {
+  let fs=new Set(); let pat=''; let i=1;
+  while(i<toks.length) {
+    if(/^-[invEclr]+$/.test(toks[i])){[...toks[i].slice(1)].forEach(c=>fs.add(c));i++;}
+    else if(!pat&&toks[i]!=='file'){pat=toks[i];i++;}
+    else{i++;}
+  }
+  if(!pat) return {error:'grep: no pattern given'};
+  let re; try{re=new RegExp(pat,fs.has('i')?'gi':'g');}catch(e){return{error:'grep: invalid regex — '+e.message};}
+  if(fs.has('c')){let n=0;lines.forEach(l=>{re.lastIndex=0;if(re.test(l))n++;});return{lines:[String(n)]};}
+  const res=[];
+  lines.forEach((l,idx)=>{re.lastIndex=0;const m=re.test(l);re.lastIndex=0;if(fs.has('v')?!m:m)res.push(fs.has('n')?(idx+1)+':'+l:l);});
+  return{lines:res,hl:fs.has('v')?null:pat};
+}
+
+function parseFields(s){const out=[];s.split(',').forEach(p=>{if(p.includes('-')){const[a,b]=p.split('-').map(Number);for(let i=a;i<=b;i++)out.push(i);}else out.push(Number(p));});return out;}
+
+function doCut(toks,lines) {
+  let delim='\t'; let fields=[]; let i=1;
+  while(i<toks.length){
+    if(toks[i]==='-d'&&toks[i+1]){delim=decodeEscapes(toks[i+1]);i+=2;}
+    else if(toks[i].startsWith('-d')&&toks[i].length>2){delim=decodeEscapes(toks[i].slice(2));i++;}
+    else if(toks[i]==='-f'&&toks[i+1]){fields=parseFields(toks[i+1]);i+=2;}
+    else if(toks[i].startsWith('-f')&&toks[i].length>2){fields=parseFields(toks[i].slice(2));i++;}
+    else{i++;}
+  }
+  if(!fields.length) return{lines};
+  return{lines:lines.map(l=>{const p=l.split(delim);return fields.map(f=>p[f-1]??'').join(delim);})};
+}
+
+function doSort(toks,lines) {
+  const af=toks.filter(t=>/^-[a-zA-Z]+$/.test(t)).join('');
+  const rev=af.includes('r'),num=af.includes('n'),uniq=toks.includes('-u')||toks.includes('--unique');
+  let key=null;
+  const ki=toks.indexOf('-k');if(ki>=0&&toks[ki+1])key=parseInt(toks[ki+1])-1;
+  const kc=toks.find(t=>t.startsWith('-k')&&t.length>2);if(kc)key=parseInt(kc.slice(2))-1;
+  let res=[...lines];
+  res.sort((a,b)=>{let va=key!=null?(a.split(/\s+/)[key]||a):a,vb=key!=null?(b.split(/\s+/)[key]||b):b;return num?(parseFloat(va)||0)-(parseFloat(vb)||0):va.localeCompare(vb);});
+  if(rev)res.reverse(); if(uniq)res=[...new Set(res)];
+  return{lines:res};
+}
+
+function doUniq(toks,lines) {
+  const count=toks.includes('-c'),dup=toks.includes('-d'),unique=toks.includes('-u');
+  const res=[]; let prev=null,cnt=1;
+  const flush=(l,c)=>{if(dup&&c===1)return;if(unique&&c>1)return;res.push(count?String(c).padStart(7)+' '+l:l);};
+  lines.forEach(l=>{if(prev===null){prev=l;cnt=1;}else if(l===prev){cnt++;}else{flush(prev,cnt);prev=l;cnt=1;}});
+  if(prev!==null)flush(prev,cnt); return{lines:res};
+}
+
+function doSed(toks,lines) {
+  const expr=toks.find(t=>!t.startsWith('-')&&t!=='sed'&&t!=='file');
+  if(!expr)return{error:'sed: no expression given'};
+  const m=expr.match(/^s([^a-zA-Z0-9\\])((?:[^\\]|\\.)*?)\1((?:[^\\]|\\.)*?)\1([gim]*)$/);
+  if(!m)return{error:'sed: only s/pat/repl/flags supported (any delimiter)'};
+  const[,,pat,repl,flags]=m; let re;
+  try{re=new RegExp(pat,flags||'g');}catch(e){return{error:'sed regex: '+e.message};}
+  const jsRepl=repl.replace(/\\([0-9])/g,'$$$1'); const hasG=flags.includes('g');
+  return{lines:lines.map(l=>hasG?l.replace(re,jsRepl):l.replace(new RegExp(pat,flags.replace('g','')),jsRepl))};
+}
+
+function evalExpr(expr,ctx){
+  expr=expr.trim();
+  const cmp=expr.match(/^(.+?)\s*(==|!=|>=|<=|>|<|~)\s*(.+)$/);
+  if(cmp){const l=evalExpr(cmp[1],ctx),r=evalExpr(cmp[3],ctx);
+    if(cmp[2]==='==')return String(l)===String(r)?1:0;if(cmp[2]==='!=')return String(l)!==String(r)?1:0;
+    if(cmp[2]==='~')return new RegExp(String(r).replace(/^\//,'').replace(/\/$/,'')).test(String(l))?1:0;
+    const nl=parseFloat(l)||0,nr=parseFloat(r)||0;
+    if(cmp[2]==='>')return nl>nr?1:0;if(cmp[2]==='<')return nl<nr?1:0;
+    if(cmp[2]==='>='  )return nl>=nr?1:0;if(cmp[2]==='<=')return nl<=nr?1:0;
+  }
+  const mod=expr.match(/^(.+?)\s*%\s*(.+)$/);if(mod)return(parseFloat(evalExpr(mod[1],ctx))||0)%(parseFloat(evalExpr(mod[2],ctx))||1);
+  const add=expr.match(/^(.+?)\s*([+\-])\s*(\S.*)$/);if(add){const a=parseFloat(evalExpr(add[1],ctx))||0,b=parseFloat(evalExpr(add[3],ctx))||0;return add[2]==='+'?a+b:a-b;}
+  if(/^\$(\d+)$/.test(expr))return ctx[parseInt(expr.slice(1))]??'';
+  if(expr==='NR')return ctx.NR;if(expr==='NF')return ctx.NF;if(expr==='$0')return ctx[0]??'';
+  if(expr in ctx)return ctx[expr]??0;
+  if((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'")))return expr.slice(1,-1);
+  if(!isNaN(expr))return parseFloat(expr);
+  return expr;
+}
+
+function evalAwk(body,ctx,out){
+  body.split(';').map(s=>s.trim()).filter(Boolean).forEach(stmt=>{
+    const pm=stmt.match(/^print\s*(.*)/);
+    if(pm){const a=pm[1].trim();if(!a){out.push(ctx[0]??'');return;}out.push(a.split(',').map(x=>String(evalExpr(x.trim(),ctx))).join(ctx.OFS??' '));return;}
+    const am=stmt.match(/^(\w+)\s*(\+?=)\s*(.+)/);
+    if(am)ctx[am[1]]=am[2]==='+='?(parseFloat(ctx[am[1]])||0)+(parseFloat(evalExpr(am[3],ctx))||0):evalExpr(am[3],ctx);
+  });
+}
+
+function awkRun(prog,lines,FS){
+  const out=[],ctx={NR:0,NF:0,FS:FS||' ',OFS:' '};
+  let p=prog.trim();
+  const bM=p.match(/BEGIN\s*\{([\s\S]*?)\}/),eM=p.match(/END\s*\{([\s\S]*?)\}/);
+  if(bM)p=p.replace(bM[0],'').trim();if(eM)p=p.replace(eM[0],'').trim();
+  const rules=[],rRe=/^(?:([^{]+?)\s*)?\{([\s\S]*?)\}/g;let rm;
+  while((rm=rRe.exec(p))!==null)rules.push({cond:rm[1]?.trim()||null,body:rm[2].trim()});
+  if(!rules.length&&p.trim())rules.push({cond:null,body:p.trim()});
+  if(bM)evalAwk(bM[1],ctx,out);
+  lines.forEach(line=>{
+    ctx.NR++;
+    const f=FS&&FS!==' '?line.split(new RegExp(FS)):line.trim().split(/\s+/).filter(s=>s!=='');
+    ctx.NF=f.length;ctx[0]=line;f.forEach((v,i)=>ctx[i+1]=v);
+    for(const r of rules){let run=true;if(r.cond){if(r.cond.startsWith('/'))run=new RegExp(r.cond.slice(1,-1)).test(line);else run=!!evalExpr(r.cond,ctx);}if(run)evalAwk(r.body,ctx,out);}
+  });
+  if(eM)evalAwk(eM[1],ctx,out);return out;
+}
+
+function doAwk(toks,lines) {
+  const prog=toks.find(t=>!t.startsWith('-')&&t!=='awk'&&t!=='file');
+  if(!prog)return{error:'awk: no program given'};
+  let sep=null;
+  const fi=toks.indexOf('-F');if(fi>=0&&toks[fi+1])sep=decodeEscapes(toks[fi+1]);
+  const sf=toks.find(t=>t.startsWith('-F')&&t.length>2);if(sf)sep=decodeEscapes(sf.slice(2));
+  try{return{lines:awkRun(prog,lines,sep)};}catch(e){return{error:'awk: '+e.message};}
+}
+
+function expandTr(s){
+  let r='';
+  for(let i=0;i<s.length;i++){
+    if(s[i+1]==='-'&&s[i+2]!==undefined){const a=s.charCodeAt(i),b=s.charCodeAt(i+2);for(let c=a;c<=b;c++)r+=String.fromCharCode(c);i+=2;}
+    else r+=s[i];
+  }
+  return r;
+}
+
+function doTr(toks,lines){
+  const del=toks.includes('-d');
+  const sets=toks.filter(t=>!t.startsWith('-')&&t!=='tr'&&t!=='file');
+  if(del&&sets[0]){const s=expandTr(decodeEscapes(sets[0]));return{lines:lines.map(l=>l.split('').filter(c=>!s.includes(c)).join(''))};}
+  if(sets.length>=2){const s=expandTr(decodeEscapes(sets[0])),d=expandTr(decodeEscapes(sets[1]));return{lines:lines.map(l=>l.split('').map(c=>{const i=s.indexOf(c);return i>=0?(d[i]??d[d.length-1]??c):c;}).join(''))};}
+  return{lines};
+}
+
+function globMatch(str,pattern) {
+  const re='^'+pattern.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$';
+  return new RegExp(re).test(str);
+}
+
+function doFind(toks) {
+  const paths = typeof self !== 'undefined' && self.allPaths ? self.allPaths : (typeof folderFiles !== 'undefined' ? [...folderFiles.keys()] : []);
+  if (!paths.length) return { error:'find: no folder loaded — switch to the Folder tab first.' };
+  let nameGlob=null,inameGlob=null,typeFilter=null,maxDepth=Infinity,notPath=null;
+  let i=1;
+  if (toks[i]&&!toks[i].startsWith('-')) i++;
+  while (i<toks.length) {
+    const t=toks[i];
+    if      (t==='-name'&&toks[i+1])     { nameGlob=toks[i+1]; i+=2; }
+    else if (t==='-iname'&&toks[i+1])    { inameGlob=toks[i+1]; i+=2; }
+    else if (t==='-type'&&toks[i+1])     { typeFilter=toks[i+1]; i+=2; }
+    else if (t==='-maxdepth'&&toks[i+1]) { maxDepth=parseInt(toks[i+1])||1; i+=2; }
+    else if ((t==='-not'||t==='!')&&toks[i+1]==='-path'&&toks[i+2]) { notPath=toks[i+2]; i+=3; }
+    else { i++; }
+  }
+  const dirs=new Set();
+  paths.forEach(p=>{ const pts=p.split('/'); for(let d=1;d<pts.length;d++) dirs.add(pts.slice(0,d).join('/')); });
+  const entries=[...[...dirs].map(d=>({path:d,type:'d'})),...paths.map(p=>({path:p,type:'f'}))].sort((a,b)=>a.path.localeCompare(b.path));
+  const results=[];
+  entries.forEach(({path,type})=>{
+    const depth=(path.match(/\//g)||[]).length;
+    if (depth>=maxDepth) return;
+    if (typeFilter==='f'&&type!=='f') return;
+    if (typeFilter==='d'&&type!=='d') return;
+    if (notPath&&globMatch(path,notPath)) return;
+    const base=path.split('/').pop();
+    if (nameGlob&&!globMatch(base,nameGlob)) return;
+    if (inameGlob&&!globMatch(base.toLowerCase(),inameGlob.toLowerCase())) return;
+    results.push('./'+path);
+  });
+  return { lines:results };
+}
+
+function execute(cmd,lines) {
+  const toks=tokenize(cmd); const tool=(toks[0]||'').replace(/^[./]*/,'');
+  if (tool==='cat')  return {lines};
+  if (tool==='head') return {lines:lines.slice(0,getN(toks,10))};
+  if (tool==='tail') return {lines:lines.slice(-getN(toks,10))};
+  if (tool==='wc')   return doWc(toks,lines);
+  if (tool==='grep') return doGrep(toks,lines);
+  if (tool==='cut')  return doCut(toks,lines);
+  if (tool==='sort') return doSort(toks,lines);
+  if (tool==='uniq') return doUniq(toks,lines);
+  if (tool==='sed')  return doSed(toks,lines);
+  if (tool==='awk')  return doAwk(toks,lines);
+  if (tool==='tr')   return doTr(toks,lines);
+  if (tool==='nl')   return {lines:lines.map((l,i)=>String(i+1).padStart(6)+'\t'+l)};
+  if (tool==='rev')  return {lines:lines.map(l=>l.split('').reverse().join(''))};
+  if (tool==='echo') return {lines:[toks.slice(1).join(' ')]};
+  if (tool==='tee')  return {lines};
+  if (tool==='find') return doFind(toks);
+  return {error:'Unknown command: '+tool+'. Supported: cat head tail wc grep cut sort uniq sed awk tr nl rev echo find'};
+}
+
+/* ============================================================ WEB WORKER SETUP */
+let shellWorker;
+let workerTimeout;
+
+function initWorker() {
+  if (shellWorker) shellWorker.terminate();
+  const workerScript = `
+    ${decodeEscapes.toString()}
+    ${tokenize.toString()}
+    ${getN.toString()}
+    ${doWc.toString()}
+    ${doGrep.toString()}
+    ${parseFields.toString()}
+    ${doCut.toString()}
+    ${doSort.toString()}
+    ${doUniq.toString()}
+    ${doSed.toString()}
+    ${evalExpr.toString()}
+    ${evalAwk.toString()}
+    ${awkRun.toString()}
+    ${doAwk.toString()}
+    ${expandTr.toString()}
+    ${doTr.toString()}
+    ${globMatch.toString()}
+    ${doFind.toString()}
+    ${execute.toString()}
+
+    self.onmessage = function(e) {
+      const { pipes, lines, allPaths } = e.data;
+      self.allPaths = allPaths; 
+
+      const firstTool = tokenize(pipes[0])[0] || '';
+      let currentLines = lines || [];
+      let hlPat = null;
+
+      if (firstTool === 'find') {
+        let res = doFind(tokenize(pipes[0]));
+        if (res.error) { self.postMessage({ error: res.error, inCmd: pipes[0] }); return; }
+        currentLines = res.lines;
+        for (let i = 1; i < pipes.length; i++) {
+          const r = execute(pipes[i], currentLines);
+          if (r.error) { self.postMessage({ error: r.error, inCmd: pipes[i] }); return; }
+          currentLines = r.lines;
+          if (r.hl) hlPat = r.hl;
+        }
+        self.postMessage({ success: true, lines: currentLines, hl: hlPat });
+        return;
+      }
+
+      if (!currentLines || !currentLines.length) {
+        self.postMessage({ error: 'No file loaded — drop a file or select one from the folder.', inCmd: '' });
+        return;
+      }
+
+      for (const cmd of pipes) {
+        const r = execute(cmd, currentLines);
+        if (r.error) { self.postMessage({ error: r.error, inCmd: cmd }); return; }
+        currentLines = r.lines;
+        if (r.hl) hlPat = r.hl;
+      }
+      self.postMessage({ success: true, lines: currentLines, hl: hlPat });
+    };
+  `;
+  const blob = new Blob([workerScript], { type: 'application/javascript' });
+  shellWorker = new Worker(URL.createObjectURL(blob));
+
+  shellWorker.onmessage = function(e) {
+    clearTimeout(workerTimeout);
+    const res = e.data;
+    if (res.error) {
+      setStatus('error', res.error + (res.inCmd ? '  (in: ' + res.inCmd + ')' : ''));
+      setOutput('<span class="out-err">Error: ' + escHtml(res.error) + (res.inCmd ? '\n  in: ' + escHtml(res.inCmd) : '') + '</span>');
+      setLineCount(null);
+    } else {
+      setStatus('success', res.lines.length.toLocaleString() + ' lines in output');
+      renderLines(res.lines, res.hl);
+      setLineCount(res.lines.length);
+    }
+  };
+}
+
+initWorker(); // Initialize the worker on load
+
 
 /* ============================================================ STATE */
 let fileLines  = [];
@@ -369,12 +680,38 @@ document.getElementById('refToggle').addEventListener('click',()=>{
   document.getElementById('refBody').classList.toggle('hidden');
 });
 
-/* ============================================================ RUN */
-document.getElementById('cmdInput').addEventListener('keydown',e=>{ if(e.key==='Enter') runCommand(); });
-document.getElementById('runBtn').addEventListener('click',runCommand);
-document.getElementById('clearCmdBtn').addEventListener('click',()=>{ document.getElementById('cmdInput').value=''; document.getElementById('cmdStatus').innerHTML=''; });
-document.getElementById('clearOutputBtn').addEventListener('click',()=>{ setOutput('<span class="out-meta">Output cleared.</span>'); setLineCount(null); });
-document.getElementById('copyOutputBtn').addEventListener('click',()=>{
+/* ============================================================ RUN & HISTORY */
+const cmdHistory = [];
+let historyIndex = -1;
+
+document.getElementById('cmdInput').addEventListener('keydown', e => { 
+  if (e.key === 'Enter') {
+    runCommand(); 
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (cmdHistory.length > 0 && historyIndex > 0) {
+      historyIndex--;
+      document.getElementById('cmdInput').value = cmdHistory[historyIndex];
+    } else if (cmdHistory.length > 0 && historyIndex === -1) {
+      historyIndex = cmdHistory.length - 1;
+      document.getElementById('cmdInput').value = cmdHistory[historyIndex];
+    }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex !== -1 && historyIndex < cmdHistory.length - 1) {
+      historyIndex++;
+      document.getElementById('cmdInput').value = cmdHistory[historyIndex];
+    } else {
+      historyIndex = -1;
+      document.getElementById('cmdInput').value = '';
+    }
+  }
+});
+
+document.getElementById('runBtn').addEventListener('click', runCommand);
+document.getElementById('clearCmdBtn').addEventListener('click', () => { document.getElementById('cmdInput').value=''; document.getElementById('cmdStatus').innerHTML=''; historyIndex = -1; });
+document.getElementById('clearOutputBtn').addEventListener('click', () => { setOutput('<span class="out-meta">Output cleared.</span>'); setLineCount(null); });
+document.getElementById('copyOutputBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(document.getElementById('outputArea').innerText).then(()=>{
     const btn=document.getElementById('copyOutputBtn'); const orig=btn.innerHTML;
     btn.innerHTML='<i class="ph ph-check"></i> Copied!'; btn.classList.add('success-state');
@@ -383,247 +720,36 @@ document.getElementById('copyOutputBtn').addEventListener('click',()=>{
 });
 
 function runCommand() {
-  const raw=document.getElementById('cmdInput').value.trim();
+  const raw = document.getElementById('cmdInput').value.trim();
   if (!raw) return;
-  const pipes=raw.split('|').map(s=>s.trim()).filter(Boolean);
-  const firstTool=tokenize(pipes[0])[0]||'';
 
-  if (firstTool==='find') {
-    let res=doFind(tokenize(pipes[0]));
-    if (res.error) { setStatus('error',res.error); setOutput('<span class="out-err">Error: '+escHtml(res.error)+'</span>'); return; }
-    let lines=res.lines;
-    for (let i=1;i<pipes.length;i++) {
-      const r=execute(pipes[i],lines);
-      if (r.error) { setStatus('error',r.error); setOutput('<span class="out-err">Error: '+escHtml(r.error)+'</span>'); return; }
-      lines=r.lines;
-    }
-    setStatus('success',lines.length.toLocaleString()+' results');
-    renderLines(lines,null); setLineCount(lines.length); return;
+  // Add to history
+  if (cmdHistory[cmdHistory.length - 1] !== raw) {
+    cmdHistory.push(raw);
   }
+  historyIndex = -1;
 
-  if (!fileLines.length) { setStatus('error','No file loaded — drop a file or select one from the folder.'); return; }
-  let lines=[...fileLines]; let hlPat=null;
-  for (const cmd of pipes) {
-    const r=execute(cmd,lines);
-    if (r.error) { setStatus('error',r.error+'  (in: '+cmd+')'); setOutput('<span class="out-err">Error: '+escHtml(r.error)+'\n  in: '+escHtml(cmd)+'</span>'); setLineCount(null); return; }
-    lines=r.lines; if (r.hl) hlPat=r.hl;
-  }
-  setStatus('success',lines.length.toLocaleString()+' lines in output');
-  renderLines(lines,hlPat); setLineCount(lines.length);
-}
+  const pipes = raw.split('|').map(s => s.trim()).filter(Boolean);
 
-/* ============================================================ FIND */
-function doFind(toks) {
-  if (!folderFiles.size) return { error:'find: no folder loaded — switch to the Folder tab first.' };
-  let nameGlob=null,inameGlob=null,typeFilter=null,maxDepth=Infinity,notPath=null;
-  let i=1;
-  if (toks[i]&&!toks[i].startsWith('-')) i++;
-  while (i<toks.length) {
-    const t=toks[i];
-    if      (t==='-name'&&toks[i+1])     { nameGlob=toks[i+1]; i+=2; }
-    else if (t==='-iname'&&toks[i+1])    { inameGlob=toks[i+1]; i+=2; }
-    else if (t==='-type'&&toks[i+1])     { typeFilter=toks[i+1]; i+=2; }
-    else if (t==='-maxdepth'&&toks[i+1]) { maxDepth=parseInt(toks[i+1])||1; i+=2; }
-    else if ((t==='-not'||t==='!')&&toks[i+1]==='-path'&&toks[i+2]) { notPath=toks[i+2]; i+=3; }
-    else { i++; }
-  }
-  const allPaths=[...folderFiles.keys()];
-  const dirs=new Set();
-  allPaths.forEach(p=>{ const pts=p.split('/'); for(let d=1;d<pts.length;d++) dirs.add(pts.slice(0,d).join('/')); });
-  const entries=[...[...dirs].map(d=>({path:d,type:'d'})),...allPaths.map(p=>({path:p,type:'f'}))].sort((a,b)=>a.path.localeCompare(b.path));
-  const results=[];
-  entries.forEach(({path,type})=>{
-    const depth=(path.match(/\//g)||[]).length;
-    if (depth>=maxDepth) return;
-    if (typeFilter==='f'&&type!=='f') return;
-    if (typeFilter==='d'&&type!=='d') return;
-    if (notPath&&globMatch(path,notPath)) return;
-    const base=path.split('/').pop();
-    if (nameGlob&&!globMatch(base,nameGlob)) return;
-    if (inameGlob&&!globMatch(base.toLowerCase(),inameGlob.toLowerCase())) return;
-    results.push('./'+path);
+  setStatus('info', 'Processing in background thread...');
+  document.getElementById('outputArea').innerHTML = '<span class="out-meta" style="color:var(--primary);"><i class="ph ph-spinner ph-spin"></i> Running...</span>';
+
+  clearTimeout(workerTimeout);
+  
+  // Send data to background Web Worker
+  shellWorker.postMessage({
+    pipes: pipes,
+    lines: fileLines,
+    allPaths: [...folderFiles.keys()]
   });
-  return { lines:results };
-}
-function globMatch(str,pattern) {
-  const re='^'+pattern.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$';
-  return new RegExp(re).test(str);
-}
 
-/* ============================================================ DISPATCH */
-function execute(cmd,lines) {
-  const toks=tokenize(cmd); const tool=(toks[0]||'').replace(/^[./]*/,'');
-  if (tool==='cat')  return {lines};
-  if (tool==='head') return {lines:lines.slice(0,getN(toks,10))};
-  if (tool==='tail') return {lines:lines.slice(-getN(toks,10))};
-  if (tool==='wc')   return doWc(toks,lines);
-  if (tool==='grep') return doGrep(toks,lines);
-  if (tool==='cut')  return doCut(toks,lines);
-  if (tool==='sort') return doSort(toks,lines);
-  if (tool==='uniq') return doUniq(toks,lines);
-  if (tool==='sed')  return doSed(toks,lines);
-  if (tool==='awk')  return doAwk(toks,lines);
-  if (tool==='tr')   return doTr(toks,lines);
-  if (tool==='nl')   return {lines:lines.map((l,i)=>String(i+1).padStart(6)+'\t'+l)};
-  if (tool==='rev')  return {lines:lines.map(l=>l.split('').reverse().join(''))};
-  if (tool==='echo') return {lines:[toks.slice(1).join(' ')]};
-  if (tool==='tee')  return {lines};
-  if (tool==='find') return doFind(toks);
-  return {error:'Unknown command: '+tool+'. Supported: cat head tail wc grep cut sort uniq sed awk tr nl rev echo find'};
-}
-
-/* ============================================================ TOKENIZER */
-function tokenize(s) {
-  const out=[]; let cur=''; let inq=null;
-  for (let i=0;i<s.length;i++) {
-    const c=s[i];
-    if ((c==='"'||c==="'")&&!inq) { inq=c; }
-    else if (c===inq) { inq=null; }
-    else if (c===' '&&!inq) { if(cur){out.push(cur);cur='';} }
-    else { cur+=c; }
-  }
-  if (cur) out.push(cur);
-  return out;
-}
-
-/* ============================================================ TOOLS */
-function getN(toks,def) {
-  const ni=toks.indexOf('-n'); if(ni>=0&&toks[ni+1]&&/^\d+$/.test(toks[ni+1])) return parseInt(toks[ni+1]);
-  const cn=toks.find(t=>/^-n\d+$/.test(t)); if(cn) return parseInt(cn.slice(2));
-  const bn=toks.find(t=>/^-\d+$/.test(t));  if(bn) return parseInt(bn.slice(1));
-  return def;
-}
-function doWc(toks,lines) {
-  const f=toks[1]||'';
-  if(f==='-l'||!f||f==='file') return {lines:[String(lines.length)+' lines']};
-  if(f==='-w') return {lines:[lines.join(' ').trim().split(/\s+/).filter(Boolean).length+' words']};
-  if(f==='-c') return {lines:[String(lines.join('\n').length)+' bytes']};
-  const w=lines.join(' ').trim().split(/\s+/).filter(Boolean).length;
-  return {lines:[lines.length+' lines  '+w+' words  '+lines.join('\n').length+' bytes']};
-}
-function doGrep(toks,lines) {
-  let fs=new Set(); let pat=''; let i=1;
-  while(i<toks.length) {
-    if(/^-[invEclr]+$/.test(toks[i])){[...toks[i].slice(1)].forEach(c=>fs.add(c));i++;}
-    else if(!pat&&toks[i]!=='file'){pat=toks[i];i++;}
-    else{i++;}
-  }
-  if(!pat) return {error:'grep: no pattern given'};
-  let re; try{re=new RegExp(pat,fs.has('i')?'gi':'g');}catch(e){return{error:'grep: invalid regex — '+e.message};}
-  if(fs.has('c')){let n=0;lines.forEach(l=>{re.lastIndex=0;if(re.test(l))n++;});return{lines:[String(n)]};}
-  const res=[];
-  lines.forEach((l,idx)=>{re.lastIndex=0;const m=re.test(l);re.lastIndex=0;if(fs.has('v')?!m:m)res.push(fs.has('n')?(idx+1)+':'+l:l);});
-  return{lines:res,hl:fs.has('v')?null:pat};
-}
-function doCut(toks,lines) {
-  let delim='\t'; let fields=[]; let i=1;
-  while(i<toks.length){
-    if(toks[i]==='-d'&&toks[i+1]){delim=decodeEscapes(toks[i+1]);i+=2;}
-    else if(toks[i].startsWith('-d')&&toks[i].length>2){delim=decodeEscapes(toks[i].slice(2));i++;}
-    else if(toks[i]==='-f'&&toks[i+1]){fields=parseFields(toks[i+1]);i+=2;}
-    else if(toks[i].startsWith('-f')&&toks[i].length>2){fields=parseFields(toks[i].slice(2));i++;}
-    else{i++;}
-  }
-  if(!fields.length) return{lines};
-  return{lines:lines.map(l=>{const p=l.split(delim);return fields.map(f=>p[f-1]??'').join(delim);})};
-}
-function parseFields(s){const out=[];s.split(',').forEach(p=>{if(p.includes('-')){const[a,b]=p.split('-').map(Number);for(let i=a;i<=b;i++)out.push(i);}else out.push(Number(p));});return out;}
-function doSort(toks,lines) {
-  const af=toks.filter(t=>/^-[a-zA-Z]+$/.test(t)).join('');
-  const rev=af.includes('r'),num=af.includes('n'),uniq=toks.includes('-u')||toks.includes('--unique');
-  let key=null;
-  const ki=toks.indexOf('-k');if(ki>=0&&toks[ki+1])key=parseInt(toks[ki+1])-1;
-  const kc=toks.find(t=>t.startsWith('-k')&&t.length>2);if(kc)key=parseInt(kc.slice(2))-1;
-  let res=[...lines];
-  res.sort((a,b)=>{let va=key!=null?(a.split(/\s+/)[key]||a):a,vb=key!=null?(b.split(/\s+/)[key]||b):b;return num?(parseFloat(va)||0)-(parseFloat(vb)||0):va.localeCompare(vb);});
-  if(rev)res.reverse(); if(uniq)res=[...new Set(res)];
-  return{lines:res};
-}
-function doUniq(toks,lines) {
-  const count=toks.includes('-c'),dup=toks.includes('-d'),unique=toks.includes('-u');
-  const res=[]; let prev=null,cnt=1;
-  const flush=(l,c)=>{if(dup&&c===1)return;if(unique&&c>1)return;res.push(count?String(c).padStart(7)+' '+l:l);};
-  lines.forEach(l=>{if(prev===null){prev=l;cnt=1;}else if(l===prev){cnt++;}else{flush(prev,cnt);prev=l;cnt=1;}});
-  if(prev!==null)flush(prev,cnt); return{lines:res};
-}
-function doSed(toks,lines) {
-  const expr=toks.find(t=>!t.startsWith('-')&&t!=='sed'&&t!=='file');
-  if(!expr)return{error:'sed: no expression given'};
-  const m=expr.match(/^s([^a-zA-Z0-9\\])((?:[^\\]|\\.)*?)\1((?:[^\\]|\\.)*?)\1([gim]*)$/);
-  if(!m)return{error:'sed: only s/pat/repl/flags supported (any delimiter)'};
-  const[,,pat,repl,flags]=m; let re;
-  try{re=new RegExp(pat,flags||'g');}catch(e){return{error:'sed regex: '+e.message};}
-  const jsRepl=repl.replace(/\\([0-9])/g,'$$$1'); const hasG=flags.includes('g');
-  return{lines:lines.map(l=>hasG?l.replace(re,jsRepl):l.replace(new RegExp(pat,flags.replace('g','')),jsRepl))};
-}
-function doAwk(toks,lines) {
-  const prog=toks.find(t=>!t.startsWith('-')&&t!=='awk'&&t!=='file');
-  if(!prog)return{error:'awk: no program given'};
-  let sep=null;
-  const fi=toks.indexOf('-F');if(fi>=0&&toks[fi+1])sep=decodeEscapes(toks[fi+1]);
-  const sf=toks.find(t=>t.startsWith('-F')&&t.length>2);if(sf)sep=decodeEscapes(sf.slice(2));
-  try{return{lines:awkRun(prog,lines,sep)};}catch(e){return{error:'awk: '+e.message};}
-}
-function awkRun(prog,lines,FS){
-  const out=[],ctx={NR:0,NF:0,FS:FS||' ',OFS:' '};
-  let p=prog.trim();
-  const bM=p.match(/BEGIN\s*\{([\s\S]*?)\}/),eM=p.match(/END\s*\{([\s\S]*?)\}/);
-  if(bM)p=p.replace(bM[0],'').trim();if(eM)p=p.replace(eM[0],'').trim();
-  const rules=[],rRe=/^(?:([^{]+?)\s*)?\{([\s\S]*?)\}/g;let rm;
-  while((rm=rRe.exec(p))!==null)rules.push({cond:rm[1]?.trim()||null,body:rm[2].trim()});
-  if(!rules.length&&p.trim())rules.push({cond:null,body:p.trim()});
-  if(bM)evalAwk(bM[1],ctx,out);
-  lines.forEach(line=>{
-    ctx.NR++;
-    const f=FS&&FS!==' '?line.split(new RegExp(FS)):line.trim().split(/\s+/).filter(s=>s!=='');
-    ctx.NF=f.length;ctx[0]=line;f.forEach((v,i)=>ctx[i+1]=v);
-    for(const r of rules){let run=true;if(r.cond){if(r.cond.startsWith('/'))run=new RegExp(r.cond.slice(1,-1)).test(line);else run=!!evalExpr(r.cond,ctx);}if(run)evalAwk(r.body,ctx,out);}
-  });
-  if(eM)evalAwk(eM[1],ctx,out);return out;
-}
-function evalAwk(body,ctx,out){
-  body.split(';').map(s=>s.trim()).filter(Boolean).forEach(stmt=>{
-    const pm=stmt.match(/^print\s*(.*)/);
-    if(pm){const a=pm[1].trim();if(!a){out.push(ctx[0]??'');return;}out.push(a.split(',').map(x=>String(evalExpr(x.trim(),ctx))).join(ctx.OFS??' '));return;}
-    const am=stmt.match(/^(\w+)\s*(\+?=)\s*(.+)/);
-    if(am)ctx[am[1]]=am[2]==='+='?(parseFloat(ctx[am[1]])||0)+(parseFloat(evalExpr(am[3],ctx))||0):evalExpr(am[3],ctx);
-  });
-}
-function evalExpr(expr,ctx){
-  expr=expr.trim();
-  const cmp=expr.match(/^(.+?)\s*(==|!=|>=|<=|>|<|~)\s*(.+)$/);
-  if(cmp){const l=evalExpr(cmp[1],ctx),r=evalExpr(cmp[3],ctx);
-    if(cmp[2]==='==')return String(l)===String(r)?1:0;if(cmp[2]==='!=')return String(l)!==String(r)?1:0;
-    if(cmp[2]==='~')return new RegExp(String(r).replace(/^\//,'').replace(/\/$/,'')).test(String(l))?1:0;
-    const nl=parseFloat(l)||0,nr=parseFloat(r)||0;
-    if(cmp[2]==='>')return nl>nr?1:0;if(cmp[2]==='<')return nl<nr?1:0;
-    if(cmp[2]==='>='  )return nl>=nr?1:0;if(cmp[2]==='<=')return nl<=nr?1:0;
-  }
-  const mod=expr.match(/^(.+?)\s*%\s*(.+)$/);if(mod)return(parseFloat(evalExpr(mod[1],ctx))||0)%(parseFloat(evalExpr(mod[2],ctx))||1);
-  const add=expr.match(/^(.+?)\s*([+\-])\s*(\S.*)$/);if(add){const a=parseFloat(evalExpr(add[1],ctx))||0,b=parseFloat(evalExpr(add[3],ctx))||0;return add[2]==='+'?a+b:a-b;}
-  if(/^\$(\d+)$/.test(expr))return ctx[parseInt(expr.slice(1))]??'';
-  if(expr==='NR')return ctx.NR;if(expr==='NF')return ctx.NF;if(expr==='$0')return ctx[0]??'';
-  if(expr in ctx)return ctx[expr]??0;
-  if((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'")))return expr.slice(1,-1);
-  if(!isNaN(expr))return parseFloat(expr);
-  return expr;
-}
-
-
-function doTr(toks,lines){
-  const del=toks.includes('-d');
-  const sets=toks.filter(t=>!t.startsWith('-')&&t!=='tr'&&t!=='file');
-  if(del&&sets[0]){const s=expandTr(decodeEscapes(sets[0]));return{lines:lines.map(l=>l.split('').filter(c=>!s.includes(c)).join(''))};}
-  if(sets.length>=2){const s=expandTr(decodeEscapes(sets[0])),d=expandTr(decodeEscapes(sets[1]));return{lines:lines.map(l=>l.split('').map(c=>{const i=s.indexOf(c);return i>=0?(d[i]??d[d.length-1]??c):c;}).join(''))};}
-  return{lines};
-}
-function expandTr(s){
-  let r='';
-  for(let i=0;i<s.length;i++){
-    if(s[i+1]==='-'&&s[i+2]!==undefined){const a=s.charCodeAt(i),b=s.charCodeAt(i+2);for(let c=a;c<=b;c++)r+=String.fromCharCode(c);i+=2;}
-    else r+=s[i];
-  }
-  return r;
+  // ReDoS & Infinite Loop Timeout (5 seconds)
+  workerTimeout = setTimeout(() => {
+    initWorker(); // Kill the old worker and spin up a new one
+    setStatus('error', 'Command timed out (possible infinite loop or complex regex).');
+    setOutput('<span class="out-err">Error: Process terminated after 5 seconds. Please try a simpler regex or check for infinite awk loops.</span>');
+    setLineCount(null);
+  }, 5000);
 }
 
 /* ============================================================ HELPERS */
