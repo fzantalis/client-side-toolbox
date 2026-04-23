@@ -154,11 +154,11 @@
       <ul style="margin-bottom:1.5rem;padding-left:1.5rem;color:var(--text-muted);">
         <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">find:</strong> Search the loaded folder by name, extension, or type. Supports <code class="il">-name</code> <code class="il">-iname</code> <code class="il">-type f/d</code> <code class="il">-maxdepth</code> <code class="il">-not -path</code>. Works in the Folder tab.</li>
         <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">cat / head / tail:</strong> View all or part of the active file.</li>
-        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">grep:</strong> Filter lines. Supports <code class="il">-i -n -v -c</code> and full regular expressions.</li>
+        <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">grep:</strong> Filter lines. Supports <code class="il">-i -n -v -c</code> and full regular expressions. When piped from <code class="il">find</code>, searches file contents across all matched files.</li>
         <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">sed:</strong> Stream substitution — <code class="il">s/pattern/replacement/flags</code> with any delimiter.</li>
         <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">awk:</strong> Field processing with <code class="il">-F</code>, <code class="il">BEGIN/END</code> blocks, conditionals, and accumulators.</li>
         <li style="margin-bottom:0.5rem;"><strong style="color:var(--text-main);">sort / uniq / cut / wc / tr / nl / rev:</strong> Full suite with proper escape-sequence support (<code class="il">\r</code> <code class="il">\t</code> <code class="il">\n</code> correctly decoded).</li>
-        <li><strong style="color:var(--text-main);">Pipes:</strong> Chain any commands with <code class="il">|</code>. Example: <code class="il">grep -i "error" file | sort | uniq -c | sort -rn</code></li>
+        <li><strong style="color:var(--text-main);">Pipes:</strong> Chain any commands with <code class="il">|</code>. Example: <code class="il">find . -name "*.log" | grep -n "error" | sort | uniq -c</code></li>
       </ul>
       <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Security &amp; Privacy</h3>
       <p>This is a <strong>100% Client-Side Utility</strong>. Files are read via the browser's <code class="il">FileReader</code> API and never transmitted anywhere. Safe for sensitive logs, private configs, or proprietary data.</p>
@@ -202,7 +202,7 @@ function tokenize(s) {
     if (escape) {
       cur+=c; escape=false;
     } else if (c==='\\') {
-      escape=true; cur+=c; // Preserve backslash for underlying tools
+      escape=true; cur+=c;
     } else if ((c==='"'||c==="'") && !inq) {
       inq=c;
     } else if (c===inq) {
@@ -233,7 +233,15 @@ function doWc(toks,lines) {
   return {lines:[lines.length+' lines  '+w+' words  '+lines.join('\n').length+' bytes']};
 }
 
-function doGrep(toks,lines) {
+/* PATCHED: looksLikePaths helper */
+function looksLikePaths(lines) {
+  if (!lines || !lines.length) return false;
+  const sample = lines.slice(0, Math.min(5, lines.length));
+  return sample.every(l => /^\.\//.test(l) || /^\//.test(l));
+}
+
+/* PATCHED: doGrep now accepts optional fileStore for cross-file search */
+function doGrep(toks, lines, fileStore) {
   let fs=new Set(); let pat=''; let i=1;
   while(i<toks.length) {
     if(/^-[invEclr]+$/.test(toks[i])){[...toks[i].slice(1)].forEach(c=>fs.add(c));i++;}
@@ -242,6 +250,35 @@ function doGrep(toks,lines) {
   }
   if(!pat) return {error:'grep: no pattern given'};
   let re; try{re=new RegExp(pat,fs.has('i')?'gi':'g');}catch(e){return{error:'grep: invalid regex — '+e.message};}
+
+  /* cross-file mode: input is a list of paths piped from find */
+  if (looksLikePaths(lines) && fileStore) {
+    const results = [];
+    for (const p of lines) {
+      const key = p.replace(/^\.\//, '');
+      const info = fileStore.get ? fileStore.get(key) : (fileStore[key] || null);
+      if (!info || info.binary || !info.content) continue;
+      const fLines = info.content.split('\n');
+      if (fs.has('c')) {
+        let n = 0;
+        fLines.forEach(l => { re.lastIndex = 0; if (re.test(l)) n++; });
+        if (n > 0) results.push(key + ':' + n);
+        continue;
+      }
+      fLines.forEach((l, idx) => {
+        re.lastIndex = 0;
+        const m = re.test(l);
+        re.lastIndex = 0;
+        const pass = fs.has('v') ? !m : m;
+        if (pass) {
+          results.push(fs.has('n') ? key + ':' + (idx + 1) + ':' + l : key + ':' + l);
+        }
+      });
+    }
+    return { lines: results, hl: fs.has('v') ? null : pat };
+  }
+
+  /* original single-file mode */
   if(fs.has('c')){let n=0;lines.forEach(l=>{re.lastIndex=0;if(re.test(l))n++;});return{lines:[String(n)]};}
   const res=[];
   lines.forEach((l,idx)=>{re.lastIndex=0;const m=re.test(l);re.lastIndex=0;if(fs.has('v')?!m:m)res.push(fs.has('n')?(idx+1)+':'+l:l);});
@@ -405,13 +442,14 @@ function doFind(toks) {
   return { lines:results };
 }
 
-function execute(cmd,lines) {
+/* PATCHED: execute now passes fileStore through to doGrep */
+function execute(cmd, lines, fileStore) {
   const toks=tokenize(cmd); const tool=(toks[0]||'').replace(/^[./]*/,'');
   if (tool==='cat')  return {lines};
   if (tool==='head') return {lines:lines.slice(0,getN(toks,10))};
   if (tool==='tail') return {lines:lines.slice(-getN(toks,10))};
   if (tool==='wc')   return doWc(toks,lines);
-  if (tool==='grep') return doGrep(toks,lines);
+  if (tool==='grep') return doGrep(toks,lines,fileStore);
   if (tool==='cut')  return doCut(toks,lines);
   if (tool==='sort') return doSort(toks,lines);
   if (tool==='uniq') return doUniq(toks,lines);
@@ -437,6 +475,7 @@ function initWorker() {
     ${tokenize.toString()}
     ${getN.toString()}
     ${doWc.toString()}
+    ${looksLikePaths.toString()}
     ${doGrep.toString()}
     ${parseFields.toString()}
     ${doCut.toString()}
@@ -454,9 +493,10 @@ function initWorker() {
     ${execute.toString()}
 
     self.onmessage = function(e) {
-      const { pipes, lines, allPaths } = e.data;
-      self.allPaths = allPaths; 
+      const { pipes, lines, allPaths, allPathsData } = e.data;
+      self.allPaths = allPaths;
 
+      const fileStore = allPathsData || null;
       const firstTool = tokenize(pipes[0])[0] || '';
       let currentLines = lines || [];
       let hlPat = null;
@@ -466,7 +506,7 @@ function initWorker() {
         if (res.error) { self.postMessage({ error: res.error, inCmd: pipes[0] }); return; }
         currentLines = res.lines;
         for (let i = 1; i < pipes.length; i++) {
-          const r = execute(pipes[i], currentLines);
+          const r = execute(pipes[i], currentLines, fileStore);
           if (r.error) { self.postMessage({ error: r.error, inCmd: pipes[i] }); return; }
           currentLines = r.lines;
           if (r.hl) hlPat = r.hl;
@@ -481,7 +521,7 @@ function initWorker() {
       }
 
       for (const cmd of pipes) {
-        const r = execute(cmd, currentLines);
+        const r = execute(cmd, currentLines, fileStore);
         if (r.error) { self.postMessage({ error: r.error, inCmd: cmd }); return; }
         currentLines = r.lines;
         if (r.hl) hlPat = r.hl;
@@ -507,7 +547,7 @@ function initWorker() {
   };
 }
 
-initWorker(); // Initialize the worker on load
+initWorker();
 
 
 /* ============================================================ STATE */
@@ -622,6 +662,8 @@ const REF = [
   ['find . -iname "*error*"',                 'Case-insensitive name match'],
   ['find . -type f -maxdepth 2',              'Limit search depth'],
   ['find . -name "*.js" -not -path "*node_modules*"','Exclude a path'],
+  ['find . -type f | grep "pattern"',         'Search contents of all files'],
+  ['find . -name "*.log" | grep -n "error"',  'Search log file contents'],
   ['cat file',                                'Print entire file'],
   ['head -n 20 file',                         'First 20 lines'],
   ['tail -n 30 file',                         'Last 30 lines'],
@@ -651,6 +693,7 @@ const REF = [
   ['tr a-z A-Z file',                         'Uppercase text'],
   ['nl file',                                 'Number all lines'],
   ['grep "error" file | sort | uniq -c | sort -rn','Top error types'],
+  ['find . -type f | grep -i "error" | sort | uniq -c | sort -rn','Cross-file error frequency'],
   ['find . -name "*.csv" | head -5',          'First 5 CSV files found'],
 ];
 const refGrid = document.getElementById('refGrid');
@@ -666,7 +709,7 @@ const CHIPS=[
   ['cat file','cat'],['head -20 file','head'],['tail -20 file','tail'],['wc -l file','wc'],
   ['grep -n "error" file','grep'],['grep -v "^#" file','grep -v'],['sort -u file','sort -u'],
   ['uniq -c file','uniq -c'],['sed "s/foo/bar/g" file','sed'],['awk "{print $1}" file','awk'],
-  ['find . -type f','find'],['find . -name "*.log"','find *.log'],['tr -d "\\r" file','strip \\r'],
+  ['find . -type f','find'],['find . -name "*.log"','find *.log'],['find . -type f | grep "pattern"','find|grep'],['tr -d "\\r" file','strip \\r'],
 ];
 const chipsRow=document.getElementById('chipsRow');
 CHIPS.forEach(([cmd,label])=>{
@@ -684,9 +727,9 @@ document.getElementById('refToggle').addEventListener('click',()=>{
 const cmdHistory = [];
 let historyIndex = -1;
 
-document.getElementById('cmdInput').addEventListener('keydown', e => { 
+document.getElementById('cmdInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') {
-    runCommand(); 
+    runCommand();
   } else if (e.key === 'ArrowUp') {
     e.preventDefault();
     if (cmdHistory.length > 0 && historyIndex > 0) {
@@ -719,14 +762,12 @@ document.getElementById('copyOutputBtn').addEventListener('click', () => {
   });
 });
 
+/* PATCHED: runCommand serializes folderFiles into a plain object for the worker */
 function runCommand() {
   const raw = document.getElementById('cmdInput').value.trim();
   if (!raw) return;
 
-  // Add to history
-  if (cmdHistory[cmdHistory.length - 1] !== raw) {
-    cmdHistory.push(raw);
-  }
+  if (cmdHistory[cmdHistory.length - 1] !== raw) cmdHistory.push(raw);
   historyIndex = -1;
 
   const pipes = raw.split('|').map(s => s.trim()).filter(Boolean);
@@ -735,17 +776,20 @@ function runCommand() {
   document.getElementById('outputArea').innerHTML = '<span class="out-meta" style="color:var(--primary);"><i class="ph ph-spinner ph-spin"></i> Running...</span>';
 
   clearTimeout(workerTimeout);
-  
-  // Send data to background Web Worker
+
+  /* Serialize folderFiles Map -> plain object so it can cross into the Worker */
+  const allPathsData = {};
+  folderFiles.forEach((v, k) => { allPathsData[k] = v; });
+
   shellWorker.postMessage({
     pipes: pipes,
     lines: fileLines,
-    allPaths: [...folderFiles.keys()]
+    allPaths: [...folderFiles.keys()],
+    allPathsData: allPathsData
   });
 
-  // ReDoS & Infinite Loop Timeout (5 seconds)
   workerTimeout = setTimeout(() => {
-    initWorker(); // Kill the old worker and spin up a new one
+    initWorker();
     setStatus('error', 'Command timed out (possible infinite loop or complex regex).');
     setOutput('<span class="out-err">Error: Process terminated after 5 seconds. Please try a simpler regex or check for infinite awk loops.</span>');
     setLineCount(null);
