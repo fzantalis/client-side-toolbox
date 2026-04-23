@@ -129,7 +129,8 @@
       { id: 'email', label: 'Email Addresses', regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, replacement: '[REDACTED_EMAIL]' },
       { id: 'uuid', label: 'UUIDs', regex: /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/g, replacement: '[REDACTED_UUID]' },
       { id: 'slack', label: 'Slack Tokens', regex: /\bxox[baprs]-[0-9a-zA-Z]{10,48}\b/g, replacement: '[REDACTED_SLACK_TOKEN]' },
-      { id: 'github', label: 'GitHub Tokens', regex: /\b(gh[pousr]_[A-Za-z0-9_]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})\b/g, replacement: '[REDACTED_GITHUB_TOKEN]' }
+      { id: 'github', label: 'GitHub Tokens', regex: /\b(gh[pousr]_[A-Za-z0-9_]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})\b/g, replacement: '[REDACTED_GITHUB_TOKEN]' },
+      { id: 'password', label: 'Passwords (Heuristic)', regex: /([\"']?(?:password|passwd|pwd|pass|secret|db_pass)[\"']?\s*[:=]\s*[\"']?)([^\s\"';,\n\r]+)/gi, replacement: '$1[REDACTED_PASSWORD]' }
     ];
 
     const container = document.getElementById('rules-container');
