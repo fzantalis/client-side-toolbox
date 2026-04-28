@@ -8,6 +8,12 @@ A suite of developer and business utilities that run **entirely in your browser*
 
 ---
 
+## 🌐 Live Demo
+
+All tools are available at **[https://zantalis.net](https://zantalis.net)** — no installation, no account, no tracking. Every tool runs purely client-side directly in your browser, making it safe to use with sensitive data such as JWTs, API keys, certificates, private documents, and personal information. Nothing you enter is ever transmitted to a server.
+
+---
+
 ## ✨ Features
 
 All tools share a common design principle: **your data never leaves your browser**. Everything is processed client-side using vanilla HTML, CSS, and JavaScript — no frameworks, no build step, no backend.
@@ -43,14 +49,13 @@ All tools share a common design principle: **your data never leaves your browser
 | **Auto Face Blur** | `demo-anonymizer.html` | Automatically detect and blur faces in images using on-device AI. |
 | **Image Resizer** | `demo-image-resizer.html` | Quickly resize, scale, and adjust the dimensions of images client-side. |
 | **Teleprompter** | `demo-teleprompter.html` | A clean, customizable in-browser teleprompter for video recording and speeches. |
-| **Responsive Website Viewer** | `demo-responsive-viewer.html` | Test your UI layouts across multiple devices. Enter a URL below to see how it renders on mobile, tablet, and desktop viewports. |
+| **Responsive Website Viewer** | `demo-responsive-viewer.html` | Test your UI layouts across multiple devices and viewports simultaneously. |
 
 ### Business & Finance
 | Tool | File | Description |
 |------|------|-------------|
 | **Hourly Wage Calculator** | `demo-hourly-wage.html` | Calculate your effective hourly rate after software costs and taxes. |
 | **Invoice Generator** | `demo-invoice.html` | Generate and download professional PDF invoices directly in the browser. |
-| **Currency Converter** | `demo-currency.html` | Offline conversion using baseline fixed rates. Quick and private. |
 | **Tip Calculator** | `demo-tip.html` | Calculate gratuity and perfectly split bills among friends easily. |
 | **Compound Interest** | `demo-compound-interest.html` | Calculate the future value of investments with compound interest growth. |
 | **Mortgage Calculator** | `demo-mortgage.html` | Estimate monthly mortgage payments and view amortization schedules. |
@@ -65,6 +70,8 @@ All tools share a common design principle: **your data never leaves your browser
 | **P2P File Transfer** | `demo-p2p.html` | Send files directly to another browser over an encrypted peer-to-peer connection. |
 | **Pomodoro Timer** | `demo-pomodoro.html` | Boost focus and productivity with an offline-ready Pomodoro interval timer. |
 | **Triangle Calculator** | `demo-triangle.html` | Solve for missing angles and side lengths of any triangle instantly. |
+| **Base Converter** | `demo-base-converter.html` | Seamlessly convert numbers between Binary, Octal, Decimal, and Hexadecimal. |
+| **Unix Epoch Converter** | `demo-unix-converter.html` | Convert Unix timestamps to human-readable dates and vice-versa instantly. |
 
 ### Security & Encoding
 | Tool | File | Description |
@@ -85,8 +92,20 @@ All tools share a common design principle: **your data never leaves your browser
 | **ERD Builder** | `demo-erd.html` | Design entity-relationship diagrams visually and export them as SQL or an image. |
 | **Subnet Calculator** | `demo-subnet-calc.html` | Instantly calculate CIDR network addresses, masks, and host ranges. |
 | **Open Graph Generator** | `demo-og-generator.html` | Preview social media share cards and generate HTML meta tags instantly. |
-| **Base Converter** | `demo-base-converter.html` | Seamlessly convert numbers between Binary, Octal, Decimal, and Hexadecimal. |
-| **Unix Epoch Converter** | `demo-unix-converter.html` | Convert Unix timestamps to human-readable dates and vice-versa instantly. |
+| **Linux Shell Reference** | `demo-linux-shell.html` | Searchable offline reference for common Linux shell commands and flags. |
+| **HTTP Client** | `demo-http-client.html` | Build, send, and inspect HTTP requests with auth helpers and instant cURL export. |
+
+### Electronics & IoT
+| Tool | File | Description |
+|------|------|-------------|
+| **555 Timer Calculator** | `demo-555-timer.html` | Calculate frequency, duty cycle, and timing for 555 timer circuits. |
+| **IoT Battery Life Estimator** | `demo-iot-battery.html` | Estimate battery runtime for IoT devices based on current draw and capacity. |
+| **LED Matrix Planner** | `demo-led-matrix.html` | Design and plan LED matrix layouts with current and resistor calculations. |
+| **NeoPixel Power Calculator** | `demo-neopixel-power.html` | Calculate power supply requirements for NeoPixel/WS2812 LED strips. |
+| **Ohm's Law Calculator** | `demo-ohms-law.html` | Instantly solve for voltage, current, resistance, and power using Ohm's Law. |
+| **RC Filter Calculator** | `demo-rc-filter.html` | Calculate cutoff frequency and impedance for RC low-pass and high-pass filters. |
+| **Resistor Calculator** | `demo-resistor-calculator.html` | Decode resistor colour bands and calculate series/parallel resistance values. |
+| **Voltage Divider Calculator** | `demo-voltage-divider.html` | Calculate output voltage and resistor values for voltage divider circuits. |
 
 ---
 
@@ -109,7 +128,7 @@ The `index.html` serves as a dashboard linking to all individual tools.
 
 ## 🔒 Privacy
 
-All processing happens **locally in your browser**. No data is sent to any server. This makes the toolbox safe to use with sensitive information such as JWTs, hashed values, or private documents.
+All processing happens **locally in your browser**. No data is sent to any server. This makes the toolbox safe to use with sensitive information such as JWTs, hashed values, private documents, API keys, and certificates.
 
 See [privacy.html](privacy.html) for the full privacy statement.
 
@@ -121,9 +140,9 @@ See [privacy.html](privacy.html) for the full privacy statement.
 client-side-toolbox/
 ├── index.html              # Main dashboard / tool launcher
 ├── style.css               # Shared styles
-├── script.js               # Shared utilities (e.g. JSON beautifier)
+├── script.js               # Shared utilities
 ├── theme-toggle.js         # Light/dark mode toggle
-├── demo-*.html             # Individual tool pages (24 tools)
+├── demo-*.html             # Individual tool pages
 ├── privacy.html            # Privacy policy
 └── terms.html              # Terms of use
 ```
