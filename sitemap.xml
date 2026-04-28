@@ -255,6 +255,11 @@
   <priority>0.80</priority>
 </url>
 <url>
+  <loc>https://zantalis.net/demo-http-client.html</loc>
+  <lastmod>2026-04-28T09:28:27+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://zantalis.net/demo-555-timer.html</loc>
   <lastmod>2026-04-22T15:59:00+00:00</lastmod>
   <priority>0.80</priority>
