@@ -1,9 +1,9 @@
 # 🧰 Client-Side Toolbox
 A suite of developer and business utilities that run **entirely in your browser** — no server, no uploads, no data leaving your machine.
 
-[![HTML](https://img.shields.io/badge/HTML-96.1%25-orange)](https://github.com/fzantalis/client-side-toolbox)
-[![CSS](https://img.shields.io/badge/CSS-2.6%25-blue)](https://github.com/fzantalis/client-side-toolbox)
-[![JavaScript](https://img.shields.io/badge/JavaScript-1.3%25-yellow)](https://github.com/fzantalis/client-side-toolbox)
+[![HTML](https://img.shields.io/badge/HTML-60%25-orange)](https://github.com/fzantalis/client-side-toolbox)
+[![CSS](https://img.shields.io/badge/CSS-25%25-blue)](https://github.com/fzantalis/client-side-toolbox)
+[![JavaScript](https://img.shields.io/badge/JavaScript-15%25-yellow)](https://github.com/fzantalis/client-side-toolbox)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ---
