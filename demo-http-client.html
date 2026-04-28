@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Client | Free Online REST API Tester & cURL Builder</title>
+  <meta name="title" content="HTTP Client | Free Online REST API Tester & cURL Builder">
+  <meta name="description" content="Test REST APIs, build HTTP requests, inspect responses, and generate cURL commands — entirely in your browser. A free, client-side HTTP client with history and collections.">
+  <meta name="keywords" content="HTTP client, REST API tester, online postman, curl builder, API debugger, fetch tool, browser HTTP, client-side API tool, request builder">
+  <meta name="author" content="fzantalis">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://zantalis.net/demo-http-client.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zantalis.net/demo-http-client.html">
+  <meta property="og:title" content="HTTP Client | Free Online REST API Tester & cURL Builder">
+  <meta property="og:description" content="Test REST APIs, build HTTP requests, inspect responses, and generate cURL commands — entirely in your browser. A free, client-side HTTP client with history and collections.">
+  <meta property="og:image" content="https://zantalis.net/og-image.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://zantalis.net/demo-http-client.html">
+  <meta property="twitter:title" content="HTTP Client | Free Online REST API Tester & cURL Builder">
+  <meta property="twitter:description" content="Test REST APIs, build HTTP requests, inspect responses, and generate cURL commands — entirely in your browser.">
+  <meta property="twitter:image" content="https://zantalis.net/og-image.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* ── Layout ── */
+    .http-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .http-layout { grid-template-columns: 1fr; } }
+
+    /* ── Sidebar: History ── */
+    .history-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 1rem;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .history-panel .panel-header { flex-shrink: 0; }
+    .history-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0.5rem;
+    }
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background .15s;
+      font-size: 0.78rem;
+      border: 1px solid transparent;
+    }
+    .history-item:hover { background: var(--bg); border-color: var(--border); }
+    .history-item .h-method {
+      font-family: 'Fira Code', monospace;
+      font-weight: 700;
+      font-size: 0.68rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .history-item .h-url {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .history-item .h-status {
+      font-size: 0.68rem;
+      font-family: 'Fira Code', monospace;
+      flex-shrink: 0;
+    }
+    .history-empty {
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    /* ── Method badge colours ── */
+    .method-get    { background: rgba(16,185,129,.12); color: #10b981; }
+    .method-post   { background: rgba(59,130,246,.12);  color: var(--primary); }
+    .method-put    { background: rgba(245,158,11,.12);  color: #f59e0b; }
+    .method-patch  { background: rgba(168,85,247,.12);  color: #a855f7; }
+    .method-delete { background: rgba(239,68,68,.12);   color: #ef4444; }
+    .method-head   { background: rgba(20,184,166,.12);  color: #14b8a6; }
+    .method-options{ background: rgba(100,116,139,.12); color: #64748b; }
+
+    /* ── Status badge ── */
+    .status-2xx { color: #10b981; }
+    .status-3xx { color: #f59e0b; }
+    .status-4xx { color: #ef4444; }
+    .status-5xx { color: #ef4444; }
+    .status-0   { color: var(--text-muted); }
+
+    /* ── URL bar ── */
+    .url-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .method-select {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: border-color .15s;
+      flex-shrink: 0;
+    }
+    .method-select:focus { outline: none; border-color: var(--primary); }
+    .url-input {
+      flex: 1;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-main);
+      transition: border-color .15s;
+    }
+    .url-input:focus { outline: none; border-color: var(--primary); }
+    .send-btn {
+      background: var(--primary);
+      color: white;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .send-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .send-btn:active { transform: translateY(0); }
+    .send-btn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; }
+
+    /* ── Tabs ── */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .tab-btn {
+      padding: 0.5rem 0.9rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all .15s;
+      margin-bottom: -1px;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      width: 16px;
+      height: 16px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    /* ── KV Table (headers, params) ── */
+    .kv-table { width: 100%; border-collapse: collapse; }
+    .kv-table th {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-muted);
+      padding: 0.4rem 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .kv-table td { padding: 0.35rem 0.4rem; vertical-align: middle; }
+    .kv-input {
+      width: 100%;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text-main);
+      transition: border-color .15s;
+    }
+    .kv-input:focus { outline: none; border-color: var(--primary); }
+    .kv-input.kv-key { color: var(--primary); }
+    .kv-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0.2rem 0.3rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: color .15s;
+    }
+    .kv-del:hover { color: #ef4444; }
+    .kv-check { cursor: pointer; accent-color: var(--primary); }
+    .add-row-btn {
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: all .15s;
+      width: 100%;
+    }
+    .add-row-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── Body editor ── */
+    .body-type-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .body-type-btn {
+      padding: 0.25rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+      transition: all .15s;
+    }
+    .body-type-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .body-editor {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-main);
+      resize: vertical;
+      min-height: 160px;
+      transition: border-color .15s;
+    }
+    .body-editor:focus { outline: none; border-color: var(--primary); }
+    .body-editor.error { border-color: #ef4444; }
+
+    /* ── Response area ── */
+    .response-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.6rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      font-size: 0.82rem;
+      flex-wrap: wrap;
+    }
+    .response-meta .meta-item { display: flex; align-items: center; gap: 0.35rem; color: var(--text-muted); }
+    .response-meta .meta-item strong { font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+    .response-body-wrap {
+      position: relative;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .response-body {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.7;
+      padding: 0.75rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 400px;
+      overflow-y: auto;
+      margin: 0;
+      background: transparent;
+      border: none;
+    }
+    .copy-resp-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+    .copy-resp-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── cURL output ── */
+    .curl-output {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      padding: 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--text-muted);
+      position: relative;
+    }
+    .curl-keyword { color: #10b981; font-weight: 700; }
+    .curl-flag    { color: var(--primary); }
+    .curl-string  { color: #f59e0b; }
+
+    /* ── Auth helpers ── */
+    .auth-type-select {
+      font-size: 0.82rem;
+      padding: 0.45rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-main);
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+      font-family: inherit;
+    }
+    .auth-type-select:focus { outline: none; border-color: var(--primary); }
+    .auth-field {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      padding: 0.45rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      transition: border-color .15s;
+    }
+    .auth-field:focus { outline: none; border-color: var(--primary); }
+
+    /* ── Loading spinner ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+
+    /* ── CORS banner ── */
+    .cors-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      background: rgba(245,158,11,.08);
+      border: 1px solid rgba(245,158,11,.25);
+      color: #b45309;
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+    [data-theme="dark"] .cors-banner { color: #f59e0b; }
+
+    /* ── Empty state ── */
+    .empty-response {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      color: var(--text-muted);
+      gap: 0.75rem;
+      text-align: center;
+    }
+    .empty-response i { font-size: 2.5rem; opacity: .4; }
+    .empty-response p { font-size: 0.875rem; max-width: 260px; }
+
+    /* ── Field label ── */
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 0.9rem 0 0.4rem;
+    }
+    .field-label:first-child { margin-top: 0; }
+
+    /* ── Quick URLs ── */
+    .quick-urls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+    .quick-url-btn {
+      font-size: 0.72rem;
+      font-family: 'Fira Code', monospace;
+      padding: 0.2rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .quick-url-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* panel body scroll */
+    .panel { overflow: visible; }
+    .panel-scroll { padding: 1.25rem; overflow-y: auto; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="breadcrumb">
+    <i class="ph ph-arrow-left"></i> Back to Toolbox
+  </a>
+
+  <header class="tool-header">
+    <div class="card-icon"><i class="ph ph-plugs-connected"></i></div>
+    <div class="tool-header-text">
+      <h1>HTTP Client</h1>
+      <p>Build, send, and inspect HTTP requests directly in your browser — with history, auth helpers, and instant cURL export.</p>
+    </div>
+  </header>
+
+  <main style="display:flex;flex-direction:column;gap:1rem;">
+
+    <!-- CORS notice -->
+    <div class="cors-banner">
+      <i class="ph ph-warning" style="font-size:1.1rem;flex-shrink:0;margin-top:.1rem;"></i>
+      <span><strong>Browser CORS notice:</strong> Requests run via the browser's <code>fetch</code> API. Endpoints that don't return CORS headers will be blocked by the browser — this is a platform limitation, not a bug. The generated cURL command always works from a real terminal.</span>
+    </div>
+
+    <div class="http-layout">
+
+      <!-- LEFT: History sidebar -->
+      <div class="history-panel">
+        <div class="panel-header">
+          <h3>History</h3>
+          <div class="panel-actions">
+            <button class="btn-secondary" id="clearHistoryBtn" style="font-size:0.75rem;padding:.3rem .6rem;"><i class="ph ph-trash"></i></button>
+          </div>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty" id="historyEmpty"><i class="ph ph-clock-counter-clockwise" style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>No requests yet</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Main workspace -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+
+        <!-- Request builder panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Request</h3>
+            <div class="panel-actions">
+              <button class="btn-secondary" id="resetBtn" style="font-size:0.78rem;padding:.35rem .7rem;"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
+            </div>
+          </div>
+          <div class="panel-scroll">
+
+            <!-- URL Bar -->
+            <div class="url-bar">
+              <select class="method-select" id="methodSelect">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+                <option value="HEAD">HEAD</option>
+                <option value="OPTIONS">OPTIONS</option>
+              </select>
+              <input class="url-input" id="urlInput" type="url" placeholder="https://api.example.com/endpoint" autocomplete="off" spellcheck="false">
+              <button class="send-btn" id="sendBtn"><i class="ph ph-paper-plane-tilt"></i> Send</button>
+            </div>
+
+            <!-- Quick test URLs -->
+            <div class="quick-urls">
+              <span style="font-size:.72rem;color:var(--text-muted);margin-right:.2rem;align-self:center;">Try:</span>
+              <button class="quick-url-btn" data-url="https://httpbin.org/get" data-method="GET">httpbin GET</button>
+              <button class="quick-url-btn" data-url="https://httpbin.org/post" data-method="POST">httpbin POST</button>
+              <button class="quick-url-btn" data-url="https://jsonplaceholder.typicode.com/todos/1" data-method="GET">JSONPlaceholder</button>
+              <button class="quick-url-btn" data-url="https://api.github.com/zen" data-method="GET">GitHub Zen</button>
+              <button class="quick-url-btn" data-url="https://httpbin.org/status/404" data-method="GET">404 test</button>
+            </div>
+
+            <!-- Tabs: Params / Headers / Auth / Body -->
+            <div class="tab-bar" id="reqTabBar">
+              <button class="tab-btn active" data-tab="params">Params <span class="tab-badge" id="badgeParams" style="display:none">0</span></button>
+              <button class="tab-btn" data-tab="headers">Headers <span class="tab-badge" id="badgeHeaders" style="display:none">0</span></button>
+              <button class="tab-btn" data-tab="auth">Auth</button>
+              <button class="tab-btn" data-tab="body">Body</button>
+            </div>
+
+            <!-- Params tab -->
+            <div id="tabParams">
+              <table class="kv-table" id="paramsTable">
+                <thead><tr><th style="width:22px"></th><th>Key</th><th>Value</th><th style="width:28px"></th></tr></thead>
+                <tbody id="paramRows"></tbody>
+              </table>
+              <button class="add-row-btn" id="addParamBtn"><i class="ph ph-plus"></i> Add param</button>
+            </div>
+
+            <!-- Headers tab -->
+            <div id="tabHeaders" style="display:none">
+              <table class="kv-table" id="headersTable">
+                <thead><tr><th style="width:22px"></th><th>Key</th><th>Value</th><th style="width:28px"></th></tr></thead>
+                <tbody id="headerRows"></tbody>
+              </table>
+              <button class="add-row-btn" id="addHeaderBtn"><i class="ph ph-plus"></i> Add header</button>
+              <div style="margin-top:0.6rem;display:flex;flex-wrap:wrap;gap:.35rem;">
+                <span style="font-size:.72rem;color:var(--text-muted);align-self:center;">Quick add:</span>
+                <button class="quick-url-btn" data-header="Content-Type" data-hval="application/json">Content-Type: JSON</button>
+                <button class="quick-url-btn" data-header="Accept" data-hval="application/json">Accept: JSON</button>
+                <button class="quick-url-btn" data-header="Cache-Control" data-hval="no-cache">Cache-Control</button>
+                <button class="quick-url-btn" data-header="X-Request-ID" data-hval="">X-Request-ID</button>
+              </div>
+            </div>
+
+            <!-- Auth tab -->
+            <div id="tabAuth" style="display:none">
+              <select class="auth-type-select" id="authType">
+                <option value="none">No Auth</option>
+                <option value="bearer">Bearer Token</option>
+                <option value="basic">Basic Auth</option>
+                <option value="apikey">API Key (Header)</option>
+              </select>
+              <div id="authFields"></div>
+            </div>
+
+            <!-- Body tab -->
+            <div id="tabBody" style="display:none">
+              <div class="body-type-bar" id="bodyTypeBar">
+                <button class="body-type-btn active" data-btype="none">none</button>
+                <button class="body-type-btn" data-btype="json">JSON</button>
+                <button class="body-type-btn" data-btype="form">form-urlencoded</button>
+                <button class="body-type-btn" data-btype="raw">raw</button>
+              </div>
+              <div id="bodyEditorWrap" style="display:none">
+                <textarea class="body-editor" id="bodyEditor" rows="8" spellcheck="false" placeholder="Request body..."></textarea>
+                <div id="bodyJsonError" style="display:none;color:#ef4444;font-size:.78rem;margin-top:.3rem;"><i class="ph ph-warning-circle"></i> Invalid JSON</div>
+              </div>
+              <div id="bodyFormWrap" style="display:none">
+                <table class="kv-table">
+                  <thead><tr><th style="width:22px"></th><th>Key</th><th>Value</th><th style="width:28px"></th></tr></thead>
+                  <tbody id="formRows"></tbody>
+                </table>
+                <button class="add-row-btn" id="addFormBtn"><i class="ph ph-plus"></i> Add field</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Response panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Response</h3>
+            <div class="panel-actions">
+              <button class="btn-secondary" id="copyRespBtn" style="font-size:.78rem;padding:.35rem .7rem;display:none;"><i class="ph ph-copy"></i> Copy</button>
+            </div>
+          </div>
+          <div class="panel-scroll">
+            <div id="responseArea">
+              <div class="empty-response" id="emptyResp">
+                <i class="ph ph-arrow-bend-right-down"></i>
+                <p>Send a request above to see the response here.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- cURL export panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>cURL Command</h3>
+            <div class="panel-actions">
+              <button class="btn-secondary" id="copyCurlBtn" style="font-size:.78rem;padding:.35rem .7rem;"><i class="ph ph-copy"></i> Copy</button>
+            </div>
+          </div>
+          <div class="panel-scroll">
+            <div class="curl-output" id="curlOutput"><span style="color:var(--text-muted)">cURL command will appear here as you build the request…</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- About section -->
+  <section class="tool-section" style="margin-top: 4rem;">
+    <div class="section-header">
+      <i class="ph ph-article"></i>
+      <h2>About the HTTP Client</h2>
+    </div>
+    <div class="card" style="display: block; line-height: 1.7; padding: 2rem;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">A Postman alternative that lives in your browser</h3>
+      <p style="margin-bottom: 1.5rem;">
+        This HTTP Client lets you construct and fire HTTP/HTTPS requests using the browser's native <code>fetch</code> API — no extensions, no installs, no backend. It is ideal for quickly testing public APIs, inspecting response structures, experimenting with auth headers, and generating <code>cURL</code> commands you can paste directly into any terminal or container shell.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Understanding CORS</h3>
+      <p style="margin-bottom: 1.5rem;">
+        Browsers enforce the <strong>Cross-Origin Resource Sharing (CORS)</strong> policy: if a server doesn't explicitly allow your origin, the browser will block the response even though the request was sent. This is not a limitation of this tool — it's a security feature of every browser. The generated <code>cURL</code> command bypasses CORS entirely because it runs outside the browser, making it the perfect companion for container shells or CI pipelines where you can't install Postman.
+      </p>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main);">Request history & privacy</h3>
+      <p>
+        Your request history is stored exclusively in <code>localStorage</code> in your own browser. Nothing is transmitted to any server. URLs, headers, auth tokens, and body payloads never leave your machine.
+      </p>
+    </div>
+  </section>
+
+  <footer style="text-align:center;padding:2rem 0;margin-top:2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.9rem;">
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Client-Side Toolbox. All rights reserved.</p>
+    <div style="margin-top: 1rem; margin-bottom: 1rem;">
+      <a href="https://github.com/fzantalis/client-side-toolbox" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: color 0.2s;">
+        <i class="ph ph-github-logo" style="font-size: 1.25rem;"></i>
+        View Source on GitHub
+      </a>
+    </div>
+    <div style="display:flex;justify-content:center;gap:1rem;margin-top:.5rem;">
+      <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
+      <span>&bull;</span>
+      <a href="terms.html" style="color:var(--text-muted);text-decoration:none;">Terms of Service</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────────
+// State
+// ──────────────────────────────────────────────────────────────
+const state = {
+  params: [],
+  headers: [],
+  formFields: [],
+  bodyType: 'none',
+  authType: 'none',
+  authValues: {},
+  lastResponse: null,
+};
+
+const MAX_HISTORY = 40;
+
+// ──────────────────────────────────────────────────────────────
+// KV Row helpers
+// ──────────────────────────────────────────────────────────────
+function makeRow(arr, tbodyId, keyPlaceholder, valPlaceholder) {
+  const id = Date.now() + Math.random();
+  const row = { id, enabled: true, key: '', value: '' };
+  arr.push(row);
+  renderKvRow(arr, tbodyId, row, keyPlaceholder, valPlaceholder);
+  updateCurl();
+  updateBadges();
+}
+
+function renderKvRow(arr, tbodyId, row, keyPh, valPh) {
+  const tbody = document.getElementById(tbodyId);
+  const tr = document.createElement('tr');
+  tr.dataset.rowId = row.id;
+  tr.innerHTML = `
+    <td><input type="checkbox" class="kv-check" ${row.enabled ? 'checked' : ''}></td>
+    <td><input class="kv-input kv-key" placeholder="${keyPh}" value="${esc(row.key)}"></td>
+    <td><input class="kv-input" placeholder="${valPh}" value="${esc(row.value)}"></td>
+    <td><button class="kv-del" title="Remove"><i class="ph ph-x"></i></button></td>`;
+  tr.querySelector('.kv-check').addEventListener('change', e => { row.enabled = e.target.checked; updateCurl(); updateBadges(); });
+  tr.querySelectorAll('.kv-input').forEach((inp, i) => {
+    inp.addEventListener('input', e => {
+      if (i === 0) row.key = e.target.value;
+      else row.value = e.target.value;
+      updateCurl();
+      updateBadges();
+    });
+  });
+  tr.querySelector('.kv-del').addEventListener('click', () => {
+    const idx = arr.findIndex(r => r.id === row.id);
+    if (idx !== -1) arr.splice(idx, 1);
+    tr.remove();
+    updateCurl();
+    updateBadges();
+  });
+  tbody.appendChild(tr);
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function getActiveKV(arr) {
+  return arr.filter(r => r.enabled && r.key.trim());
+}
+
+// ──────────────────────────────────────────────────────────────
+// Badges
+// ──────────────────────────────────────────────────────────────
+function updateBadges() {
+  const pc = getActiveKV(state.params).length;
+  const hc = getActiveKV(state.headers).length;
+  const pb = document.getElementById('badgeParams');
+  const hb = document.getElementById('badgeHeaders');
+  pb.textContent = pc; pb.style.display = pc ? 'inline-flex' : 'none';
+  hb.textContent = hc; hb.style.display = hc ? 'inline-flex' : 'none';
+}
+
+// ──────────────────────────────────────────────────────────────
+// URL with params
+// ──────────────────────────────────────────────────────────────
+function buildUrl() {
+  const base = document.getElementById('urlInput').value.trim();
+  const active = getActiveKV(state.params);
+  if (!active.length) return base;
+  try {
+    const u = new URL(base);
+    active.forEach(r => u.searchParams.set(r.key, r.value));
+    return u.toString();
+  } catch {
+    const qs = active.map(r => encodeURIComponent(r.key) + '=' + encodeURIComponent(r.value)).join('&');
+    return base + (base.includes('?') ? '&' : '?') + qs;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Auth → headers
+// ──────────────────────────────────────────────────────────────
+function getAuthHeader() {
+  const t = state.authType;
+  const v = state.authValues;
+  if (t === 'bearer' && v.token) return { Authorization: 'Bearer ' + v.token };
+  if (t === 'basic' && v.username) {
+    const encoded = btoa((v.username || '') + ':' + (v.password || ''));
+    return { Authorization: 'Basic ' + encoded };
+  }
+  if (t === 'apikey' && v.key && v.value) return { [v.key]: v.value };
+  return {};
+}
+
+// ──────────────────────────────────────────────────────────────
+// Build fetch options
+// ──────────────────────────────────────────────────────────────
+function buildFetchOptions() {
+  const method = document.getElementById('methodSelect').value;
+  const headers = {};
+  getActiveKV(state.headers).forEach(r => { headers[r.key] = r.value; });
+  Object.assign(headers, getAuthHeader());
+
+  let body = undefined;
+  const bt = state.bodyType;
+  if (bt === 'json') {
+    const raw = document.getElementById('bodyEditor').value.trim();
+    if (raw) { body = raw; headers['Content-Type'] = headers['Content-Type'] || 'application/json'; }
+  } else if (bt === 'form') {
+    const pairs = getActiveKV(state.formFields);
+    if (pairs.length) {
+      body = pairs.map(r => encodeURIComponent(r.key) + '=' + encodeURIComponent(r.value)).join('&');
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    }
+  } else if (bt === 'raw') {
+    const raw = document.getElementById('bodyEditor').value.trim();
+    if (raw) body = raw;
+  }
+
+  if (method === 'GET' || method === 'HEAD') body = undefined;
+
+  return { method, headers, body };
+}
+
+// ──────────────────────────────────────────────────────────────
+// cURL generator
+// ──────────────────────────────────────────────────────────────
+function updateCurl() {
+  const url = buildUrl();
+  const opts = buildFetchOptions();
+  if (!url) {
+    document.getElementById('curlOutput').innerHTML = '<span style="color:var(--text-muted)">cURL command will appear here as you build the request…</span>';
+    return;
+  }
+  const parts = [`<span class="curl-keyword">curl</span> <span class="curl-flag">-X</span> <span class="curl-string">${opts.method}</span>`];
+  parts.push(`  <span class="curl-string">'${url}'</span>`);
+  Object.entries(opts.headers).forEach(([k, v]) => {
+    parts.push(`  <span class="curl-flag">-H</span> <span class="curl-string">'${k}: ${v}'</span>`);
+  });
+  if (opts.body) {
+    const escaped = String(opts.body).replace(/'/g, "'\\''");
+    parts.push(`  <span class="curl-flag">--data</span> <span class="curl-string">'${escaped}'</span>`);
+  }
+  document.getElementById('curlOutput').innerHTML = parts.join(' \\\n');
+}
+
+// ──────────────────────────────────────────────────────────────
+// Send request
+// ──────────────────────────────────────────────────────────────
+async function sendRequest() {
+  const url = buildUrl();
+  if (!url) { alert('Please enter a URL.'); return; }
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Sending…';
+
+  const opts = buildFetchOptions();
+  const t0 = performance.now();
+  let responseData = { status: 0, statusText: '', headers: {}, body: '', duration: 0, size: 0, error: null };
+
+  try {
+    const resp = await fetch(url, { ...opts, signal: AbortSignal.timeout(30000) });
+    const elapsed = Math.round(performance.now() - t0);
+    const bodyText = await resp.text();
+    const hdrs = {};
+    resp.headers.forEach((v, k) => { hdrs[k] = v; });
+    responseData = {
+      status: resp.status,
+      statusText: resp.statusText,
+      headers: hdrs,
+      body: bodyText,
+      duration: elapsed,
+      size: new TextEncoder().encode(bodyText).length,
+      error: null,
+    };
+  } catch (err) {
+    responseData.error = err.message;
+    responseData.duration = Math.round(performance.now() - t0);
+  }
+
+  state.lastResponse = responseData;
+  renderResponse(responseData);
+  saveHistory({ method: opts.method, url, status: responseData.status, duration: responseData.duration });
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Send';
+}
+
+// ──────────────────────────────────────────────────────────────
+// Render response
+// ──────────────────────────────────────────────────────────────
+function statusClass(s) {
+  if (s >= 200 && s < 300) return 'status-2xx';
+  if (s >= 300 && s < 400) return 'status-3xx';
+  if (s >= 400 && s < 500) return 'status-4xx';
+  if (s >= 500) return 'status-5xx';
+  return 'status-0';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(2) + ' MB';
+}
+
+function prettyJson(s) {
+  try {
+    return JSON.stringify(JSON.parse(s), null, 2);
+  } catch { return s; }
+}
+
+function syntaxHighlight(s) {
+  return s
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+      let cls = 'color:#a855f7';
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? 'color:var(--primary)' : 'color:#10b981';
+      } else if (/true|false/.test(match)) cls = 'color:#f59e0b';
+      else if (/null/.test(match)) cls = 'color:#64748b';
+      return `<span style="${cls}">${match}</span>`;
+    });
+}
+
+function renderResponse(data) {
+  const area = document.getElementById('responseArea');
+  const copyBtn = document.getElementById('copyRespBtn');
+
+  if (data.error) {
+    area.innerHTML = `
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:1rem;margin-bottom:.75rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;color:#ef4444;font-weight:700;margin-bottom:.4rem;">
+          <i class="ph ph-warning-circle"></i> Request Failed
+        </div>
+        <code style="font-size:.82rem;font-family:'Fira Code',monospace;color:var(--text-muted)">${esc(data.error)}</code>
+        ${data.error.toLowerCase().includes('cors') || data.error.toLowerCase().includes('fetch') ? '<p style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">This is likely a CORS block. Try the cURL command below in a real terminal.</p>' : ''}
+      </div>`;
+    copyBtn.style.display = 'none';
+    return;
+  }
+
+  const sc = statusClass(data.status);
+  const isJson = (data.headers['content-type'] || '').includes('json');
+  const bodyFormatted = isJson ? prettyJson(data.body) : data.body;
+
+  // Response tabs
+  area.innerHTML = `
+    <div class="response-meta">
+      <div class="meta-item"><span>Status</span><strong class="${sc}">${data.status} ${esc(data.statusText)}</strong></div>
+      <div class="meta-item"><i class="ph ph-timer"></i><strong>${data.duration} ms</strong></div>
+      <div class="meta-item"><i class="ph ph-file"></i><strong>${formatSize(data.size)}</strong></div>
+    </div>
+    <div class="tab-bar" id="respTabBar" style="margin-bottom:.75rem">
+      <button class="tab-btn active" data-rtab="body">Body</button>
+      <button class="tab-btn" data-rtab="headers">Headers</button>
+    </div>
+    <div id="respTabBody">
+      <div class="response-body-wrap">
+        <pre class="response-body" id="respBodyPre">${isJson ? syntaxHighlight(bodyFormatted) : esc(bodyFormatted)}</pre>
+      </div>
+    </div>
+    <div id="respTabHeaders" style="display:none">
+      <table class="kv-table">
+        <thead><tr><th>Header</th><th>Value</th></tr></thead>
+        <tbody>${Object.entries(data.headers).map(([k,v]) => `<tr><td><code style="color:var(--primary);font-size:.78rem">${esc(k)}</code></td><td><code style="font-size:.78rem;color:var(--text-muted)">${esc(v)}</code></td></tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+
+  // Response sub-tabs
+  area.querySelectorAll('[data-rtab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      area.querySelectorAll('[data-rtab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('respTabBody').style.display = btn.dataset.rtab === 'body' ? '' : 'none';
+      document.getElementById('respTabHeaders').style.display = btn.dataset.rtab === 'headers' ? '' : 'none';
+    });
+  });
+
+  copyBtn.style.display = 'inline-flex';
+}
+
+// ──────────────────────────────────────────────────────────────
+// History
+// ──────────────────────────────────────────────────────────────
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('http_client_history') || '[]'); } catch { return []; }
+}
+function saveHistory(entry) {
+  const hist = loadHistory();
+  hist.unshift({ ...entry, ts: Date.now() });
+  if (hist.length > MAX_HISTORY) hist.length = MAX_HISTORY;
+  localStorage.setItem('http_client_history', JSON.stringify(hist));
+  renderHistory();
+}
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('historyEmpty');
+  const hist = loadHistory();
+  // Remove all items except empty
+  list.querySelectorAll('.history-item').forEach(el => el.remove());
+  if (!hist.length) { empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  hist.forEach(h => {
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    const sc = statusClass(h.status);
+    const mCls = 'method-' + h.method.toLowerCase();
+    item.innerHTML = `
+      <span class="h-method ${mCls}">${h.method}</span>
+      <span class="h-url" title="${esc(h.url)}">${esc(new URL(h.url).pathname || h.url)}</span>
+      <span class="h-status ${sc}">${h.status || '—'}</span>`;
+    item.addEventListener('click', () => {
+      document.getElementById('urlInput').value = h.url;
+      document.getElementById('methodSelect').value = h.method;
+      updateCurl();
+    });
+    list.appendChild(item);
+  });
+}
+
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+  localStorage.removeItem('http_client_history');
+  renderHistory();
+});
+
+// ──────────────────────────────────────────────────────────────
+// Request tabs
+// ──────────────────────────────────────────────────────────────
+const reqTabs = { params: 'tabParams', headers: 'tabHeaders', auth: 'tabAuth', body: 'tabBody' };
+document.querySelectorAll('#reqTabBar .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#reqTabBar .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(reqTabs).forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById(reqTabs[btn.dataset.tab]).style.display = '';
+  });
+});
+
+// ──────────────────────────────────────────────────────────────
+// Add row buttons
+// ──────────────────────────────────────────────────────────────
+document.getElementById('addParamBtn').addEventListener('click', () => makeRow(state.params, 'paramRows', 'key', 'value'));
+document.getElementById('addHeaderBtn').addEventListener('click', () => makeRow(state.headers, 'headerRows', 'Header-Name', 'header-value'));
+document.getElementById('addFormBtn').addEventListener('click', () => makeRow(state.formFields, 'formRows', 'field', 'value'));
+
+// Quick header shortcuts
+document.querySelectorAll('[data-header]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = Date.now() + Math.random();
+    const row = { id, enabled: true, key: btn.dataset.header, value: btn.dataset.hval || '' };
+    state.headers.push(row);
+    renderKvRow(state.headers, 'headerRows', 'Header-Name', 'header-value');
+    // Update last pushed row's inputs (they were just created)
+    const tbody = document.getElementById('headerRows');
+    const lastTr = tbody.lastElementChild;
+    if (lastTr) {
+      const inputs = lastTr.querySelectorAll('.kv-input');
+      inputs[0].value = row.key;
+      inputs[1].value = row.value;
+      row.key = btn.dataset.header;
+      row.value = btn.dataset.hval || '';
+    }
+    updateCurl();
+    updateBadges();
+    // Switch to headers tab
+    document.querySelectorAll('#reqTabBar .tab-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === 'headers');
+    });
+    Object.values(reqTabs).forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById('tabHeaders').style.display = '';
+  });
+});
+
+// ──────────────────────────────────────────────────────────────
+// Body type
+// ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.body-type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.body-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.bodyType = btn.dataset.btype;
+    const bew = document.getElementById('bodyEditorWrap');
+    const bfw = document.getElementById('bodyFormWrap');
+    bew.style.display = (state.bodyType === 'json' || state.bodyType === 'raw') ? '' : 'none';
+    bfw.style.display = state.bodyType === 'form' ? '' : 'none';
+    const editor = document.getElementById('bodyEditor');
+    if (state.bodyType === 'json') editor.placeholder = '{\n  "key": "value"\n}';
+    else editor.placeholder = 'Request body…';
+    updateCurl();
+  });
+});
+
+document.getElementById('bodyEditor').addEventListener('input', () => {
+  const raw = document.getElementById('bodyEditor').value.trim();
+  const errEl = document.getElementById('bodyJsonError');
+  const editor = document.getElementById('bodyEditor');
+  if (state.bodyType === 'json' && raw) {
+    try { JSON.parse(raw); editor.classList.remove('error'); errEl.style.display = 'none'; }
+    catch { editor.classList.add('error'); errEl.style.display = 'block'; }
+  } else { editor.classList.remove('error'); errEl.style.display = 'none'; }
+  updateCurl();
+});
+
+// ──────────────────────────────────────────────────────────────
+// Auth
+// ──────────────────────────────────────────────────────────────
+function renderAuthFields() {
+  const t = state.authType;
+  const wrap = document.getElementById('authFields');
+  wrap.innerHTML = '';
+  if (t === 'none') return;
+  if (t === 'bearer') {
+    const inp = document.createElement('input');
+    inp.className = 'auth-field'; inp.type = 'text'; inp.placeholder = 'Bearer token…';
+    inp.addEventListener('input', e => { state.authValues.token = e.target.value; updateCurl(); });
+    wrap.appendChild(inp);
+  } else if (t === 'basic') {
+    ['username','password'].forEach(ph => {
+      const inp = document.createElement('input');
+      inp.className = 'auth-field';
+      inp.type = ph === 'password' ? 'password' : 'text';
+      inp.placeholder = ph;
+      inp.addEventListener('input', e => { state.authValues[ph] = e.target.value; updateCurl(); });
+      wrap.appendChild(inp);
+    });
+  } else if (t === 'apikey') {
+    const keyInp = document.createElement('input');
+    keyInp.className = 'auth-field'; keyInp.placeholder = 'Header name (e.g. X-API-Key)';
+    keyInp.addEventListener('input', e => { state.authValues.key = e.target.value; updateCurl(); });
+    const valInp = document.createElement('input');
+    valInp.className = 'auth-field'; valInp.placeholder = 'API key value'; valInp.type = 'password';
+    valInp.addEventListener('input', e => { state.authValues.value = e.target.value; updateCurl(); });
+    wrap.appendChild(keyInp); wrap.appendChild(valInp);
+  }
+}
+
+document.getElementById('authType').addEventListener('change', e => {
+  state.authType = e.target.value;
+  state.authValues = {};
+  renderAuthFields();
+  updateCurl();
+});
+
+// ──────────────────────────────────────────────────────────────
+// URL / method changes
+// ──────────────────────────────────────────────────────────────
+document.getElementById('urlInput').addEventListener('input', updateCurl);
+document.getElementById('methodSelect').addEventListener('change', () => {
+  const m = document.getElementById('methodSelect').value;
+  // body not applicable for GET/HEAD
+  const noBody = m === 'GET' || m === 'HEAD';
+  document.querySelector('[data-tab="body"]').style.opacity = noBody ? '.4' : '1';
+  updateCurl();
+});
+
+// ──────────────────────────────────────────────────────────────
+// Quick URLs
+// ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.quick-url-btn[data-url]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('urlInput').value = btn.dataset.url;
+    document.getElementById('methodSelect').value = btn.dataset.method;
+    updateCurl();
+  });
+});
+
+// ──────────────────────────────────────────────────────────────
+// Send button + Enter key
+// ──────────────────────────────────────────────────────────────
+document.getElementById('sendBtn').addEventListener('click', sendRequest);
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendRequest();
+});
+
+// ──────────────────────────────────────────────────────────────
+// Copy buttons
+// ──────────────────────────────────────────────────────────────
+document.getElementById('copyCurlBtn').addEventListener('click', async () => {
+  const raw = document.getElementById('curlOutput').innerText;
+  await navigator.clipboard.writeText(raw);
+  const btn = document.getElementById('copyCurlBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+  setTimeout(() => btn.innerHTML = orig, 2000);
+});
+
+document.getElementById('copyRespBtn').addEventListener('click', async () => {
+  if (!state.lastResponse) return;
+  await navigator.clipboard.writeText(state.lastResponse.body);
+  const btn = document.getElementById('copyRespBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+  setTimeout(() => btn.innerHTML = orig, 2000);
+});
+
+// ──────────────────────────────────────────────────────────────
+// Reset
+// ──────────────────────────────────────────────────────────────
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.getElementById('urlInput').value = '';
+  document.getElementById('methodSelect').value = 'GET';
+  document.getElementById('paramRows').innerHTML = '';
+  document.getElementById('headerRows').innerHTML = '';
+  document.getElementById('formRows').innerHTML = '';
+  document.getElementById('bodyEditor').value = '';
+  document.getElementById('authType').value = 'none';
+  Object.assign(state, { params: [], headers: [], formFields: [], bodyType: 'none', authType: 'none', authValues: {} });
+  document.querySelectorAll('.body-type-btn').forEach(b => b.classList.toggle('active', b.dataset.btype === 'none'));
+  document.getElementById('bodyEditorWrap').style.display = 'none';
+  document.getElementById('bodyFormWrap').style.display = 'none';
+  document.getElementById('authFields').innerHTML = '';
+  document.getElementById('responseArea').innerHTML = `<div class="empty-response" id="emptyResp"><i class="ph ph-arrow-bend-right-down"></i><p>Send a request above to see the response here.</p></div>`;
+  document.getElementById('copyRespBtn').style.display = 'none';
+  state.lastResponse = null;
+  updateCurl();
+  updateBadges();
+});
+
+// ──────────────────────────────────────────────────────────────
+// Init
+// ──────────────────────────────────────────────────────────────
+renderHistory();
+updateCurl();
+// Pre-populate one empty param and header row
+makeRow(state.params, 'paramRows', 'key', 'value');
+makeRow(state.headers, 'headerRows', 'Header-Name', 'header-value');
+</script>
+
+<script src="theme-toggle.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
