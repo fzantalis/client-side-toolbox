@@ -259,7 +259,7 @@
     .compare-stat .cs-lbl { color: var(--text-muted); }
     .compare-stat .cs-val { font-weight: 600; }
 
-    /* ── Historical ───────────────────────────────────────────────────────── */
+    /* ── Historical & Lifestyle ────────────────────────────────────────────── */
     .hist-form {
       display: grid;
       grid-template-columns: 1fr 1fr auto;
@@ -281,12 +281,12 @@
       box-sizing: border-box;
     }
     .hist-form input:focus { outline: none; border-color: var(--primary); }
-    .hist-daily-grid {
+    .hist-daily-grid, .lifestyle-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 0.6rem;
     }
-    .hist-stat-card {
+    .hist-stat-card, .life-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -366,7 +366,7 @@
     <div class="card-icon"><i class="ph ph-cloud-sun"></i></div>
     <div class="tool-header-text">
       <h1>Weather Dashboard</h1>
-      <p>Live forecast, city comparator, historical lookup, and severe weather timeline — no API key, no tracking.</p>
+      <p>Live forecast, city comparator, historical lookup, severe weather timeline, and lifestyle insights — no API key, no tracking.</p>
     </div>
   </header>
 
@@ -376,6 +376,9 @@
       <div class="tab-nav">
         <button class="tab-btn active" onclick="switchTab('forecast')" id="tab-forecast">
           <i class="ph ph-sun"></i> Forecast
+        </button>
+        <button class="tab-btn" onclick="switchTab('lifestyle')" id="tab-lifestyle">
+          <i class="ph ph-leaf"></i> Health & Lifestyle
         </button>
         <button class="tab-btn" onclick="switchTab('compare')" id="tab-compare">
           <i class="ph ph-scales"></i> Comparator
@@ -407,6 +410,21 @@
           <div class="state-box">
             <i class="ph ph-cloud-sun"></i>
             <p>Search a city or tap <strong>My Location</strong> for a live forecast.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-body tab-pane" id="pane-lifestyle">
+        <div class="search-row">
+          <input type="text" id="lifeCity" placeholder="City name…"
+            autocomplete="off" onkeydown="if(event.key==='Enter') lifeSearch()">
+          <button class="btn-secondary" onclick="lifeUseLocation()"><i class="ph ph-map-pin"></i> My Location</button>
+          <button class="btn-primary" onclick="lifeSearch()"><i class="ph ph-magnifying-glass"></i> Insights</button>
+        </div>
+        <div id="life-content">
+          <div class="state-box">
+            <i class="ph ph-leaf"></i>
+            <p>Search a city to get real-time air quality, wardrobe recommendations, and activity suitability scores.</p>
           </div>
         </div>
       </div>
@@ -475,13 +493,13 @@
       <h2>About the Weather Dashboard</h2>
     </div>
     <div class="card" style="display:block;line-height:1.7;padding:2rem;">
-      <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Four tools in one</h3>
+      <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Five tools in one</h3>
       <p style="margin-bottom:1.5rem;">
-        The Weather Dashboard bundles four utilities: a live <strong>Forecast</strong> (current + hourly + 7-day), a <strong>Comparator</strong> for side-by-side city comparison, a <strong>Historical Lookup</strong> reaching back to 1940, and a <strong>Severe Weather</strong> risk timeline for the next 48 hours.
+        The Weather Dashboard bundles five utilities: a live <strong>Forecast</strong>, a <strong>Health & Lifestyle</strong> engine translating weather into daily actionable insights, a <strong>Comparator</strong> for city comparisons, a <strong>Historical Lookup</strong> reaching back to 1940, and a <strong>Severe Weather</strong> risk timeline.
       </p>
       <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Powered by Open-Meteo</h3>
       <p style="margin-bottom:1.5rem;">
-        All data is sourced from <strong>Open-Meteo</strong>, a free and open-source meteorological API using ECMWF, GFS, and ERA5 models. No API key required. City geocoding also uses Open-Meteo's free geocoding endpoint.
+        All data is sourced from <strong>Open-Meteo</strong>'s free and open-source meteorological and Air Quality APIs using ECMWF, GFS, and ERA5 models. No API key required. City geocoding also uses Open-Meteo's free geocoding endpoint.
       </p>
       <h3 style="margin-bottom:1rem;font-size:1.25rem;color:var(--text-main);">Privacy &amp; Client-Side</h3>
       <p>API calls go directly from your browser to Open-Meteo — no data touches any server owned by this toolbox. When you use <strong>My Location</strong>, your coordinates are sent only to Open-Meteo and are never stored or logged here.</p>
@@ -765,7 +783,172 @@ function renderForecast(d, name) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TAB 2 — COMPARATOR
+// TAB 2 — HEALTH & LIFESTYLE
+// ═══════════════════════════════════════════════════════════════════════════
+async function lifeSearch() {
+  const q = document.getElementById('lifeCity').value.trim(); if (!q) return;
+  setLoading('life-content');
+  try { const g = await geocode(q); await lifeFetch(g.lat, g.lon, g.name); }
+  catch(e) { setErr('life-content', e.message); }
+}
+function lifeUseLocation() {
+  if (!navigator.geolocation) return;
+  setLoading('life-content');
+  navigator.geolocation.getCurrentPosition(
+    p => lifeFetch(p.coords.latitude, p.coords.longitude, p.coords.latitude.toFixed(2)+', '+p.coords.longitude.toFixed(2)),
+    () => setErr('life-content', 'Location access denied. Try searching by city.')
+  );
+}
+async function lifeFetch(lat, lon, name) {
+  try {
+    const pw = new URLSearchParams({
+      latitude: lat, longitude: lon,
+      current: 'temperature_2m,apparent_temperature,precipitation,cloud_cover,wind_speed_10m,relative_humidity_2m,is_day,weather_code',
+      hourly: 'precipitation_probability',
+      timezone: 'auto'
+    });
+    const pa = new URLSearchParams({
+      latitude: lat, longitude: lon,
+      current: 'european_aqi,pm10,pm2_5',
+      timezone: 'auto'
+    });
+    
+    const [resW, resA] = await Promise.all([
+      fetch('https://api.open-meteo.com/v1/forecast?' + pw),
+      fetch('https://air-quality-api.open-meteo.com/v1/air-quality?' + pa)
+    ]);
+    
+    const dataW = await resW.json();
+    const dataA = await resA.json();
+    
+    renderLife(dataW, dataA, name);
+  } catch(e) { 
+    setErr('life-content', 'Failed to fetch lifestyle data. Air quality might be unavailable for this coordinate.'); 
+  }
+}
+
+function renderLife(dataW, dataA, name) {
+  const cur = dataW.current;
+  const aqi = dataA.current?.european_aqi || 0;
+  const pm10 = dataA.current?.pm10 || 0;
+  const pm25 = dataA.current?.pm2_5 || 0;
+
+  // Find current hour index for rain prob
+  const now = new Date();
+  let hi = dataW.hourly.time.findIndex(t => {
+    const h = new Date(t);
+    return h.getHours()===now.getHours() && h.toDateString()===now.toDateString();
+  });
+  if (hi < 0) hi = 0;
+  const rainProb = dataW.hourly.precipitation_probability[hi] || 0;
+
+  // 1. AQI Color Logic (European AQI standard)
+  function getAqiInfo(val) {
+    if (val <= 20) return { lbl: 'Good', col: '#22c55e', sub: 'Air quality is ideal for most individuals.' };
+    if (val <= 40) return { lbl: 'Fair', col: '#eab308', sub: 'Air quality is generally acceptable.' };
+    if (val <= 60) return { lbl: 'Moderate', col: '#f97316', sub: 'Sensitive individuals should limit prolonged outdoor exertion.' };
+    if (val <= 80) return { lbl: 'Poor', col: '#ef4444', sub: 'Everyone may begin to experience health effects.' };
+    return { lbl: 'Very Poor', col: '#831843', sub: 'Health warnings of emergency conditions.' };
+  }
+  const aqiInfo = getAqiInfo(aqi);
+
+  // 2. Wardrobe Logic
+  let clothes = "T-shirt and light shorts."; let cIcon = "👕🩳";
+  if (cur.apparent_temperature < 5) { clothes = "Heavy winter coat, gloves, and a scarf."; cIcon = "🧥🧤"; }
+  else if (cur.apparent_temperature < 15) { clothes = "Light jacket, warm layers, or a cozy sweater."; cIcon = "🧥👖"; }
+  else if (cur.apparent_temperature < 22) { clothes = "Long sleeves or light, breathable layers."; cIcon = "👕👖"; }
+
+  let accTxt = "You are good to go as is.";
+  if (rainProb > 20 || cur.precipitation > 0) accTxt = "Don't forget to bring an umbrella! ☂️";
+  else if (cur.weather_code <= 2 && cur.is_day) accTxt = "Polarized sunglasses recommended. 🕶️";
+
+  // 3. Activity Scores (Out of 10)
+  let runScore = 10;
+  if (cur.temperature_2m < 5 || cur.temperature_2m > 25) runScore -= 3;
+  if (cur.precipitation > 0) runScore -= 5;
+  if (aqi > 60) runScore -= 4;
+  runScore = Math.max(0, Math.min(10, runScore));
+
+  let starScore = 10;
+  starScore -= Math.round(cur.cloud_cover / 10);
+  if (cur.is_day) starScore = 0; // Can't stargaze in daytime
+  starScore = Math.max(0, starScore);
+
+  let dryScore = 10;
+  if (cur.precipitation > 0) dryScore = 0;
+  else {
+     if (cur.relative_humidity_2m > 60) dryScore -= (cur.relative_humidity_2m - 60) / 5;
+     if (cur.wind_speed_10m < 5) dryScore -= 2;
+  }
+  dryScore = Math.max(0, Math.min(10, Math.round(dryScore)));
+
+  function scoreColor(s) { return s>=8?'#22c55e':s>=5?'#f59e0b':'#ef4444'; }
+
+  let html = `<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+    <i class="ph ph-map-pin" style="color:var(--text-muted)"></i>
+    <span style="font-size:.9rem;font-weight:600">${name}</span>
+    <span style="font-size:.78rem;color:var(--text-muted)">· Current Insights</span>
+  </div>
+
+  <div class="sec-label" style="margin-top:0">Air Quality & Health</div>
+  <div class="current-card" style="margin-bottom:1.5rem; gap:2rem;">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+      <div style="font-size:3.5rem;font-weight:700;line-height:1;color:${aqiInfo.col}">${aqi}</div>
+      <div style="font-size:0.85rem;font-weight:700;text-transform:uppercase;margin-top:0.3rem;">AQI · ${aqiInfo.lbl}</div>
+    </div>
+    <div style="flex:1;">
+      <p style="font-size:0.9rem;margin-bottom:1rem;color:var(--text-main);">${aqiInfo.sub}</p>
+      <div style="display:flex;gap:1.5rem;">
+        <div><div class="e-lbl">PM 10</div><div style="font-size:1rem;font-weight:600;">${pm10} <span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">μg/m³</span></div></div>
+        <div><div class="e-lbl">PM 2.5</div><div style="font-size:1rem;font-weight:600;">${pm25} <span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">μg/m³</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label">What to Wear Engine</div>
+  <div class="lifestyle-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); margin-bottom:1.5rem;">
+    <div class="life-card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="font-size:2.5rem;line-height:1;">${cIcon}</div>
+      <div>
+        <div class="e-lbl" style="margin-bottom:0.2rem;">Apparel</div>
+        <div style="font-size:0.85rem;font-weight:500;color:var(--text-main);">${clothes}</div>
+      </div>
+    </div>
+    <div class="life-card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="font-size:2.5rem;line-height:1;color:var(--primary)"><i class="ph ph-bag"></i></div>
+      <div>
+        <div class="e-lbl" style="margin-bottom:0.2rem;">Accessories</div>
+        <div style="font-size:0.85rem;font-weight:500;color:var(--text-main);">${accTxt}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label">Activity Suitability</div>
+  <div class="lifestyle-grid">
+    <div class="life-card">
+      <div class="e-lbl">🏃 Outdoor Run</div>
+      <div style="font-size:1.8rem;font-weight:700;color:${scoreColor(runScore)};">${runScore}<span style="font-size:1rem;color:var(--text-muted)">/10</span></div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">Based on temp, rain, and AQI.</div>
+    </div>
+    <div class="life-card">
+      <div class="e-lbl">🔭 Stargazing</div>
+      <div style="font-size:1.8rem;font-weight:700;color:${scoreColor(starScore)};">${starScore}<span style="font-size:1rem;color:var(--text-muted)">/10</span></div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">Based on cloud cover and daylight.</div>
+    </div>
+    <div class="life-card">
+      <div class="e-lbl">👕 Drying Clothes</div>
+      <div style="font-size:1.8rem;font-weight:700;color:${scoreColor(dryScore)};">${dryScore}<span style="font-size:1rem;color:var(--text-muted)">/10</span></div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">Based on humidity, wind, and rain.</div>
+    </div>
+  </div>
+
+  <p class="data-credit" style="margin-top:2rem;">Data: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo Air Quality & Weather API</a></p>`;
+
+  document.getElementById('life-content').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TAB 3 — COMPARATOR
 // ═══════════════════════════════════════════════════════════════════════════
 async function cmpRun() {
   const cities = ['cmpCity1','cmpCity2','cmpCity3']
@@ -808,7 +991,7 @@ async function cmpRun() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TAB 3 — HISTORICAL
+// TAB 4 — HISTORICAL
 // ═══════════════════════════════════════════════════════════════════════════
 (function initHistDate() {
   const inp = document.getElementById('histDate');
@@ -868,7 +1051,7 @@ async function histRun() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TAB 4 — SEVERE RISK
+// TAB 5 — SEVERE RISK
 // ═══════════════════════════════════════════════════════════════════════════
 async function sevRun() {
   const q = document.getElementById('sevCity').value.trim(); if (!q) return;
