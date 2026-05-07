@@ -373,7 +373,6 @@
   <main style="width:100%;">
     <div class="panel" style="width:100%;box-sizing:border-box;height:auto;overflow:visible;">
 
-      <!-- Tab nav -->
       <div class="tab-nav">
         <button class="tab-btn active" onclick="switchTab('forecast')" id="tab-forecast">
           <i class="ph ph-sun"></i> Forecast
@@ -389,7 +388,6 @@
         </button>
       </div>
 
-      <!-- ═══ TAB 1: FORECAST ═══ -->
       <div class="panel-body tab-pane active" id="pane-forecast">
         <div class="search-row">
           <input type="text" id="fcCity" placeholder="City name, e.g. Tokyo, Athens, New York…"
@@ -413,7 +411,6 @@
         </div>
       </div>
 
-      <!-- ═══ TAB 2: COMPARATOR ═══ -->
       <div class="panel-body tab-pane" id="pane-compare">
         <div class="compare-inputs">
           <input type="text" id="cmpCity1" placeholder="City 1 (e.g. Paris)" onkeydown="if(event.key==='Enter') cmpRun()">
@@ -432,7 +429,6 @@
         </div>
       </div>
 
-      <!-- ═══ TAB 3: HISTORICAL ═══ -->
       <div class="panel-body tab-pane" id="pane-history">
         <div class="hist-form">
           <div>
@@ -455,7 +451,6 @@
         </div>
       </div>
 
-      <!-- ═══ TAB 4: SEVERE RISK ═══ -->
       <div class="panel-body tab-pane" id="pane-severe">
         <div class="search-row">
           <input type="text" id="sevCity" placeholder="City name…"
@@ -474,7 +469,6 @@
     </div>
   </main>
 
-  <!-- About -->
   <section class="tool-section" style="margin-top:4rem;">
     <div class="section-header">
       <i class="ph ph-article"></i>
@@ -619,7 +613,7 @@ async function fcFetch(lat, lon, name) {
     latitude:lat, longitude:lon,
     current:['temperature_2m','relative_humidity_2m','apparent_temperature','weather_code',
              'wind_speed_10m','wind_direction_10m','surface_pressure','uv_index','visibility'].join(','),
-    hourly:['temperature_2m','weather_code','precipitation_probability'].join(','),
+    hourly:['temperature_2m','weather_code','precipitation_probability', 'relative_humidity_2m', 'apparent_temperature', 'wind_speed_10m', 'wind_direction_10m', 'surface_pressure', 'visibility'].join(','),
     daily:['weather_code','temperature_2m_max','temperature_2m_min','precipitation_probability_max',
            'uv_index_max','sunrise','sunset','precipitation_sum'].join(','),
     wind_speed_unit:'kmh', timezone:'auto', forecast_days:7
@@ -641,21 +635,66 @@ function renderForecast(d, name) {
   });
   if (hi < 0) hi = 0;
 
+  // Set up values for the top "Current/Daily" card
+  let topW, topTemp, topDesc, topHum, topWind, topWindDir, topPress, topVis, topLoc;
+  let uvIndex, sunriseTime, sunsetTime, precipSum;
+
+  if (_selectedDayIndex === -1) {
+    // Current Real-Time Conditions
+    topW = w;
+    topTemp = C(cur.temperature_2m);
+    topDesc = `${w.l} · Feels like ${C(cur.apparent_temperature)}`;
+    topHum = cur.relative_humidity_2m;
+    topWind = cur.wind_speed_10m;
+    topWindDir = cur.wind_direction_10m;
+    topPress = cur.surface_pressure;
+    topVis = cur.visibility;
+    topLoc = name;
+
+    uvIndex = cur.uv_index ?? daily.uv_index_max?.[0] ?? 0;
+    sunriseTime = daily.sunrise ? new Date(daily.sunrise[0]).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '–';
+    sunsetTime  = daily.sunset ? new Date(daily.sunset[0]).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '–';
+    precipSum = (daily.precipitation_sum?.[0] || 0).toFixed(1);
+  } else {
+    // Selected Future/Past Day Conditions
+    // We use roughly 14:00 (2 PM) local time as the representative midday hour for stats like Wind/Pressure/Humidity
+    let reprI = _selectedDayIndex * 24 + 14; 
+    if (reprI >= hourly.time.length) reprI = hourly.time.length - 1;
+
+    topW = wmo(daily.weather_code[_selectedDayIndex]);
+    topTemp = C(daily.temperature_2m_max[_selectedDayIndex]); // Use Daily High
+    topDesc = `${topW.l} · Low ${C(daily.temperature_2m_min[_selectedDayIndex])}`; // Use Daily Low instead of feels like
+    topHum = hourly.relative_humidity_2m[reprI] ?? 0;
+    topWind = hourly.wind_speed_10m[reprI] ?? 0;
+    topWindDir = hourly.wind_direction_10m[reprI] ?? 0;
+    topPress = hourly.surface_pressure[reprI] ?? 0;
+    topVis = hourly.visibility[reprI] ?? 0;
+    
+    const dt = new Date(daily.time[_selectedDayIndex]+'T12:00:00');
+    const dayName = _selectedDayIndex === 0 ? 'Today' : DAY[dt.getDay()];
+    topLoc = `${name} · ${dayName}`;
+
+    uvIndex = daily.uv_index_max?.[_selectedDayIndex] ?? 0;
+    sunriseTime = daily.sunrise ? new Date(daily.sunrise[_selectedDayIndex]).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '–';
+    sunsetTime  = daily.sunset ? new Date(daily.sunset[_selectedDayIndex]).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '–';
+    precipSum = (daily.precipitation_sum?.[_selectedDayIndex] || 0).toFixed(1);
+  }
+
   let html = '';
 
-  // Current
+  // Big Overview Card
   html += `<div class="current-card">
-    <div class="cur-icon">${w.i}</div>
+    <div class="cur-icon">${topW.i}</div>
     <div class="cur-main">
-      <div class="cur-temp">${C(cur.temperature_2m)}</div>
-      <div class="cur-desc">${w.l} · Feels like ${C(cur.apparent_temperature)}</div>
-      <div class="cur-loc"><i class="ph ph-map-pin"></i>${name}</div>
+      <div class="cur-temp">${topTemp}</div>
+      <div class="cur-desc">${topDesc}</div>
+      <div class="cur-loc"><i class="ph ph-map-pin"></i>${topLoc}</div>
     </div>
     <div class="stat-grid">
-      <div class="stat-item"><div class="stat-lbl">Humidity</div><div class="stat-val">${cur.relative_humidity_2m}%</div></div>
-      <div class="stat-item"><div class="stat-lbl">Wind</div><div class="stat-val">${formatWind(cur.wind_speed_10m)} ${windDir(cur.wind_direction_10m)}</div></div>
-      <div class="stat-item"><div class="stat-lbl">Pressure</div><div class="stat-val">${Math.round(cur.surface_pressure)} hPa</div></div>
-      <div class="stat-item"><div class="stat-lbl">Visibility</div><div class="stat-val">${cur.visibility>=1000?(cur.visibility/1000).toFixed(0)+'km':cur.visibility+'m'}</div></div>
+      <div class="stat-item"><div class="stat-lbl">Humidity</div><div class="stat-val">${topHum}%</div></div>
+      <div class="stat-item"><div class="stat-lbl">Wind</div><div class="stat-val">${formatWind(topWind)} ${windDir(topWindDir)}</div></div>
+      <div class="stat-item"><div class="stat-lbl">Pressure</div><div class="stat-val">${Math.round(topPress)} hPa</div></div>
+      <div class="stat-item"><div class="stat-lbl">Visibility</div><div class="stat-val">${topVis>=1000?(topVis/1000).toFixed(0)+'km':topVis+'m'}</div></div>
     </div>
   </div>`;
 
@@ -673,7 +712,7 @@ function renderForecast(d, name) {
 
   html += `<div class="sec-label" style="display:flex; justify-content:space-between; align-items:center;">
     <span>${stripLabel}</span>
-    ${_selectedDayIndex !== -1 ? `<span style="cursor:pointer; color:var(--primary); text-transform:none; font-size:0.75rem; font-weight:600;" onclick="selectDay(-1)">View Next 24h</span>` : ''}
+    ${_selectedDayIndex !== -1 ? `<span style="cursor:pointer; color:var(--primary); text-transform:none; font-size:0.75rem; font-weight:600;" onclick="selectDay(-1)">View Live / Next 24h</span>` : ''}
   </div>
   <div class="hourly-strip">`;
   
@@ -693,7 +732,7 @@ function renderForecast(d, name) {
   html += `</div>`;
 
   // 7-day
-  html += `<div class="sec-label">7-Day Forecast <span style="text-transform:none;font-size:0.7rem;font-weight:400;margin-left:0.3rem;letter-spacing:normal">(Click a day to view hourly)</span></div><div class="forecast-grid">`;
+  html += `<div class="sec-label">7-Day Forecast <span style="text-transform:none;font-size:0.7rem;font-weight:400;margin-left:0.3rem;letter-spacing:normal">(Click a day to view daily & hourly)</span></div><div class="forecast-grid">`;
   for (let i=0; i<daily.time.length; i++) {
     const dt = new Date(daily.time[i]+'T12:00:00');
     const dw = wmo(daily.weather_code[i]);
@@ -714,14 +753,11 @@ function renderForecast(d, name) {
   html += `</div>`;
 
   // Extras
-  const sunrise = daily.sunrise?new Date(daily.sunrise[0]).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'–';
-  const sunset  = daily.sunset ?new Date(daily.sunset[0]).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'–';
-  const uv = cur.uv_index??daily.uv_index_max?.[0]??0;
   html += `<div class="sec-label">At a Glance</div><div class="extras-row">
-    <div class="e-card"><div class="e-lbl">☀️ UV Index</div><div class="e-val">${Math.round(uv)}</div><div class="e-sub">${uvLbl(uv)}</div></div>
-    <div class="e-card"><div class="e-lbl">🌅 Sunrise</div><div class="e-val" style="font-size:.93rem">${sunrise}</div></div>
-    <div class="e-card"><div class="e-lbl">🌇 Sunset</div><div class="e-val" style="font-size:.93rem">${sunset}</div></div>
-    <div class="e-card"><div class="e-lbl">🌧️ Precip Today</div><div class="e-val" style="font-size:.93rem">${(daily.precipitation_sum?.[0]||0).toFixed(1)} mm</div></div>
+    <div class="e-card"><div class="e-lbl">☀️ UV Index</div><div class="e-val">${Math.round(uvIndex)}</div><div class="e-sub">${uvLbl(uvIndex)}</div></div>
+    <div class="e-card"><div class="e-lbl">🌅 Sunrise</div><div class="e-val" style="font-size:.93rem">${sunriseTime}</div></div>
+    <div class="e-card"><div class="e-lbl">🌇 Sunset</div><div class="e-val" style="font-size:.93rem">${sunsetTime}</div></div>
+    <div class="e-card"><div class="e-lbl">🌧️ Precip Daily</div><div class="e-val" style="font-size:.93rem">${precipSum} mm</div></div>
   </div>
   <p class="data-credit">Data: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> · Updated ${new Date(cur.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</p>`;
 
