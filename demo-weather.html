@@ -175,8 +175,12 @@
       align-items: center;
       gap: 0.2rem;
       text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
     }
+    .d-card:hover { border-color: var(--primary); }
     .d-card.today { border-color: var(--primary); }
+    .d-card.selected { border-color: var(--primary); background: rgba(59,130,246,0.06); }
     .d-name { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
     .d-icon { font-size: 1.45rem; }
     .d-desc { font-size: 0.6rem; color: var(--text-muted); line-height: 1.3; min-height: 1.7em; }
@@ -202,7 +206,7 @@
 
     /* ── Unit toggle ──────────────────────────────────────────────────────── */
     .unit-toggle { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; flex-shrink: 0; }
-    .unit-toggle button { border: none; border-radius: 0; padding: 0.38rem 0.7rem; font-size: 0.8rem; background: transparent; color: var(--text-muted); font-weight: 600; }
+    .unit-toggle button { border: none; border-radius: 0; padding: 0.38rem 0.7rem; font-size: 0.8rem; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s; }
     .unit-toggle button.active { background: var(--primary); color: #fff; }
     .unit-toggle button:first-child { border-right: 1px solid var(--border); }
 
@@ -394,6 +398,10 @@
             <button id="fcBtnC" class="active" onclick="setUnit('C')">°C</button>
             <button id="fcBtnF" onclick="setUnit('F')">°F</button>
           </div>
+          <div class="unit-toggle">
+            <button id="btnKmh" class="active" onclick="setWindUnit('kmh')">km/h</button>
+            <button id="btnBft" onclick="setWindUnit('bft')">Bft</button>
+          </div>
           <button class="btn-secondary" onclick="fcUseLocation()"><i class="ph ph-map-pin"></i> My Location</button>
           <button class="btn-primary" onclick="fcSearch()"><i class="ph ph-magnifying-glass"></i> Search</button>
         </div>
@@ -505,6 +513,9 @@
 <script>
 // ── Shared ───────────────────────────────────────────────────────────────────
 let unit = 'C';
+let windUnit = 'kmh';
+let _selectedDayIndex = -1;
+
 function C(v) { return unit === 'C' ? Math.round(v)+'°C' : Math.round(v*9/5+32)+'°F'; }
 
 function setUnit(u) {
@@ -514,11 +525,40 @@ function setUnit(u) {
   if (_fcData) renderForecast(_fcData, _fcName);
 }
 
+function setWindUnit(u) {
+  windUnit = u;
+  document.getElementById('btnKmh').classList.toggle('active', u==='kmh');
+  document.getElementById('btnBft').classList.toggle('active', u==='bft');
+  if (_fcData) renderForecast(_fcData, _fcName);
+}
+
+function formatWind(kmh) {
+  if (windUnit === 'kmh') return Math.round(kmh) + ' km/h';
+  if (kmh < 1) return '0 Bft';
+  if (kmh <= 5) return '1 Bft';
+  if (kmh <= 11) return '2 Bft';
+  if (kmh <= 19) return '3 Bft';
+  if (kmh <= 28) return '4 Bft';
+  if (kmh <= 38) return '5 Bft';
+  if (kmh <= 49) return '6 Bft';
+  if (kmh <= 61) return '7 Bft';
+  if (kmh <= 74) return '8 Bft';
+  if (kmh <= 88) return '9 Bft';
+  if (kmh <= 102) return '10 Bft';
+  if (kmh <= 117) return '11 Bft';
+  return '12 Bft';
+}
+
 function switchTab(id) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('pane-'+id).classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
+}
+
+function selectDay(index) {
+  _selectedDayIndex = index;
+  if (_fcData) renderForecast(_fcData, _fcName);
 }
 
 // WMO codes
@@ -574,6 +614,7 @@ function fcUseLocation() {
 }
 async function fcFetch(lat, lon, name) {
   _fcName = name;
+  _selectedDayIndex = -1;
   const p = new URLSearchParams({
     latitude:lat, longitude:lon,
     current:['temperature_2m','relative_humidity_2m','apparent_temperature','weather_code',
@@ -612,15 +653,31 @@ function renderForecast(d, name) {
     </div>
     <div class="stat-grid">
       <div class="stat-item"><div class="stat-lbl">Humidity</div><div class="stat-val">${cur.relative_humidity_2m}%</div></div>
-      <div class="stat-item"><div class="stat-lbl">Wind</div><div class="stat-val">${Math.round(cur.wind_speed_10m)} km/h ${windDir(cur.wind_direction_10m)}</div></div>
+      <div class="stat-item"><div class="stat-lbl">Wind</div><div class="stat-val">${formatWind(cur.wind_speed_10m)} ${windDir(cur.wind_direction_10m)}</div></div>
       <div class="stat-item"><div class="stat-lbl">Pressure</div><div class="stat-val">${Math.round(cur.surface_pressure)} hPa</div></div>
       <div class="stat-item"><div class="stat-lbl">Visibility</div><div class="stat-val">${cur.visibility>=1000?(cur.visibility/1000).toFixed(0)+'km':cur.visibility+'m'}</div></div>
     </div>
   </div>`;
 
-  // Hourly
-  html += `<div class="sec-label">Next 24 Hours</div><div class="hourly-strip">`;
-  for (let i=hi; i<Math.min(hi+24, hourly.time.length); i++) {
+  // Hourly Strip
+  let startI = hi;
+  let limit = Math.min(hi+24, hourly.time.length);
+  let stripLabel = "Next 24 Hours";
+
+  if (_selectedDayIndex !== -1) {
+    startI = _selectedDayIndex * 24;
+    limit = startI + 24;
+    const dt = new Date(daily.time[_selectedDayIndex]+'T12:00:00');
+    stripLabel = _selectedDayIndex === 0 ? "Hourly — Today" : "Hourly — " + DAY[dt.getDay()];
+  }
+
+  html += `<div class="sec-label" style="display:flex; justify-content:space-between; align-items:center;">
+    <span>${stripLabel}</span>
+    ${_selectedDayIndex !== -1 ? `<span style="cursor:pointer; color:var(--primary); text-transform:none; font-size:0.75rem; font-weight:600;" onclick="selectDay(-1)">View Next 24h</span>` : ''}
+  </div>
+  <div class="hourly-strip">`;
+  
+  for (let i=startI; i<limit; i++) {
     const t = new Date(hourly.time[i]);
     const h = t.getHours();
     const isNow = i===hi;
@@ -636,12 +693,16 @@ function renderForecast(d, name) {
   html += `</div>`;
 
   // 7-day
-  html += `<div class="sec-label">7-Day Forecast</div><div class="forecast-grid">`;
+  html += `<div class="sec-label">7-Day Forecast <span style="text-transform:none;font-size:0.7rem;font-weight:400;margin-left:0.3rem;letter-spacing:normal">(Click a day to view hourly)</span></div><div class="forecast-grid">`;
   for (let i=0; i<daily.time.length; i++) {
     const dt = new Date(daily.time[i]+'T12:00:00');
     const dw = wmo(daily.weather_code[i]);
     const rain = daily.precipitation_probability_max[i]||0;
-    html += `<div class="d-card${i===0?' today':''}">
+    let cardClass = 'd-card';
+    if (i === 0 && _selectedDayIndex === -1) cardClass += ' today';
+    if (_selectedDayIndex === i) cardClass += ' selected';
+    
+    html += `<div class="${cardClass}" onclick="selectDay(${i})">
       <div class="d-name">${i===0?'Today':DAY[dt.getDay()]}</div>
       <div class="d-icon">${dw.i}</div>
       <div class="d-desc">${dw.l}</div>
@@ -698,7 +759,7 @@ async function cmpRun() {
           <div class="compare-desc">${w.l} · Feels like ${C(c.apparent_temperature)}</div>
           <div class="compare-stats">
             <div class="compare-stat"><span class="cs-lbl">Humidity</span><span class="cs-val">${c.relative_humidity_2m}%</span></div>
-            <div class="compare-stat"><span class="cs-lbl">Wind</span><span class="cs-val">${Math.round(c.wind_speed_10m)} km/h ${windDir(c.wind_direction_10m)}</span></div>
+            <div class="compare-stat"><span class="cs-lbl">Wind</span><span class="cs-val">${formatWind(c.wind_speed_10m)} ${windDir(c.wind_direction_10m)}</span></div>
             <div class="compare-stat"><span class="cs-lbl">Pressure</span><span class="cs-val">${Math.round(c.surface_pressure)} hPa</span></div>
             <div class="compare-stat"><span class="cs-lbl">UV Index</span><span class="cs-val">${Math.round(uv)} — ${uvLbl(uv)}</span></div>
           </div>
@@ -759,7 +820,7 @@ async function histRun() {
       <div class="hist-stat-card"><div class="e-lbl">🌡️ Low</div><div class="e-val">${C(daily.temperature_2m_min[0])}</div></div>
       <div class="hist-stat-card"><div class="e-lbl">🌡️ Mean</div><div class="e-val">${C(daily.temperature_2m_mean[0])}</div></div>
       <div class="hist-stat-card"><div class="e-lbl">🌧️ Precipitation</div><div class="e-val">${(daily.precipitation_sum[0]||0).toFixed(1)} mm</div></div>
-      <div class="hist-stat-card"><div class="e-lbl">💨 Max Wind</div><div class="e-val">${Math.round(daily.wind_speed_10m_max[0])} km/h</div></div>
+      <div class="hist-stat-card"><div class="e-lbl">💨 Max Wind</div><div class="e-val">${formatWind(daily.wind_speed_10m_max[0])}</div></div>
       <div class="hist-stat-card"><div class="e-lbl">🧭 Wind Dir</div><div class="e-val">${windDir(daily.wind_direction_10m_dominant[0])}</div></div>
       <div class="hist-stat-card"><div class="e-lbl">☀️ UV Max</div><div class="e-val">${Math.round(uv)} <span style="font-size:.73rem;font-weight:400;color:var(--text-muted)">${uvLbl(uv)}</span></div></div>
       <div class="hist-stat-card"><div class="e-lbl">🌅 Sunrise</div><div class="e-val" style="font-size:.95rem">${sunrise}</div></div>
@@ -846,7 +907,7 @@ function renderSevere(d, name) {
     </div>
     <div class="summary-card">
       <div class="sc-lbl">Max Wind Gust</div>
-      <div class="sc-val">${maxGust>0?Math.round(maxGust)+' km/h':'–'}</div>
+      <div class="sc-val">${maxGust>0?formatWind(maxGust):'–'}</div>
       <div class="sc-sub">${maxGust>0?gustLabel(maxGust):'–'}</div>
     </div>
     <div class="summary-card">
